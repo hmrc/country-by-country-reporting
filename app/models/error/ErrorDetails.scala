@@ -14,13 +14,31 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.countrybycountryreporting.config
+package models.error
 
-import javax.inject.{Inject, Singleton}
-import play.api.Configuration
+import play.api.libs.json.Json
 
-@Singleton
-class AppConfig @Inject()(config: Configuration) {
+case class SourceFaultDetail(detail: Seq[String])
 
-  val appName: String = config.get[String]("appName")
+object SourceFaultDetail {
+  implicit val format = Json.format[SourceFaultDetail]
+}
+
+case class ErrorDetail(
+  timestamp: String,
+  correlationId: Option[String],
+  errorCode: String,
+  errorMessage: String,
+  source: String,
+  sourceFaultDetail: Option[SourceFaultDetail]
+)
+
+object ErrorDetail {
+  implicit val format = Json.format[ErrorDetail]
+}
+
+case class ErrorDetails(errorDetail: ErrorDetail)
+
+object ErrorDetails {
+  implicit val format = Json.format[ErrorDetails]
 }
