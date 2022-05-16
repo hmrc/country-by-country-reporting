@@ -49,7 +49,7 @@ class SubscriptionConnectorSpec extends SpecBase with WireMockServerHandler with
     "read subscription" - {
       "must return status as OK for read Subscription" in {
         stubResponse(
-          "/dac6/dct70d/v1",
+          "/cbc/dct70d/v1",
           OK
         )
 
@@ -64,7 +64,7 @@ class SubscriptionConnectorSpec extends SpecBase with WireMockServerHandler with
 
         forAll(arbitrary[DisplaySubscriptionForCBCRequest], errorCodes) { (sub, errorCode) =>
           stubResponse(
-            "/dac6/dct70d/v1",
+            "/cbc/dct70d/v1",
             errorCode
           )
 
