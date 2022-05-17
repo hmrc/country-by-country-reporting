@@ -51,7 +51,7 @@ class IdentifierAuthActionSpec extends PlaySpec with GuiceOneAppPerSuite with Mo
   implicit val timeout: Timeout = 5 seconds
 
   val application: Application = new GuiceApplicationBuilder()
-    .configure(Configuration("metrics.enabled" -> "false", "enrolmentKeys.cbc.key" -> "HMRC-CBC-ORG", "enrolmentKeys.cbc.identifier" -> "CBCID"))
+    .configure(Configuration("metrics.enabled" -> "false", "enrolmentKeys.cbc.key" -> "HMRC-CBC-ORG", "enrolmentKeys.cbc.identifier" -> "cbcId"))
     .overrides(
       bind[AuthConnector].toInstance(mockAuthConnector)
     )
@@ -85,7 +85,7 @@ class IdentifierAuthActionSpec extends PlaySpec with GuiceOneAppPerSuite with Mo
 
     "the user is logged in" must {
       "must return the request" in {
-        val retrieval = Enrolments(Set(Enrolment("HMRC-CBC-ORG", Seq(EnrolmentIdentifier("CBCID", "subscriptionID")), "ACTIVE")))
+        val retrieval = Enrolments(Set(Enrolment("HMRC-CBC-ORG", Seq(EnrolmentIdentifier("cbcId", "subscriptionID")), "ACTIVE")))
         when(mockAuthConnector.authorise[Enrolments](any[Predicate](), any[Retrieval[Enrolments]]())(any[HeaderCarrier](), any[ExecutionContext]()))
           .thenReturn(Future.successful(retrieval))
 

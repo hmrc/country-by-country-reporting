@@ -47,6 +47,6 @@ trait SpecBase
 
   protected def applicationBuilder(): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
-      .configure(Configuration("metrics.enabled" -> "false", "enrolmentKeys.cbc.key" -> "HMRC-CBC-ORG", "enrolmentKeys.cbc.identifier" -> "CBCID"))
+      .configure(Configuration("metrics.enabled" -> "false", "enrolmentKeys.cbc.key" -> "HMRC-CBC-ORG", "enrolmentKeys.cbc.identifier" -> "cbcId"))
       .overrides()
 }
