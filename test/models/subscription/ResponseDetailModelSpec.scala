@@ -34,9 +34,8 @@ class ResponseDetailModelSpec extends SpecBase {
           |"email": "",
           |"phone": "",
           |"mobile": "",
-          |"individual": {
-          |"lastName": "Last",
-          |"firstName": "First"
+          |"organisation": {
+          |"organisationName": "orgName"
           |}
           |}
           |],
@@ -51,8 +50,8 @@ class ResponseDetailModelSpec extends SpecBase {
           |}""".stripMargin
 
       val expectedJson =
-        """{"subscriptionID":"111111111","tradingName":"","isGBUser":true,"primaryContact":{"individual":
-          |{"firstName":"First","lastName":"Last"},"email":"","phone":"","mobile":""},"secondaryContact"
+        """{"subscriptionID":"111111111","tradingName":"","isGBUser":true,"primaryContact":{"organisation":
+          |{"organisationName":"orgName"},"email":"","phone":"","mobile":""},"secondaryContact"
           |:{"organisation":{"organisationName":""},"email":""}}""".stripMargin
       val json: JsValue =
         Json.parse(responseDetailJson)

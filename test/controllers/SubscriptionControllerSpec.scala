@@ -62,9 +62,8 @@ class SubscriptionControllerSpec extends SpecBase with Generators with ScalaChec
         |"email": "",
         |"phone": "",
         |"mobile": "",
-        |"individual": {
-        |"lastName": "Last",
-        |"firstName": "First"
+        |"organisation": {
+        |"organisationName": "orgName"
         |}
         |}
         |],
@@ -88,18 +87,16 @@ class SubscriptionControllerSpec extends SpecBase with Generators with ScalaChec
                                              |      "isGBUser": true,
                                              |      "primaryContact":
                                              |        {
-                                             |          "individual": {
-                                             |             "lastName": "lastName",
-                                             |             "firstName": "firstName",
-                                             |             "middleName": "middleName"
-                                             |         },
+                                             |          "organisation": {
+                                             |            "organisationName": "orgName1"
+                                             |          },
                                              |          "email": "test@email.com",
                                              |          "phone": "+4411223344"
                                              |        },
                                              |      "secondaryContact":
                                              |        {
                                              |          "organisation": {
-                                             |            "organisationName": "orgName"
+                                             |            "organisationName": "orgName2"
                                              |          },
                                              |          "email": "test@email.com",
                                              |          "phone": "+4411223344"
