@@ -2,3 +2,8 @@
 
 POST        /subscription/read-subscription             controllers.SubscriptionController.readSubscription
 POST        /subscription/update-subscription           controllers.SubscriptionController.updateSubscription
+
+POST       /callback                                    controllers.upscan.UploadCallbackController.callback
+GET        /upscan/details/:uploadId                    controllers.upscan.UploadFormController.getDetails(uploadId: String)
+GET        /upscan/status/:uploadId                     controllers.upscan.UploadFormController.getStatus(uploadId: String)
+POST       /upscan/upload                               controllers.upscan.UploadFormController.requestUpload
