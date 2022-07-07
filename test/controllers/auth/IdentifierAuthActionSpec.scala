@@ -51,7 +51,7 @@ class IdentifierAuthActionSpec extends PlaySpec with GuiceOneAppPerSuite with Mo
   implicit val timeout: Timeout = 5 seconds
 
   val application: Application = new GuiceApplicationBuilder()
-    .configure(Configuration("metrics.enabled" -> "false", "enrolmentKeys.cbc.key" -> "HMRC-CBC-ORG", "enrolmentKeys.cbc.identifier" -> "cbcId"))
+    .configure(Configuration("metrics.enabled" -> "false", "enrolmentKeys.cbc.key" -> "HMRC-CBC-ORG", "enrolmentKeys.cbc.identifier" -> "cbcId", "auditing.enabled" -> false))
     .overrides(
       bind[AuthConnector].toInstance(mockAuthConnector)
     )

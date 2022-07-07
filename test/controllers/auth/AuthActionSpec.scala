@@ -51,7 +51,7 @@ class AuthActionSpec extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar
   implicit val timeout: Timeout = 5 seconds
 
   val application: Application = new GuiceApplicationBuilder()
-    .configure(Configuration("metrics.enabled" -> "false"))
+    .configure(Configuration("metrics.enabled" -> "false", "auditing.enabled" -> "false"))
     .overrides(
       bind[AuthConnector].toInstance(mockAuthConnector)
     )

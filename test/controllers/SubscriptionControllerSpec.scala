@@ -47,6 +47,9 @@ class SubscriptionControllerSpec extends SpecBase with Generators with ScalaChec
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[IdentifierAuthAction].to[FakeIdentifierAuthAction]
     )
+    .configure(
+      "auditing.enabled" -> "false"
+    )
     .build()
 
   "SubscriptionController" - {
