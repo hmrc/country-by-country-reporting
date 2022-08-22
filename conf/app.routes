@@ -3,6 +3,10 @@
 POST        /subscription/read-subscription             controllers.SubscriptionController.readSubscription
 POST        /subscription/update-subscription           controllers.SubscriptionController.updateSubscription
 
+POST        /validate-submission                        controllers.validation.SubmissionValidationController.validateSubmission
+
+POST        /validation-result                          controllers.EISResponseController.processEISResponse
+
 POST       /callback                                    controllers.upscan.UploadCallbackController.callback
 GET        /upscan/details/:uploadId                    controllers.upscan.UploadFormController.getDetails(uploadId: String)
 GET        /upscan/status/:uploadId                     controllers.upscan.UploadFormController.getStatus(uploadId: String)
