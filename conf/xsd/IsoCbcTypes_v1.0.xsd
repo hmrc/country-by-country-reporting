@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- edited with XMLSPY v2004 rel. 3 U (http://www.xmlspy.com) by Sebastien Michon (OECD) -->
-<xsd:schema xmlns:iso="urn:oecd:ties:isomdrtypes:v1" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:oecd:ties:isomdrtypes:v1" elementFormDefault="qualified" attributeFormDefault="unqualified" version="1.0">
+<xsd:schema xmlns:iso="urn:oecd:ties:isocbctypes:v1" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:oecd:ties:isocbctypes:v1" elementFormDefault="qualified" attributeFormDefault="unqualified" version="1.0">
 	<!--  ISO 3166 alpha 2 Country Code 
 
-The following disclaimer refers to all uses of the ISO country code list in the MDR schema: For practical reasons, the list is based on the ISO 3166-1 country list which is currently used by banks and other financial institutions, and hence by tax administrations. The use of this list does not imply the expression by the OECD of any opinion whatsoever concerning the legal status of the territories listed. Its content is without prejudice to the status of or sovereignty over any territory, to the delimitation of international frontiers and boundaries and to the name of any territory, city or area.  
+The following disclaimer refers to all uses of the ISO country code list in the CBC schema: For practical reasons, the list is based on the ISO 3166-1 country list which is currently used by banks and other financial institutions, and hence by tax administrations. The use of this list does not imply the expression by the OECD of any opinion whatsoever concerning the legal status of the territories listed. Its content is without prejudice to the status of or sovereignty over any territory, to the delimitation of international frontiers and boundaries and to the name of any territory, city or area.
     -->
 	<xsd:simpleType name="CountryCode_Type">
 		<xsd:annotation>
@@ -1270,7 +1270,7 @@ The following disclaimer refers to all uses of the ISO country code list in the 
 	<!--   -->
 	<!--  ISO 4217 alpha 3 Currency Code 
 
-The following disclaimer refers to all uses of the ISO currency code list in the MDR schema: For practical reasons, the list is based on the ISO 4217 Alpha 3 currency list which is currently used by banks and other financial institutions, and hence by tax administrations. The use of this list does not imply the expression by the OECD of any opinion whatsoever concerning the legal status of the territories listed. Its content is without prejudice to the status of or sovereignty over any territory, to the delimitation of international frontiers and boundaries and to the name of any territory, city or area.  
+The following disclaimer refers to all uses of the ISO currency code list in the CBC schema: For practical reasons, the list is based on the ISO 4217 Alpha 3 currency list which is currently used by banks and other financial institutions, and hence by tax administrations. The use of this list does not imply the expression by the OECD of any opinion whatsoever concerning the legal status of the territories listed. Its content is without prejudice to the status of or sovereignty over any territory, to the delimitation of international frontiers and boundaries and to the name of any territory, city or area.
      -->
 	<xsd:simpleType name="currCode_Type">
 		<xsd:annotation>
@@ -2174,7 +2174,7 @@ The following disclaimer refers to all uses of the ISO currency code list in the
 	<!--   -->
 	<!--  Language codes - ISO 639 - Part 1 (ISO 639-1:2002) 
 
-The following disclaimer refers to all uses of the ISO language code list in the MDR schema: For practical reasons, the list is based on the ISO 639-1 language list which is currently used by banks and other financial institutions, and hence by tax administrations. The use of this list does not imply the expression by the OECD of any opinion whatsoever concerning the legal status of the territories listed. Its content is without prejudice to the status of or sovereignty over any territory, to the delimitation of international frontiers and boundaries and to the name of any territory, city or area.  
+The following disclaimer refers to all uses of the ISO language code list in the CBC schema: For practical reasons, the list is based on the ISO 639-1 language list which is currently used by banks and other financial institutions, and hence by tax administrations. The use of this list does not imply the expression by the OECD of any opinion whatsoever concerning the legal status of the territories listed. Its content is without prejudice to the status of or sovereignty over any territory, to the delimitation of international frontiers and boundaries and to the name of any territory, city or area.
     -->
 	<xsd:simpleType name="LanguageCode_Type">
 		<xsd:annotation>

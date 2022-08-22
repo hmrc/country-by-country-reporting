@@ -39,7 +39,7 @@ class EISResponsePreConditionCheckActionRefinerSpec extends SpecBase with Before
   val acceptedXml: NodeSeq = <gsm:BREResponse xmlns:gsm="http://www.hmrc.gsi.gov.uk/gsm">
     <requestCommon>
       <receiptDate>2001-12-17T09:30:47.450Z</receiptDate>
-      <regime>MDR</regime>
+      <regime>CBC</regime>
       <conversationID>{uuid}</conversationID>
       <schemaVersion>1.0.0</schemaVersion>
     </requestCommon>
@@ -57,7 +57,7 @@ class EISResponsePreConditionCheckActionRefinerSpec extends SpecBase with Before
   val rejectedXml: NodeSeq = <gsm:BREResponse xmlns:gsm="http://www.hmrc.gsi.gov.uk/gsm">
     <requestCommon>
       <receiptDate>2001-12-17T09:30:47.400Z</receiptDate>
-      <regime>MDR</regime>
+      <regime>CBC</regime>
       <conversationID>{uuid}</conversationID>
       <schemaVersion>1.0.0</schemaVersion>
     </requestCommon>
@@ -71,8 +71,8 @@ class EISResponsePreConditionCheckActionRefinerSpec extends SpecBase with Before
           <RecordError>
             <Code>80000</Code>
             <Details>Duplicate doc ref IDs</Details>
-            <DocRefIDInError>MDRUSER001DHSJEURUT20001</DocRefIDInError>
-            <DocRefIDInError>MDRUSER001DHSJEURUT20002</DocRefIDInError>
+            <DocRefIDInError>CBCUSER001DHSJEURUT20001</DocRefIDInError>
+            <DocRefIDInError>CBCUSER001DHSJEURUT20002</DocRefIDInError>
           </RecordError>
         </ValidationErrors>
         <ValidationResult>

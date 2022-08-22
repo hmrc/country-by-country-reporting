@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<MDR_OECD xmlns="urn:oecd:ties:mdr:v1" >
+<CBC_OECD xmlns="urn:oecd:ties:cbc:v1" >
     <MessageSpec_Type>
         <TransmittingCountry>AF</TransmittingCountry>
         <ReceivingCountry>AF</ReceivingCountry>
-        <MessageType>MDR</MessageType>
+        <MessageType>CBC</MessageType>
         <Language>EN</Language>
         <Warning>This is a warning</Warning>
         <Contact>This is a Contact</Contact>
-        <MessageRefId>GBXAMDR1234567</MessageRefId>
+        <MessageRefId>GBXACBC1234567</MessageRefId>
         <MessageTypeIndic>CBC401</MessageTypeIndic>
         <Timestamp>2020-05-14T17:10:00</Timestamp>
     </MessageSpec_Type>
-    <MdrBody>
+    <CbcBody>
         <Disclosing>
             <ID>
                 <Individual>
@@ -67,16 +67,16 @@
                     </Address>
                 </Organisation>
             </ID>
-            <Capacity>MDR501</Capacity>
-            <Nexus>MDR601</Nexus>
-            <Nexus>MDR602</Nexus>
+            <Capacity>CBC501</Capacity>
+            <Nexus>CBC601</Nexus>
+            <Nexus>CBC602</Nexus>
             <DocSpec>
                 <DocTypeIndic>OECD0</DocTypeIndic>
                 <DocRefID>GB123456</DocRefID>
                 <CorrDocRefId>This is corr ref ID</CorrDocRefId>
             </DocSpec>
         </Disclosing>
-        <MdrReport>
+        <CbcReport>
             <ReportableTaxPayer>
                 <ID>
                     <Individual>
@@ -171,7 +171,7 @@
                         <BirthDate>2007-01-14</BirthDate>
                     </Individual>
                 </ID>
-                <Role>MDR1101</Role>
+                <Role>CBC1101</Role>
             </Intermediaries>
             <Intermediaries>
                 <ID>
@@ -197,13 +197,13 @@
                         </Address>
                     </Organisation>
                 </ID>
-                <Role>MDR1102</Role>
+                <Role>CBC1102</Role>
             </Intermediaries>
             <Structure>
                 <Arrangement>
                     <CrsAvoidance>
                         <DisclosureDate>12-04-2021</DisclosureDate>
-                        <Reason>MDR701</Reason>
+                        <Reason>CBC701</Reason>
                         <OtherInfo>Other inforamtion</OtherInfo>
                         <StructureChart>
                             <ID>
@@ -291,9 +291,9 @@
                     </CrsAvoidance>
                     <OOS>
                         <DisclosureDate>31-10-2021</DisclosureDate>
-                        <Reason>MDR7001</Reason>
-                        <Type>MDR1001</Type>
-                        <Type>MDR1002</Type>
+                        <Reason>CBC7001</Reason>
+                        <Type>CBC1001</Type>
+                        <Type>CBC1002</Type>
                         <OtherInfo>Other inforamtion</OtherInfo>
                         <StructureChart>
                             <ID>
@@ -386,6 +386,6 @@
                 <DocRefID>GB123456</DocRefID>
                 <CorrDocRefId>This is corr ref ID</CorrDocRefId>
             </DocSpec>
-        </MdrReport>
-    </MdrBody>
-</MDR_OECD>
+        </CbcReport>
+    </CbcBody>
+</CBC_OECD>

@@ -33,16 +33,16 @@ class XmlErrorMessageHelperSpec extends SpecBase {
 
     "generateErrorMessages" - {
 
-      "when element contains 'mdr:' prefix" - {
+      "when element contains 'cbc:' prefix" - {
 
         "must return correct error for missing element declaration'" in {
-          val missingDeclaration = SaxParseError(lineNumber, "cvc-elt.1: Cannot find the declaration of element 'mdr:MDR_OECD'.")
+          val missingDeclaration = SaxParseError(lineNumber, "cvc-elt.1: Cannot find the declaration of element 'cbc:CBC_OECD'.")
           val result             = helper.generateErrorMessages(ListBuffer(missingDeclaration))
-          result mustBe List(GenericError(lineNumber, Message("xml.must.have.element.declaration", List("MDR_OECD", "urn:oecd:ties:mdr:v1"))))
+          result mustBe List(GenericError(lineNumber, Message("xml.must.have.element.declaration", List("CBC_OECD", "urn:oecd:ties:cbc:v1"))))
         }
 
         "must return correct error for missing attribute error'" in {
-          val missingAttributeError = SaxParseError(lineNumber, "cvc-complex-type.4: Attribute 'currCode' must appear on element 'mdr:Amount'.")
+          val missingAttributeError = SaxParseError(lineNumber, "cvc-complex-type.4: Attribute 'currCode' must appear on element 'cbc:Amount'.")
           val result                = helper.generateErrorMessages(ListBuffer(missingAttributeError))
           result mustBe List(GenericError(lineNumber, Message("xml.add.an.element", List("Amount currCode"))))
         }
@@ -57,7 +57,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           val invalidEnumError2 =
             SaxParseError(
               lineNumber,
-              s"cvc-attribute.3: The value '$tooLongValue' of attribute 'xnlNameType' on element 'mdr:FirstName' is not valid with respect to its type, 'StringMin1Max200_Type'."
+              s"cvc-attribute.3: The value '$tooLongValue' of attribute 'xnlNameType' on element 'cbc:FirstName' is not valid with respect to its type, 'StringMin1Max200_Type'."
             )
           val result = helper.generateErrorMessages(ListBuffer(invalidEnumError1, invalidEnumError2))
           result mustBe List(GenericError(lineNumber, Message("xml.not.allowed.length", List("FirstName xnlNameType", "200"))))
@@ -73,7 +73,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           val invalidEnumError2 =
             SaxParseError(
               lineNumber,
-              s"cvc-attribute.3: The value '$tooLongValue' of attribute 'INType' on element 'mdr:IN' is not valid with respect to its type, 'StringMin1Max200_Type'."
+              s"cvc-attribute.3: The value '$tooLongValue' of attribute 'INType' on element 'cbc:IN' is not valid with respect to its type, 'StringMin1Max200_Type'."
             )
           val result = helper.generateErrorMessages(ListBuffer(invalidEnumError1, invalidEnumError2))
           result mustBe List(GenericError(lineNumber, Message("xml.not.allowed.length", List("INType", "200"))))
@@ -88,7 +88,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           val invalidEnumError2 =
             SaxParseError(
               lineNumber,
-              "cvc-attribute.3: The value 'GBf' of attribute 'issuedBy' on element 'mdr:TIN' is not valid with respect to its type, 'CountryCode_Type'."
+              "cvc-attribute.3: The value 'GBf' of attribute 'issuedBy' on element 'cbc:TIN' is not valid with respect to its type, 'CountryCode_Type'."
             )
           val result = helper.generateErrorMessages(ListBuffer(invalidEnumError1, invalidEnumError2))
           result mustBe List(GenericError(lineNumber, Message("xml.not.ISO.code", List("TIN issuedBy"))))
@@ -101,7 +101,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
                           "cvc-minLength-valid: Value '' with length = '0' is not facet-valid with respect to minLength '1' for type 'StringMin1Max200_Type'."
             )
 
-          val missingElementError2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '' of element 'mdr:TIN' is not valid.")
+          val missingElementError2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '' of element 'cbc:TIN' is not valid.")
 
           val result = helper.generateErrorMessages(ListBuffer(missingElementError1, missingElementError2))
           result mustBe List(GenericError(lineNumber, Message("xml.add.a.element", List("TIN"))))
@@ -114,7 +114,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
                           "cvc-minLength-valid: Value '' with length = '0' is not facet-valid with respect to minLength '1' for type 'StringMin1Max400_Type'."
             )
 
-          val missingElementError2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '' of element 'mdr:Street' is not valid.")
+          val missingElementError2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '' of element 'cbc:Street' is not valid.")
 
           val result = helper.generateErrorMessages(ListBuffer(missingElementError1, missingElementError2))
           result mustBe List(GenericError(lineNumber, Message("xml.optional.field.empty", List("Street"))))
@@ -126,7 +126,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
             lineNumber,
             "cvc-enumeration-valid: Value '' is not facet-valid with respect to enumeration '[AT, BE, BG, CY, CZ, DK, EE, FI, FR, DE, GR, HU, HR, IE, IT, LV, LT, LU, MT, NL, PL, PT, RO, SK, SI, ES, SE, GB]'. It must be a value from the enumeration."
           )
-          val error2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '' of element 'mdr:ConcernedMS' is not valid.")
+          val error2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '' of element 'cbc:ConcernedMS' is not valid.")
 
           val result = helper.generateErrorMessages(ListBuffer(error1, error2))
           result mustBe List(GenericError(lineNumber, Message("xml.add.a.element", List("ConcernedMS"))))
@@ -138,7 +138,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
             SaxParseError(lineNumber,
                           "cvc-minLength-valid: Value '' with length = '0' is not facet-valid with respect to minLength '1' for type 'StringMin1Max200_Type'."
             )
-          val error2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '' of element 'mdr:BirthPlace' is not valid.")
+          val error2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '' of element 'cbc:BirthPlace' is not valid.")
           val result = helper.generateErrorMessages(ListBuffer(error1, error2))
           result mustBe List(GenericError(lineNumber, Message("xml.add.a.element", List("BirthPlace"))))
         }
@@ -149,7 +149,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
             lineNumber,
             s"cvc-maxLength-valid: Value '$over200' with length = '201' is not facet-valid with respect to maxLength '200' for type 'StringMin1Max200_Type'."
           )
-          val error2 = SaxParseError(lineNumber, "cvc-complex-type.2.2: Element 'mdr:TIN' must have no element [children], and the value must be valid.")
+          val error2 = SaxParseError(lineNumber, "cvc-complex-type.2.2: Element 'cbc:TIN' must have no element [children], and the value must be valid.")
 
           val result = helper.generateErrorMessages(ListBuffer(error1, error2))
           result mustBe List(GenericError(lineNumber, Message("xml.not.allowed.length", List("TIN", "200"))))
@@ -162,7 +162,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
                           "cvc-minLength-valid: Value '' with length = '0' is not facet-valid with respect to minLength '1' for type 'StringMin1Max200_Type'."
             )
           val error2 =
-            SaxParseError(lineNumber, "cvc-complex-type.2.2: Element 'mdr:OrganisationName' must have no element [children], and the value must be valid.")
+            SaxParseError(lineNumber, "cvc-complex-type.2.2: Element 'cbc:OrganisationName' must have no element [children], and the value must be valid.")
           val result = helper.generateErrorMessages(ListBuffer(error1, error2))
           result mustBe List(GenericError(lineNumber, Message("xml.add.an.element", List("OrganisationName"))))
         }
@@ -173,7 +173,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
             lineNumber,
             s"cvc-maxLength-valid: Value '$over400' with length = '401' is not facet-valid with respect to maxLength '400' for type 'StringMin1Max400_Type'."
           )
-          val maxlengthError2 = SaxParseError(lineNumber, s"cvc-type.3.1.3: The value '$over400' of element 'mdr:BuildingIdentifier' is not valid.")
+          val maxlengthError2 = SaxParseError(lineNumber, s"cvc-type.3.1.3: The value '$over400' of element 'cbc:BuildingIdentifier' is not valid.")
 
           val result = helper.generateErrorMessages(ListBuffer(maxLengthError1, maxlengthError2))
           result mustBe List(GenericError(lineNumber, Message("xml.not.allowed.length", List("BuildingIdentifier", "400"))))
@@ -185,7 +185,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
             lineNumber,
             s"cvc-maxLength-valid: Value '$over400' with length = '201' is not facet-valid with respect to maxLength '400' for type 'StringMin1Max200_Type'."
           )
-          val maxlengthError2 = SaxParseError(lineNumber, s"cvc-type.3.1.3: The value '$over400' of element 'mdr:MessageRefId' is not valid.")
+          val maxlengthError2 = SaxParseError(lineNumber, s"cvc-type.3.1.3: The value '$over400' of element 'cbc:MessageRefId' is not valid.")
 
           val result = helper.generateErrorMessages(ListBuffer(maxLengthError1, maxlengthError2))
           result mustBe List(GenericError(lineNumber, Message("xml.not.allowed.length", List("MessageRefId", "85"))))
@@ -197,7 +197,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
             lineNumber,
             s"cvc-maxLength-valid: Value '$over400' with length = '201' is not facet-valid with respect to maxLength '400' for type 'StringMin1Max200_Type'."
           )
-          val maxlengthError2 = SaxParseError(lineNumber, s"cvc-type.3.1.3: The value '$over400' of element 'mdr:DocRefId' is not valid.")
+          val maxlengthError2 = SaxParseError(lineNumber, s"cvc-type.3.1.3: The value '$over400' of element 'cbc:DocRefId' is not valid.")
 
           val result = helper.generateErrorMessages(ListBuffer(maxLengthError1, maxlengthError2))
           result mustBe List(GenericError(lineNumber, Message("xml.not.allowed.length", List("DocRefId", "100"))))
@@ -209,22 +209,22 @@ class XmlErrorMessageHelperSpec extends SpecBase {
             lineNumber,
             s"cvc-maxLength-valid: Value '$over4000' with length = '4001' is not facet-valid with respect to maxLength '4000' for type 'StringMin1Max4000_Type'."
           )
-          val maxlengthError2 = SaxParseError(lineNumber, s"cvc-type.3.1.3: The value '$over400' of element 'mdr:Warning' is not valid.")
+          val maxlengthError2 = SaxParseError(lineNumber, s"cvc-type.3.1.3: The value '$over400' of element 'cbc:Warning' is not valid.")
 
           val result = helper.generateErrorMessages(ListBuffer(maxLengthError1, maxlengthError2))
           result mustBe List(GenericError(lineNumber, Message("xml.not.allowed.length", List("Warning", "4,000"))))
         }
 
-        "must return correct error when invalid enum given for MDR" in {
+        "must return correct error when invalid enum given for CBC" in {
 
           val invalidEnumError1 = SaxParseError(
             lineNumber,
-            "cvc-enumeration-valid: Value 'ABC' is not facet-valid with respect to enumeration '[MDR]'. It must be a value from the enumeration."
+            "cvc-enumeration-valid: Value 'ABC' is not facet-valid with respect to enumeration '[CBC]'. It must be a value from the enumeration."
           )
-          val invalidEnumError2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value 'ABC' of element 'mdr:MessageType' is not valid.")
+          val invalidEnumError2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value 'ABC' of element 'cbc:MessageType' is not valid.")
 
           val result = helper.generateErrorMessages(ListBuffer(invalidEnumError1, invalidEnumError2))
-          result mustBe List(GenericError(lineNumber, Message("xml.add.mdr")))
+          result mustBe List(GenericError(lineNumber, Message("xml.add.cbc")))
         }
 
         "must return correct error when invalid enum given for element" in {
@@ -233,7 +233,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
             lineNumber,
             "cvc-enumeration-valid: Value 'Invalid code' is not facet-valid with respect to enumeration '[AF, AX, AL, DZ]'. It must be a value from the enumeration."
           )
-          val invalidEnumError2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value 'Raneevev' of element 'mdr:Country' is not valid.")
+          val invalidEnumError2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value 'Raneevev' of element 'cbc:Country' is not valid.")
 
           val result = helper.generateErrorMessages(ListBuffer(invalidEnumError1, invalidEnumError2))
           result mustBe List(GenericError(lineNumber, Message("xml.not.ISO.code", List("Country"))))
@@ -242,7 +242,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
         "must return correct error when decimal is included on whole number field" in {
 
           val error1 = SaxParseError(lineNumber, "cvc-datatype-valid.1.2.1: '4000.02' is not a valid value for 'integer'.")
-          val error2 = SaxParseError(lineNumber, "cvc-complex-type.2.2: Element 'mdr:Amount' must have no element [children], and the value must be valid.")
+          val error2 = SaxParseError(lineNumber, "cvc-complex-type.2.2: Element 'cbc:Amount' must have no element [children], and the value must be valid.")
           val result = helper.generateErrorMessages(ListBuffer(error1, error2))
           result mustBe List(GenericError(lineNumber, Message("xml.must.be.whole.number", List("Amount"))))
         }
@@ -251,7 +251,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
 
           val error1 =
             SaxParseError(lineNumber, "cvc-maxInclusive-valid: Value '120' is not facet-valid with respect to maxInclusive '100' for type 'Ownership'.")
-          val error2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '90.1' of element 'mdr:Ownership' is not valid.")
+          val error2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '90.1' of element 'cbc:Ownership' is not valid.")
           val result = helper.generateErrorMessages(ListBuffer(error1, error2))
           result mustBe List(GenericError(lineNumber, Message("xml.not.valid.percentage", List("Ownership"))))
         }
@@ -259,7 +259,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
         "must return correct error when a percentage is not a whole number" in {
 
           val error1 = SaxParseError(lineNumber, "cvc-datatype-valid.1.2.1: '90.1' is not a valid value for 'integer'.")
-          val error2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '90.1' of element 'mdr:Ownership' is not valid.")
+          val error2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '90.1' of element 'cbc:Ownership' is not valid.")
           val result = helper.generateErrorMessages(ListBuffer(error1, error2))
           result mustBe List(GenericError(lineNumber, Message("xml.not.valid.percentage", List("Ownership"))))
         }
@@ -267,7 +267,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
         "must return correct error for invalid date format" in {
 
           val error1 = SaxParseError(lineNumber, "cvc-datatype-valid.1.2.1: '14-01-2007' is not a valid value for 'date'.")
-          val error2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '14-01-2007' of element 'mdr:BirthDate' is not valid.")
+          val error2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '14-01-2007' of element 'cbc:BirthDate' is not valid.")
           val result = helper.generateErrorMessages(ListBuffer(error1, error2))
           result mustBe List(GenericError(lineNumber, Message("xml.date.format", List("BirthDate"))))
         }
@@ -275,7 +275,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
         "must return correct error for invalid dateTime format" in {
 
           val error1 = SaxParseError(lineNumber, "cvc-datatype-valid.1.2.1: '14-01-2007' is not a valid value for 'dateTime'.")
-          val error2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '14-01-2007' of element 'mdr:BirthDate' is not valid.")
+          val error2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '14-01-2007' of element 'cbc:BirthDate' is not valid.")
           val result = helper.generateErrorMessages(ListBuffer(error1, error2))
           result mustBe List(GenericError(lineNumber, Message("xml.dateTime.format", List("BirthDate"))))
         }
@@ -283,14 +283,14 @@ class XmlErrorMessageHelperSpec extends SpecBase {
         "must return correct error for invalid date format (leap year)" in {
 
           val error1 = SaxParseError(lineNumber, "cvc-datatype-valid.1.2.1: '2021-02-31' is not a valid value for 'date'.")
-          val error2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '2021-02-31' of element 'mdr:BirthDate' is not valid.")
+          val error2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '2021-02-31' of element 'cbc:BirthDate' is not valid.")
           val result = helper.generateErrorMessages(ListBuffer(error1, error2))
           result mustBe List(GenericError(lineNumber, Message("xml.date.format.real", List("BirthDate"))))
         }
 
         "must return correct error for invalid date format (ImplementingDate)" in {
           val error1 = SaxParseError(lineNumber, "cvc-datatype-valid.1.2.1: '2020-05-oo' is not a valid value for 'dateTime'.")
-          val error2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '2020-05-oo' of element 'mdr:ImplementingDate' is not valid.")
+          val error2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '2020-05-oo' of element 'cbc:ImplementingDate' is not valid.")
 
           val result = helper.generateErrorMessages(ListBuffer(error1, error2))
           result mustBe List(GenericError(lineNumber, Message("xml.dateTime.format", List("ImplementingDate"))))
@@ -300,7 +300,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
 
           val error1 = SaxParseError(
             lineNumber,
-            "cvc-complex-type.2.4.a: Invalid content was found starting with element '{\"urn:ukdac6:v0.1\":mdr:BuildingIdentifier}'. One of '{\"urn:ukdac6:v0.1\":Street}' is expected."
+            "cvc-complex-type.2.4.a: Invalid content was found starting with element '{\"urn:ukdac6:v0.1\":cbc:BuildingIdentifier}'. One of '{\"urn:ukdac6:v0.1\":Street}' is expected."
           )
           val result = helper.generateErrorMessages(ListBuffer(error1))
           result mustBe List(GenericError(lineNumber, Message("xml.defaultMessage")))
@@ -322,7 +322,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
             lineNumber,
             "cvc-pattern-valid: Value 'rbrbrbrbrb' is not facet-valid with respect to pattern '[A-Z]{2}[D]([2]\\d{3}(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01]))([A-Z0-9]{6})' for type '#AnonType_DisclosureIDDAC6Disclosure_Type'."
           )
-          val error2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value 'rbrbrbrbrb' of element 'mdr:DisclosureID' is not valid.")
+          val error2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value 'rbrbrbrbrb' of element 'cbc:DisclosureID' is not valid.")
           val result = helper.generateErrorMessages(ListBuffer(error1, error2))
           result mustBe List(GenericError(lineNumber, Message("xml.defaultMessage")))
         }
@@ -333,7 +333,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
             SaxParseError(lineNumber,
                           "cvc-minLength-valid: Value '' with length = '0' is not facet-valid with respect to minLength '2' for type 'StringMin2Max200_Type'."
             )
-          val error2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '' of element 'mdr:MessageRefId' is not valid.")
+          val error2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '' of element 'cbc:MessageRefId' is not valid.")
           val result = helper.generateErrorMessages(ListBuffer(error1, error2))
           result mustBe List(GenericError(lineNumber, Message("xml.add.a.element", List("MessageRefId"))))
         }
@@ -369,7 +369,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           elements.map { element =>
             val error1 = SaxParseError(
               lineNumber,
-              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'mdr:ABC'. One of '{\"urn:oecd:ties:mdr:v1\":mdr:$element}' is expected."""
+              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'cbc:ABC'. One of '{\"urn:oecd:ties:cbc:v1\":cbc:$element}' is expected."""
             )
             val result = helper.generateErrorMessages(ListBuffer(error1))
             result mustBe List(GenericError(lineNumber, Message("xml.add.line", Seq(element))))
@@ -387,7 +387,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           elements.map { element =>
             val error1 = SaxParseError(
               lineNumber,
-              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'mdr:ABC'. One of '{\"urn:oecd:ties:mdr:v1\":mdr:$element}' is expected."""
+              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'cbc:ABC'. One of '{\"urn:oecd:ties:cbc:v1\":cbc:$element}' is expected."""
             )
             val result = helper.generateErrorMessages(ListBuffer(error1))
             result mustBe List(GenericError(lineNumber, Message("xml.add.a.element", Seq(element))))
@@ -398,13 +398,13 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           val elements = List(
             "ID",
             "Address",
-            "MdrBody"
+            "CbcBody"
           )
 
           elements.map { element =>
             val error1 = SaxParseError(
               lineNumber,
-              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'mdr:ABC'. One of '{\"urn:oecd:ties:mdr:v1\":mdr:$element}' is expected."""
+              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'cbc:ABC'. One of '{\"urn:oecd:ties:cbc:v1\":cbc:$element}' is expected."""
             )
             val result = helper.generateErrorMessages(ListBuffer(error1))
             result mustBe List(GenericError(lineNumber, Message("xml.add.an.element", Seq(element))))
@@ -415,7 +415,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
 
           val error1 = SaxParseError(
             lineNumber,
-            s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'mdr:ABC'. One of '{\"urn:oecd:ties:mdr:v1\":mdr:Disclosing}' is expected."""
+            s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'cbc:ABC'. One of '{\"urn:oecd:ties:cbc:v1\":cbc:Disclosing}' is expected."""
           )
           val result = helper.generateErrorMessages(ListBuffer(error1))
           result mustBe List(GenericError(lineNumber, Message("xml.add.element", Seq("Disclosing"))))
@@ -425,7 +425,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
 
           val error1 = SaxParseError(
             lineNumber,
-            s"""cvc-complex-type.2.4.b: The content of element 'mdr:ParentElement' is not complete. One of '{\"urn:oecd:ties:mdr:v1\":mdr:ChildElement}' is expected."""
+            s"""cvc-complex-type.2.4.b: The content of element 'cbc:ParentElement' is not complete. One of '{\"urn:oecd:ties:cbc:v1\":cbc:ChildElement}' is expected."""
           )
           val result = helper.generateErrorMessages(ListBuffer(error1))
           result mustBe List(GenericError(lineNumber, Message("xml.empty.tag", Seq("ParentElement", "ChildElement"))))
@@ -435,19 +435,19 @@ class XmlErrorMessageHelperSpec extends SpecBase {
 
           val error1 = SaxParseError(
             lineNumber,
-            "cvc-complex-type.2.4.d: Invalid content was found starting with element 'mdr:AddressFix'. No child element is expected at this point."
+            "cvc-complex-type.2.4.d: Invalid content was found starting with element 'cbc:AddressFix'. No child element is expected at this point."
           )
           val result = helper.generateErrorMessages(ListBuffer(error1))
           result mustBe List(GenericError(lineNumber, Message("xml.addressFix.error")))
         }
       }
 
-      "when element does not contain 'mdr:' prefix" - {
+      "when element does not contain 'cbc:' prefix" - {
 
         "must return correct error for missing element declaration'" in {
-          val missingDeclaration = SaxParseError(lineNumber, "cvc-elt.1: Cannot find the declaration of element 'MDR_OECD'.")
+          val missingDeclaration = SaxParseError(lineNumber, "cvc-elt.1: Cannot find the declaration of element 'CBC_OECD'.")
           val result             = helper.generateErrorMessages(ListBuffer(missingDeclaration))
-          result mustBe List(GenericError(lineNumber, Message("xml.must.have.element.declaration", List("MDR_OECD", "urn:oecd:ties:mdr:v1"))))
+          result mustBe List(GenericError(lineNumber, Message("xml.must.have.element.declaration", List("CBC_OECD", "urn:oecd:ties:cbc:v1"))))
         }
 
         "must return correct error for missing attribute error'" in {
@@ -629,16 +629,16 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           result mustBe List(GenericError(lineNumber, Message("xml.not.allowed.length", List("Warning", "4,000"))))
         }
 
-        "must return correct error when invalid enum given for MDR" in {
+        "must return correct error when invalid enum given for CBC" in {
 
           val invalidEnumError1 = SaxParseError(
             lineNumber,
-            "cvc-enumeration-valid: Value 'ABC' is not facet-valid with respect to enumeration '[MDR]'. It must be a value from the enumeration."
+            "cvc-enumeration-valid: Value 'ABC' is not facet-valid with respect to enumeration '[CBC]'. It must be a value from the enumeration."
           )
           val invalidEnumError2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value 'ABC' of element 'MessageType' is not valid.")
 
           val result = helper.generateErrorMessages(ListBuffer(invalidEnumError1, invalidEnumError2))
-          result mustBe List(GenericError(lineNumber, Message("xml.add.mdr")))
+          result mustBe List(GenericError(lineNumber, Message("xml.add.cbc")))
         }
 
         "must return correct error when invalid enum given for element" in {
@@ -783,7 +783,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           elements.map { element =>
             val error1 = SaxParseError(
               lineNumber,
-              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'ABC'. One of '{\"urn:oecd:ties:mdr:v1\":$element}' is expected."""
+              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'ABC'. One of '{\"urn:oecd:ties:cbc:v1\":$element}' is expected."""
             )
             val result = helper.generateErrorMessages(ListBuffer(error1))
             result mustBe List(GenericError(lineNumber, Message("xml.add.line", Seq(element))))
@@ -801,7 +801,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           elements.map { element =>
             val error1 = SaxParseError(
               lineNumber,
-              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'ABC'. One of '{\"urn:oecd:ties:mdr:v1\":$element}' is expected."""
+              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'ABC'. One of '{\"urn:oecd:ties:cbc:v1\":$element}' is expected."""
             )
             val result = helper.generateErrorMessages(ListBuffer(error1))
             result mustBe List(GenericError(lineNumber, Message("xml.add.a.element", Seq(element))))
@@ -812,13 +812,13 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           val elements = List(
             "ID",
             "Address",
-            "MdrBody"
+            "CbcBody"
           )
 
           elements.map { element =>
             val error1 = SaxParseError(
               lineNumber,
-              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'ABC'. One of '{\"urn:oecd:ties:mdr:v1\":$element}' is expected."""
+              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'ABC'. One of '{\"urn:oecd:ties:cbc:v1\":$element}' is expected."""
             )
             val result = helper.generateErrorMessages(ListBuffer(error1))
             result mustBe List(GenericError(lineNumber, Message("xml.add.an.element", Seq(element))))
@@ -829,7 +829,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
 
           val error1 = SaxParseError(
             lineNumber,
-            s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'ABC'. One of '{\"urn:oecd:ties:mdr:v1\":Disclosing}' is expected."""
+            s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'ABC'. One of '{\"urn:oecd:ties:cbc:v1\":Disclosing}' is expected."""
           )
           val result = helper.generateErrorMessages(ListBuffer(error1))
           result mustBe List(GenericError(lineNumber, Message("xml.add.element", Seq("Disclosing"))))
@@ -839,7 +839,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
 
           val error1 = SaxParseError(
             lineNumber,
-            s"""cvc-complex-type.2.4.b: The content of element 'ParentElement' is not complete. One of '{\"urn:oecd:ties:mdr:v1\":ChildElement}' is expected."""
+            s"""cvc-complex-type.2.4.b: The content of element 'ParentElement' is not complete. One of '{\"urn:oecd:ties:cbc:v1\":ChildElement}' is expected."""
           )
           val result = helper.generateErrorMessages(ListBuffer(error1))
           result mustBe List(GenericError(lineNumber, Message("xml.empty.tag", Seq("ParentElement", "ChildElement"))))

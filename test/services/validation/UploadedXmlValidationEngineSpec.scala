@@ -113,7 +113,7 @@ class UploadedXmlValidationEngineSpec extends SpecBase {
 
   val typeError1 = SaxParseError(
     176,
-    "cvc-enumeration-valid: Value '' is not facet-valid with respect to enumeration '[MDR801, MDR802, MDR803, MDR804, MDR805, MDR806]'. It must be a value from the enumeration."
+    "cvc-enumeration-valid: Value '' is not facet-valid with respect to enumeration '[CBC801, CBC802, CBC803, CBC804, CBC805, CBC806]'. It must be a value from the enumeration."
   )
 
   val typeError2 = SaxParseError(176, "cvc-type.3.1.3: The value '' of element 'Type' is not valid.")

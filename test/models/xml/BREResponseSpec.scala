@@ -32,7 +32,7 @@ class BREResponseSpec extends SpecBase {
       val xml = <BREResponse>
         <requestCommon>
           <receiptDate>2001-12-17T09:30:47Z</receiptDate>
-          <regime>MDR</regime>
+          <regime>CBC</regime>
           <conversationID>{uuid}</conversationID>
           <schemaVersion>1.0.0</schemaVersion>
         </requestCommon>
@@ -60,7 +60,7 @@ class BREResponseSpec extends SpecBase {
 
       val expectedResult = ParseSuccess(
         BREResponse(
-          "MDR",
+          "CBC",
           uuid,
           GenericStatusMessage(
             ValidationErrors(
@@ -89,7 +89,7 @@ class BREResponseSpec extends SpecBase {
       val xml = <BREResponse>
         <requestCommon>
           <receiptDate>2001-12-17T09:30:47Z</receiptDate>
-          <regime>MDR</regime>
+          <regime>CBC</regime>
           <conversationID>{uuid}</conversationID>
           <schemaVersion>1.0.0</schemaVersion>
         </requestCommon>
@@ -104,7 +104,7 @@ class BREResponseSpec extends SpecBase {
         </requestDetail>
       </BREResponse>
 
-      val expectedResult = ParseSuccess(BREResponse("MDR", uuid, GenericStatusMessage(ValidationErrors(None, None), ValidationStatus.accepted)))
+      val expectedResult = ParseSuccess(BREResponse("CBC", uuid, GenericStatusMessage(ValidationErrors(None, None), ValidationStatus.accepted)))
 
       XmlReader.of[BREResponse].read(xml) mustBe expectedResult
 

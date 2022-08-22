@@ -7,7 +7,7 @@
 			<xs:element name="requestCommon" type="gsm:requestCommon_Type"/>
 			<xs:element name="requestDetail" type="gsm:requestDetail_Type">
 				<xs:annotation>
-					<xs:documentation>Wrapper tag for the MDR submission XML payload</xs:documentation>
+					<xs:documentation>Wrapper tag for the CBC submission XML payload</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>
@@ -18,7 +18,7 @@
 			<xs:element name="regime">
 				<xs:simpleType>
 					<xs:restriction base="xs:string">
-						<xs:enumeration value="MDR"/>
+						<xs:enumeration value="CBC"/>
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:element>

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- edited with XMLSpy v2012 rel. 2 sp1 (x64) (http://www.altova.com) by Sebastien Michon (OECD) -->
-<xsd:schema xmlns:mdr="urn:oecd:ties:mdr:v1" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:stf="urn:oecd:ties:mdrstf:v1" xmlns:iso="urn:oecd:ties:isomdrtypes:v1" targetNamespace="urn:oecd:ties:mdr:v1" elementFormDefault="qualified" attributeFormDefault="unqualified" version="1.0">
-	<xsd:import namespace="urn:oecd:ties:isomdrtypes:v1" schemaLocation="IsoCbcTypes_v1.0.xsd"/>
-	<xsd:import namespace="urn:oecd:ties:mdrstf:v1" schemaLocation="OecdCbcTypes_v1.0.xsd"/>
+<xsd:schema xmlns:cbc="urn:oecd:ties:cbc:v1" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:stf="urn:oecd:ties:cbcstf:v1" xmlns:iso="urn:oecd:ties:isocbctypes:v1" targetNamespace="urn:oecd:ties:cbc:v1" elementFormDefault="qualified" attributeFormDefault="unqualified" version="1.0">
+	<xsd:import namespace="urn:oecd:ties:isocbctypes:v1" schemaLocation="IsoCbcTypes_v1.0.xsd"/>
+	<xsd:import namespace="urn:oecd:ties:cbcstf:v1" schemaLocation="OecdCbcTypes_v1.0.xsd"/>
 	<!-- -->
 	<!--+++++++++++++++++++++++  String lenght types ++++++++++++++++++++++++++++++++++++++ -->
 	<!-- -->
@@ -67,7 +67,7 @@
 			<xsd:documentation xml:lang="en">Defines a string with minimum length 1 and maximum length of 4000, with the Language attribute</xsd:documentation>
 		</xsd:annotation>
 		<xsd:simpleContent>
-			<xsd:extension base="mdr:StringMin1Max4000_Type">
+			<xsd:extension base="cbc:StringMin1Max4000_Type">
 				<xsd:attribute name="language" type="iso:LanguageCode_Type" use="optional">
 					<xsd:annotation>
 						<xsd:documentation xml:lang="en">Language used</xsd:documentation>
@@ -85,12 +85,12 @@
 			<xsd:documentation xml:lang="en">Message type defines the type of reporting</xsd:documentation>
 		</xsd:annotation>
 		<xsd:restriction base="xsd:string">
-			<xsd:enumeration value="MDR"/>
+			<xsd:enumeration value="CBC"/>
 		</xsd:restriction>
 	</xsd:simpleType>
 	<!--  -->
 	<!-- MessageTypeIndic - 4 -->
-	<xsd:simpleType name="MdrMessageTypeIndic_EnumType">
+	<xsd:simpleType name="CbcMessageTypeIndic_EnumType">
 		<xsd:annotation>
 			<xsd:documentation xml:lang="en">The MessageTypeIndic defines the type of message sent</xsd:documentation>
 		</xsd:annotation>
@@ -115,22 +115,22 @@
 			</xsd:documentation>
 		</xsd:annotation>
 		<xsd:restriction base="xsd:string">
-			<xsd:enumeration value="MDR501">
+			<xsd:enumeration value="CBC501">
 				<xsd:annotation>
 					<xsd:documentation>Intermediary - Promoter</xsd:documentation>
 				</xsd:annotation>
 			</xsd:enumeration>
-			<xsd:enumeration value="MDR502">
+			<xsd:enumeration value="CBC502">
 				<xsd:annotation>
 					<xsd:documentation>Intermediary - Service Provider</xsd:documentation>
 				</xsd:annotation>
 			</xsd:enumeration>
-			<xsd:enumeration value="MDR503">
+			<xsd:enumeration value="CBC503">
 				<xsd:annotation>
 					<xsd:documentation>Intermediary - Client </xsd:documentation>
 				</xsd:annotation>
 			</xsd:enumeration>
-			<xsd:enumeration value="MDR504">
+			<xsd:enumeration value="CBC504">
 				<xsd:annotation>
 					<xsd:documentation>Reportable Taxpayer</xsd:documentation>
 				</xsd:annotation>
@@ -145,22 +145,22 @@
 			</xsd:documentation>
 		</xsd:annotation>
 		<xsd:restriction base="xsd:string">
-			<xsd:enumeration value="MDR601">
+			<xsd:enumeration value="CBC601">
 				<xsd:annotation>
 					<xsd:documentation>Tax residence</xsd:documentation>
 				</xsd:annotation>
 			</xsd:enumeration>
-			<xsd:enumeration value="MDR602">
+			<xsd:enumeration value="CBC602">
 				<xsd:annotation>
 					<xsd:documentation>Incorporation / Establishment</xsd:documentation>
 				</xsd:annotation>
 			</xsd:enumeration>
-			<xsd:enumeration value="MDR603">
+			<xsd:enumeration value="CBC603">
 				<xsd:annotation>
 					<xsd:documentation>Place of Management</xsd:documentation>
 				</xsd:annotation>
 			</xsd:enumeration>
-			<xsd:enumeration value="MDR604">
+			<xsd:enumeration value="CBC604">
 				<xsd:annotation>
 					<xsd:documentation>Branch</xsd:documentation>
 				</xsd:annotation>
@@ -174,12 +174,12 @@
 			<xsd:documentation xml:lang="en">Reason for disclosure</xsd:documentation>
 		</xsd:annotation>
 		<xsd:restriction base="xsd:string">
-			<xsd:enumeration value="MDR701">
+			<xsd:enumeration value="CBC701">
 				<xsd:annotation>
 					<xsd:documentation>Arrangement available for implementation</xsd:documentation>
 				</xsd:annotation>
 			</xsd:enumeration>
-			<xsd:enumeration value="MDR702">
+			<xsd:enumeration value="CBC702">
 				<xsd:annotation>
 					<xsd:documentation>Provision of Relevant Services</xsd:documentation>
 				</xsd:annotation>
@@ -193,32 +193,32 @@
 			<xsd:documentation xml:lang="en">Type of CRS Avoidance Arrangement</xsd:documentation>
 		</xsd:annotation>
 		<xsd:restriction base="xsd:string">
-			<xsd:enumeration value="MDR801">
+			<xsd:enumeration value="CBC801">
 				<xsd:annotation>
 					<xsd:documentation>Not a Financial Account</xsd:documentation>
 				</xsd:annotation>
 			</xsd:enumeration>
-			<xsd:enumeration value="MDR802">
+			<xsd:enumeration value="CBC802">
 				<xsd:annotation>
 					<xsd:documentation>Conversion or transfer</xsd:documentation>
 				</xsd:annotation>
 			</xsd:enumeration>
-			<xsd:enumeration value="MDR803">
+			<xsd:enumeration value="CBC803">
 				<xsd:annotation>
 					<xsd:documentation>Incorrect due diligence</xsd:documentation>
 				</xsd:annotation>
 			</xsd:enumeration>
-			<xsd:enumeration value="MDR804">
+			<xsd:enumeration value="CBC804">
 				<xsd:annotation>
 					<xsd:documentation>Non-reporting of Controlling Persons</xsd:documentation>
 				</xsd:annotation>
 			</xsd:enumeration>
-			<xsd:enumeration value="MDR805">
+			<xsd:enumeration value="CBC805">
 				<xsd:annotation>
 					<xsd:documentation>Disguise of payments</xsd:documentation>
 				</xsd:annotation>
 			</xsd:enumeration>
-			<xsd:enumeration value="MDR806">
+			<xsd:enumeration value="CBC806">
 				<xsd:annotation>
 					<xsd:documentation>Other</xsd:documentation>
 				</xsd:annotation>
@@ -232,12 +232,12 @@
 			<xsd:documentation xml:lang="en">Reason for disclosure</xsd:documentation>
 		</xsd:annotation>
 		<xsd:restriction base="xsd:string">
-			<xsd:enumeration value="MDR901">
+			<xsd:enumeration value="CBC901">
 				<xsd:annotation>
 					<xsd:documentation>Structure made available for implementation</xsd:documentation>
 				</xsd:annotation>
 			</xsd:enumeration>
-			<xsd:enumeration value="MDR902">
+			<xsd:enumeration value="CBC902">
 				<xsd:annotation>
 					<xsd:documentation>Provision of Relevant Services</xsd:documentation>
 				</xsd:annotation>
@@ -251,42 +251,42 @@
 			<xsd:documentation xml:lang="en">Type of Opaque Offshore Structure</xsd:documentation>
 		</xsd:annotation>
 		<xsd:restriction base="xsd:string">
-			<xsd:enumeration value="MDR1001">
+			<xsd:enumeration value="CBC1001">
 				<xsd:annotation>
 					<xsd:documentation>Use of nominees</xsd:documentation>
 				</xsd:annotation>
 			</xsd:enumeration>
-			<xsd:enumeration value="MDR1002">
+			<xsd:enumeration value="CBC1002">
 				<xsd:annotation>
 					<xsd:documentation>Means of indirect control</xsd:documentation>
 				</xsd:annotation>
 			</xsd:enumeration>
-			<xsd:enumeration value="MDR1003">
+			<xsd:enumeration value="CBC1003">
 				<xsd:annotation>
 					<xsd:documentation>Access to assets without disclosure of Beneficial Owners</xsd:documentation>
 				</xsd:annotation>
 			</xsd:enumeration>
-			<xsd:enumeration value="MDR1004">
+			<xsd:enumeration value="CBC1004">
 				<xsd:annotation>
 					<xsd:documentation>Use of Legal Persons without basic corporate information</xsd:documentation>
 				</xsd:annotation>
 			</xsd:enumeration>
-			<xsd:enumeration value="MDR1005">
+			<xsd:enumeration value="CBC1005">
 				<xsd:annotation>
 					<xsd:documentation>Use of Legal Persons without obligation to disclose shareholders</xsd:documentation>
 				</xsd:annotation>
 			</xsd:enumeration>
-			<xsd:enumeration value="MDR1006">
+			<xsd:enumeration value="CBC1006">
 				<xsd:annotation>
 					<xsd:documentation>Use of Legal Persons without notification of change of shareholders/partners</xsd:documentation>
 				</xsd:annotation>
 			</xsd:enumeration>
-			<xsd:enumeration value="MDR1007">
+			<xsd:enumeration value="CBC1007">
 				<xsd:annotation>
 					<xsd:documentation>Use of Legal Arrangements without Beneficial Ownership information</xsd:documentation>
 				</xsd:annotation>
 			</xsd:enumeration>
-			<xsd:enumeration value="MDR1008">
+			<xsd:enumeration value="CBC1008">
 				<xsd:annotation>
 					<xsd:documentation>Other</xsd:documentation>
 				</xsd:annotation>
@@ -300,17 +300,17 @@
 			<xsd:documentation xml:lang="en">Role of the Intermediary</xsd:documentation>
 		</xsd:annotation>
 		<xsd:restriction base="xsd:string">
-			<xsd:enumeration value="MDR1101">
+			<xsd:enumeration value="CBC1101">
 				<xsd:annotation>
 					<xsd:documentation>Promoter</xsd:documentation>
 				</xsd:annotation>
 			</xsd:enumeration>
-			<xsd:enumeration value="MDR1102">
+			<xsd:enumeration value="CBC1102">
 				<xsd:annotation>
 					<xsd:documentation>Service Provider</xsd:documentation>
 				</xsd:annotation>
 			</xsd:enumeration>
-			<xsd:enumeration value="MDR1103">
+			<xsd:enumeration value="CBC1103">
 				<xsd:annotation>
 					<xsd:documentation>Client</xsd:documentation>
 				</xsd:annotation>
@@ -332,16 +332,16 @@
 	<xsd:complexType name="DocSpec_Type">
 		<xsd:annotation>
 			<xsd:documentation xml:lang="en">Document specification: Data identifying and describing the document, where
-'document' here means the part of a message that is to transmit the data about a single block of MDR information. </xsd:documentation>
+'document' here means the part of a message that is to transmit the data about a single block of CBC information. </xsd:documentation>
 		</xsd:annotation>
 		<xsd:sequence>
 			<xsd:element name="DocTypeIndic" type="stf:OECDDocTypeIndic_EnumType"/>
-			<xsd:element name="DocRefId" type="mdr:StringMin1Max200_Type">
+			<xsd:element name="DocRefId" type="cbc:StringMin1Max200_Type">
 				<xsd:annotation>
 					<xsd:documentation xml:lang="en">Sender's unique identifier of this document </xsd:documentation>
 				</xsd:annotation>
 			</xsd:element>
-			<xsd:element name="CorrDocRefId" type="mdr:StringMin1Max200_Type" minOccurs="0">
+			<xsd:element name="CorrDocRefId" type="cbc:StringMin1Max200_Type" minOccurs="0">
 				<xsd:annotation>
 					<xsd:documentation xml:lang="en">Reference id of the document referred to if this is correction</xsd:documentation>
 				</xsd:annotation>
@@ -355,7 +355,7 @@
 			<xsd:documentation xml:lang="en">Name of organisation</xsd:documentation>
 		</xsd:annotation>
 		<xsd:simpleContent>
-			<xsd:extension base="mdr:StringMin1Max200_Type">
+			<xsd:extension base="cbc:StringMin1Max200_Type">
 				<xsd:attribute name="language" type="iso:LanguageCode_Type" use="optional">
 					<xsd:annotation>
 						<xsd:documentation xml:lang="en">Language used</xsd:documentation>
@@ -373,15 +373,15 @@
 			</xsd:documentation>
 		</xsd:annotation>
 		<xsd:sequence>
-			<xsd:element name="Street" type="mdr:StringMin1Max200_Type" minOccurs="0"/>
-			<xsd:element name="BuildingIdentifier" type="mdr:StringMin1Max200_Type" minOccurs="0"/>
-			<xsd:element name="SuiteIdentifier" type="mdr:StringMin1Max200_Type" minOccurs="0"/>
-			<xsd:element name="FloorIdentifier" type="mdr:StringMin1Max200_Type" minOccurs="0"/>
-			<xsd:element name="DistrictName" type="mdr:StringMin1Max200_Type" minOccurs="0"/>
-			<xsd:element name="POB" type="mdr:StringMin1Max200_Type" minOccurs="0"/>
-			<xsd:element name="PostCode" type="mdr:StringMin1Max200_Type" minOccurs="0"/>
-			<xsd:element name="City" type="mdr:StringMin1Max200_Type"/>
-			<xsd:element name="CountrySubentity" type="mdr:StringMin1Max200_Type" minOccurs="0"/>
+			<xsd:element name="Street" type="cbc:StringMin1Max200_Type" minOccurs="0"/>
+			<xsd:element name="BuildingIdentifier" type="cbc:StringMin1Max200_Type" minOccurs="0"/>
+			<xsd:element name="SuiteIdentifier" type="cbc:StringMin1Max200_Type" minOccurs="0"/>
+			<xsd:element name="FloorIdentifier" type="cbc:StringMin1Max200_Type" minOccurs="0"/>
+			<xsd:element name="DistrictName" type="cbc:StringMin1Max200_Type" minOccurs="0"/>
+			<xsd:element name="POB" type="cbc:StringMin1Max200_Type" minOccurs="0"/>
+			<xsd:element name="PostCode" type="cbc:StringMin1Max200_Type" minOccurs="0"/>
+			<xsd:element name="City" type="cbc:StringMin1Max200_Type"/>
+			<xsd:element name="CountrySubentity" type="cbc:StringMin1Max200_Type" minOccurs="0"/>
 		</xsd:sequence>
 	</xsd:complexType>
 	<!--  -->
@@ -389,7 +389,7 @@
 	<xsd:complexType name="Address_Type">
 		<xsd:annotation>
 			<xsd:documentation xml:lang="en">
-			There are two alternative options for Address type in the MDR XML schema – AddressFix and AddressFree. In principle, AddressFix should be used in all cases.
+			There are two alternative options for Address type in the CBC XML schema – AddressFix and AddressFree. In principle, AddressFix should be used in all cases.
 			
 If the sending Competent Authority chooses to enter the data in 'AddressFree', all available address details shall be presented as one string of bytes, with blanks, slashes or carriage returns being used as a delimiter between parts of the address. This option should only be used if the data cannot be presented in the AddressFix format.
 
@@ -399,10 +399,10 @@ NOTE: If the sending Competent Authority selects AddressFix, it will have the op
 		<xsd:sequence>
 			<xsd:element name="CountryCode" type="iso:CountryCode_Type"/>
 			<xsd:choice>
-				<xsd:element name="AddressFree" type="mdr:StringMin1Max4000_Type"/>
+				<xsd:element name="AddressFree" type="cbc:StringMin1Max4000_Type"/>
 				<xsd:sequence>
-					<xsd:element name="AddressFix" type="mdr:AddressFix_Type"/>
-					<xsd:element name="AddressFree" type="mdr:StringMin1Max4000_Type" minOccurs="0"/>
+					<xsd:element name="AddressFix" type="cbc:AddressFix_Type"/>
+					<xsd:element name="AddressFree" type="cbc:StringMin1Max4000_Type" minOccurs="0"/>
 				</xsd:sequence>
 			</xsd:choice>
 		</xsd:sequence>
@@ -436,7 +436,7 @@ taken from the ISO codelist 4217 and added in attribute currCode.
 			<xsd:documentation xml:lang="en">This is the identification number/identification code for the party in question. As the identifier may be not strictly numeric, it is just defined as a string of characters. Attribute 'issuedBy' is required to designate the issuer of the identifier. </xsd:documentation>
 		</xsd:annotation>
 		<xsd:simpleContent>
-			<xsd:extension base="mdr:StringMin1Max200_Type">
+			<xsd:extension base="cbc:StringMin1Max200_Type">
 				<xsd:attribute name="issuedBy" type="iso:CountryCode_Type" use="optional">
 					<xsd:annotation>
 						<xsd:documentation xml:lang="en">Country code of issuing country, indicating country of Residence (to taxes and other)</xsd:documentation>
@@ -454,27 +454,27 @@ taken from the ISO codelist 4217 and added in attribute currCode.
 		<xsd:sequence>
 			<xsd:element name="TransmittingCountry" type="iso:CountryCode_Type"/>
 			<xsd:element name="ReceivingCountry" type="iso:CountryCode_Type"/>
-			<xsd:element name="MessageType" type="mdr:MessageType_EnumType"/>
+			<xsd:element name="MessageType" type="cbc:MessageType_EnumType"/>
 			<xsd:element name="Language" type="iso:LanguageCode_Type" minOccurs="0"/>
-			<xsd:element name="Warning" type="mdr:StringMin1Max4000_Type" minOccurs="0">
+			<xsd:element name="Warning" type="cbc:StringMin1Max4000_Type" minOccurs="0">
 				<xsd:annotation>
 					<xsd:documentation xml:lang="en">Free text expressing the restrictions for use of the information this
 message contains and the legal framework under which it is given</xsd:documentation>
 				</xsd:annotation>
 			</xsd:element>
-			<xsd:element name="Contact" type="mdr:StringMin1Max4000_Type" minOccurs="0">
+			<xsd:element name="Contact" type="cbc:StringMin1Max4000_Type" minOccurs="0">
 				<xsd:annotation>
 					<xsd:documentation xml:lang="en">All necessary contact information about persons responsible for and
 involved in the processing of the data transmitted in this message, both legally and technically. Free text as this is not
 intended for automatic processing. </xsd:documentation>
 				</xsd:annotation>
 			</xsd:element>
-			<xsd:element name="MessageRefId" type="mdr:StringMin1Max170_Type">
+			<xsd:element name="MessageRefId" type="cbc:StringMin1Max170_Type">
 				<xsd:annotation>
 					<xsd:documentation xml:lang="en">Sender's unique identifier for this message</xsd:documentation>
 				</xsd:annotation>
 			</xsd:element>
-			<xsd:element name="MessageTypeIndic" type="mdr:MdrMessageTypeIndic_EnumType"/>
+			<xsd:element name="MessageTypeIndic" type="cbc:CbcMessageTypeIndic_EnumType"/>
 			<xsd:element name="Timestamp" type="xsd:dateTime"/>
 		</xsd:sequence>
 	</xsd:complexType>
@@ -485,13 +485,13 @@ intended for automatic processing. </xsd:documentation>
 			<xsd:documentation xml:lang="en">This is the identification number/identification code for the Entity in question. As the identifier may be not strictly numeric, it is just defined as a string of characters. Attribute 'issuedBy' is required to designate the issuer of the identifier.  Attribute 'INType' defines the type of identification number. </xsd:documentation>
 		</xsd:annotation>
 		<xsd:simpleContent>
-			<xsd:extension base="mdr:StringMin1Max200_Type">
+			<xsd:extension base="cbc:StringMin1Max200_Type">
 				<xsd:attribute name="issuedBy" type="iso:CountryCode_Type" use="optional">
 					<xsd:annotation>
 						<xsd:documentation xml:lang="en">Country code of issuing country, indicating country of Residence (to taxes and other)</xsd:documentation>
 					</xsd:annotation>
 				</xsd:attribute>
-				<xsd:attribute name="INType" type="mdr:StringMin1Max200_Type" use="optional">
+				<xsd:attribute name="INType" type="cbc:StringMin1Max200_Type" use="optional">
 					<xsd:annotation>
 						<xsd:documentation xml:lang="en">Identification Number Type</xsd:documentation>
 					</xsd:annotation>
@@ -512,18 +512,18 @@ all of the subelements are defined elsewhere in this schema.</xsd:documentation>
 		</xsd:annotation>
 		<xsd:sequence>
 			<xsd:element name="ResCountryCode" type="iso:CountryCode_Type" maxOccurs="unbounded"/>
-			<xsd:element name="TIN" type="mdr:TIN_Type">
+			<xsd:element name="TIN" type="cbc:TIN_Type">
 				<xsd:annotation>
 					<xsd:documentation>Tax Identification Number</xsd:documentation>
 				</xsd:annotation>
 			</xsd:element>
-			<xsd:element name="IN" type="mdr:OrganisationIN_Type" minOccurs="0" maxOccurs="unbounded">
+			<xsd:element name="IN" type="cbc:OrganisationIN_Type" minOccurs="0" maxOccurs="unbounded">
 				<xsd:annotation>
 					<xsd:documentation xml:lang="en">Entity Identification Number</xsd:documentation>
 				</xsd:annotation>
 			</xsd:element>
-			<xsd:element name="Name" type="mdr:NameOrganisation_Type" maxOccurs="unbounded"/>
-			<xsd:element name="Address" type="mdr:Address_Type" maxOccurs="unbounded"/>
+			<xsd:element name="Name" type="cbc:NameOrganisation_Type" maxOccurs="unbounded"/>
+			<xsd:element name="Address" type="cbc:Address_Type" maxOccurs="unbounded"/>
 		</xsd:sequence>
 	</xsd:complexType>
 	<!-- -->
@@ -540,9 +540,9 @@ all of the subelements are defined elsewhere in this schema.</xsd:documentation>
 		</xsd:annotation>
 		<xsd:sequence>
 			<xsd:element name="ResCountryCode" type="iso:CountryCode_Type" maxOccurs="unbounded"/>
-			<xsd:element name="TIN" type="mdr:TIN_Type" maxOccurs="unbounded"/>
-			<xsd:element name="Name" type="mdr:NamePerson_Type" maxOccurs="unbounded"/>
-			<xsd:element name="Address" type="mdr:Address_Type" maxOccurs="unbounded"/>
+			<xsd:element name="TIN" type="cbc:TIN_Type" maxOccurs="unbounded"/>
+			<xsd:element name="Name" type="cbc:NamePerson_Type" maxOccurs="unbounded"/>
+			<xsd:element name="Address" type="cbc:Address_Type" maxOccurs="unbounded"/>
 			<xsd:element name="BirthDate" type="xsd:date" minOccurs="0"/>
 		</xsd:sequence>
 	</xsd:complexType>
@@ -554,12 +554,12 @@ all of the subelements are defined elsewhere in this schema.</xsd:documentation>
 			<xsd:documentation xml:lang="en">The user must spread the data about the name of a party over up to six elements. The container element for this will be 'NameFix'. </xsd:documentation>
 		</xsd:annotation>
 		<xsd:sequence>
-			<xsd:element name="PrecedingTitle" type="mdr:StringMin1Max200_Type" minOccurs="0">
+			<xsd:element name="PrecedingTitle" type="cbc:StringMin1Max200_Type" minOccurs="0">
 				<xsd:annotation>
 					<xsd:documentation xml:lang="en">His Excellency,Estate of the Late ...</xsd:documentation>
 				</xsd:annotation>
 			</xsd:element>
-			<xsd:element name="Title" type="mdr:StringMin1Max200_Type" minOccurs="0" maxOccurs="unbounded">
+			<xsd:element name="Title" type="cbc:StringMin1Max200_Type" minOccurs="0" maxOccurs="unbounded">
 				<xsd:annotation>
 					<xsd:documentation xml:lang="en">Greeting title. Example: Mr, Dr, Ms, Herr, etc. Can have multiple titles.</xsd:documentation>
 				</xsd:annotation>
@@ -570,8 +570,8 @@ all of the subelements are defined elsewhere in this schema.</xsd:documentation>
 				</xsd:annotation>
 				<xsd:complexType>
 					<xsd:simpleContent>
-						<xsd:extension base="mdr:StringMin1Max200_Type">
-							<xsd:attribute name="xnlNameType" type="mdr:StringMin1Max200_Type">
+						<xsd:extension base="cbc:StringMin1Max200_Type">
+							<xsd:attribute name="xnlNameType" type="cbc:StringMin1Max200_Type">
 								<xsd:annotation>
 									<xsd:documentation xml:lang="en">Defines the name type of FirstName. Example: Given Name, Forename, Christian Name, Father's Name, etc. In some countries, FirstName could be a Family Name or a SurName. Use this attribute to define the type for this name.
 									</xsd:documentation>
@@ -587,8 +587,8 @@ all of the subelements are defined elsewhere in this schema.</xsd:documentation>
 				</xsd:annotation>
 				<xsd:complexType>
 					<xsd:simpleContent>
-						<xsd:extension base="mdr:StringMin1Max200_Type">
-							<xsd:attribute name="xnlNameType" type="mdr:StringMin1Max200_Type">
+						<xsd:extension base="cbc:StringMin1Max200_Type">
+							<xsd:attribute name="xnlNameType" type="cbc:StringMin1Max200_Type">
 								<xsd:annotation>
 									<xsd:documentation xml:lang="en">Defines the name type of Middle Name. Example: First name, middle name, maiden name, father's name, given name, etc.
 									</xsd:documentation>
@@ -604,8 +604,8 @@ all of the subelements are defined elsewhere in this schema.</xsd:documentation>
 				</xsd:annotation>
 				<xsd:complexType>
 					<xsd:simpleContent>
-						<xsd:extension base="mdr:StringMin1Max200_Type">
-							<xsd:attribute name="xnlNameType" type="mdr:StringMin1Max200_Type">
+						<xsd:extension base="cbc:StringMin1Max200_Type">
+							<xsd:attribute name="xnlNameType" type="cbc:StringMin1Max200_Type">
 								<xsd:annotation>
 									<xsd:documentation xml:lang="en">Defines the type of name associated with the NamePrefix. For example the type of name is LastName and this prefix is the prefix for this last name.
 							</xsd:documentation>
@@ -622,8 +622,8 @@ In case of a company, this field can be used for the company name.</xsd:document
 				</xsd:annotation>
 				<xsd:complexType>
 					<xsd:simpleContent>
-						<xsd:extension base="mdr:StringMin1Max200_Type">
-							<xsd:attribute name="xnlNameType" type="mdr:StringMin1Max200_Type">
+						<xsd:extension base="cbc:StringMin1Max200_Type">
+							<xsd:attribute name="xnlNameType" type="cbc:StringMin1Max200_Type">
 								<xsd:annotation>
 									<xsd:documentation xml:lang="en">Defines the name type of LastName. Example: Father's name, Family name, Sur Name, Mother's Name, etc. In some countries, LastName could be the given name or first name.
 									</xsd:documentation>
@@ -633,17 +633,17 @@ In case of a company, this field can be used for the company name.</xsd:document
 					</xsd:simpleContent>
 				</xsd:complexType>
 			</xsd:element>
-			<xsd:element name="GenerationIdentifier" type="mdr:StringMin1Max200_Type" minOccurs="0" maxOccurs="unbounded">
+			<xsd:element name="GenerationIdentifier" type="cbc:StringMin1Max200_Type" minOccurs="0" maxOccurs="unbounded">
 				<xsd:annotation>
 					<xsd:documentation xml:lang="en">Jnr, Thr Third, III</xsd:documentation>
 				</xsd:annotation>
 			</xsd:element>
-			<xsd:element name="Suffix" type="mdr:StringMin1Max200_Type" minOccurs="0" maxOccurs="unbounded">
+			<xsd:element name="Suffix" type="cbc:StringMin1Max200_Type" minOccurs="0" maxOccurs="unbounded">
 				<xsd:annotation>
 					<xsd:documentation xml:lang="en">Could be compressed initials - PhD, VC, QC</xsd:documentation>
 				</xsd:annotation>
 			</xsd:element>
-			<xsd:element name="GeneralSuffix" type="mdr:StringMin1Max200_Type" minOccurs="0">
+			<xsd:element name="GeneralSuffix" type="cbc:StringMin1Max200_Type" minOccurs="0">
 				<xsd:annotation>
 					<xsd:documentation xml:lang="en">Deceased, Retired ...</xsd:documentation>
 				</xsd:annotation>
@@ -661,13 +661,13 @@ In case of a company, this field can be used for the company name.</xsd:document
 	<xsd:complexType name="CrsAvoidanceArrangement_Type">
 		<xsd:sequence>
 			<xsd:element name="DisclosureDate" type="xsd:date"/>
-			<xsd:element name="Reason" type="mdr:DisclosureReasonCRSAA_EnumType" minOccurs="0"/>
-			<xsd:element name="Type" type="mdr:CRSAvoidanceArrangement_EnumType" maxOccurs="unbounded"/>
-			<xsd:element name="OtherInfo" type="mdr:StringMin1Max4000WithLang_Type" minOccurs="0" maxOccurs="unbounded"/>
-			<xsd:element name="StructureChart" type="mdr:ReportableTaxPayerChart_Type" minOccurs="0"/>
-			<xsd:element name="Narrative" type="mdr:StringMin1Max4000WithLang_Type" maxOccurs="unbounded"/>
+			<xsd:element name="Reason" type="cbc:DisclosureReasonCRSAA_EnumType" minOccurs="0"/>
+			<xsd:element name="Type" type="cbc:CRSAvoidanceArrangement_EnumType" maxOccurs="unbounded"/>
+			<xsd:element name="OtherInfo" type="cbc:StringMin1Max4000WithLang_Type" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="StructureChart" type="cbc:ReportableTaxPayerChart_Type" minOccurs="0"/>
+			<xsd:element name="Narrative" type="cbc:StringMin1Max4000WithLang_Type" maxOccurs="unbounded"/>
 			<xsd:element name="Jurisdictions" type="iso:CountryCode_Type" maxOccurs="unbounded"/>
-			<xsd:element name="Summary" type="mdr:StringMin1Max4000WithLang_Type" maxOccurs="unbounded"/>
+			<xsd:element name="Summary" type="cbc:StringMin1Max4000WithLang_Type" maxOccurs="unbounded"/>
 		</xsd:sequence>
 	</xsd:complexType>
 	<!-- -->
@@ -675,27 +675,27 @@ In case of a company, this field can be used for the company name.</xsd:document
 	<xsd:complexType name="OpaqueOffshoreStructure_Type">
 		<xsd:sequence>
 			<xsd:element name="DisclosureDate" type="xsd:date"/>
-			<xsd:element name="Reason" type="mdr:DisclosureReasonOOS_EnumType" minOccurs="0"/>
-			<xsd:element name="Type" type="mdr:OOS_EnumType" maxOccurs="unbounded"/>
-			<xsd:element name="OtherInfo" type="mdr:StringMin1Max4000WithLang_Type" minOccurs="0" maxOccurs="unbounded"/>
-			<xsd:element name="StructureChart" type="mdr:ReportableTaxPayerChart_Type" minOccurs="0"/>
-			<xsd:element name="Narrative" type="mdr:StringMin1Max4000WithLang_Type" maxOccurs="unbounded"/>
+			<xsd:element name="Reason" type="cbc:DisclosureReasonOOS_EnumType" minOccurs="0"/>
+			<xsd:element name="Type" type="cbc:OOS_EnumType" maxOccurs="unbounded"/>
+			<xsd:element name="OtherInfo" type="cbc:StringMin1Max4000WithLang_Type" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="StructureChart" type="cbc:ReportableTaxPayerChart_Type" minOccurs="0"/>
+			<xsd:element name="Narrative" type="cbc:StringMin1Max4000WithLang_Type" maxOccurs="unbounded"/>
 			<xsd:element name="Jurisdictions" type="iso:CountryCode_Type" maxOccurs="unbounded"/>
-			<xsd:element name="Summary" type="mdr:StringMin1Max4000WithLang_Type" maxOccurs="unbounded"/>
+			<xsd:element name="Summary" type="cbc:StringMin1Max4000WithLang_Type" maxOccurs="unbounded"/>
 		</xsd:sequence>
 	</xsd:complexType>
 	<!-- -->
 	<!-- Reportable Tax Payer Chart -->
 	<xsd:complexType name="ReportableTaxPayerChart_Type">
 		<xsd:sequence>
-			<xsd:element name="ID" type="mdr:PersonOrOrganisation_Type"/>
-			<xsd:element name="Ownership" type="mdr:Percentage_Type" minOccurs="0"/>
-			<xsd:element name="InvestAmount" type="mdr:MonAmnt_Type" minOccurs="0"/>
-			<xsd:element name="OtherInfo" type="mdr:StringMin1Max4000WithLang_Type" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="ID" type="cbc:PersonOrOrganisation_Type"/>
+			<xsd:element name="Ownership" type="cbc:Percentage_Type" minOccurs="0"/>
+			<xsd:element name="InvestAmount" type="cbc:MonAmnt_Type" minOccurs="0"/>
+			<xsd:element name="OtherInfo" type="cbc:StringMin1Max4000WithLang_Type" minOccurs="0" maxOccurs="unbounded"/>
 			<xsd:element name="ListChilds" minOccurs="0">
 				<xsd:complexType>
 					<xsd:sequence>
-						<xsd:element name="ChildRTP" type="mdr:ReportableTaxPayerChart_Type" maxOccurs="unbounded"/>
+						<xsd:element name="ChildRTP" type="cbc:ReportableTaxPayerChart_Type" maxOccurs="unbounded"/>
 					</xsd:sequence>
 				</xsd:complexType>
 			</xsd:element>
@@ -706,8 +706,8 @@ In case of a company, this field can be used for the company name.</xsd:document
 	<xsd:complexType name="PersonOrOrganisation_Type">
 		<xsd:sequence>
 			<xsd:choice>
-				<xsd:element name="Individual" type="mdr:PersonParty_Type"/>
-				<xsd:element name="Organisation" type="mdr:OrganisationParty_Type"/>
+				<xsd:element name="Individual" type="cbc:PersonParty_Type"/>
+				<xsd:element name="Organisation" type="cbc:OrganisationParty_Type"/>
 			</xsd:choice>
 		</xsd:sequence>
 	</xsd:complexType>
@@ -716,18 +716,18 @@ In case of a company, this field can be used for the company name.</xsd:document
 	<!-- Disclosing Person / Entity -->
 	<xsd:complexType name="Disclosing_Type">
 		<xsd:sequence>
-			<xsd:element name="ID" type="mdr:PersonOrOrganisation_Type"/>
-			<xsd:element name="Capacity" type="mdr:CapacityDisclosingPerson_EnumType" maxOccurs="unbounded"/>
-			<xsd:element name="Nexus" type="mdr:NexusDisclosure_EnumType" maxOccurs="unbounded"/>
+			<xsd:element name="ID" type="cbc:PersonOrOrganisation_Type"/>
+			<xsd:element name="Capacity" type="cbc:CapacityDisclosingPerson_EnumType" maxOccurs="unbounded"/>
+			<xsd:element name="Nexus" type="cbc:NexusDisclosure_EnumType" maxOccurs="unbounded"/>
 		</xsd:sequence>
 	</xsd:complexType>
 	<!-- -->
 	<!-- Correctable Disclosing Person / Entity -->
 	<xsd:complexType name="CorrectableDisclosing_Type">
 		<xsd:complexContent>
-			<xsd:extension base="mdr:Disclosing_Type">
+			<xsd:extension base="cbc:Disclosing_Type">
 				<xsd:sequence>
-					<xsd:element name="DocSpec" type="mdr:DocSpec_Type"/>
+					<xsd:element name="DocSpec" type="cbc:DocSpec_Type"/>
 				</xsd:sequence>
 			</xsd:extension>
 		</xsd:complexContent>
@@ -736,15 +736,15 @@ In case of a company, this field can be used for the company name.</xsd:document
 	<!-- Reportable Tax Payer -->
 	<xsd:complexType name="TaxPayer_Type">
 		<xsd:sequence>
-			<xsd:element name="ID" type="mdr:PersonOrOrganisation_Type"/>
+			<xsd:element name="ID" type="cbc:PersonOrOrganisation_Type"/>
 		</xsd:sequence>
 	</xsd:complexType>
 	<!-- -->
 	<!-- Intermediaries -->
 	<xsd:complexType name="Intermediary_Type">
 		<xsd:sequence>
-			<xsd:element name="ID" type="mdr:PersonOrOrganisation_Type"/>
-			<xsd:element name="Role" type="mdr:IntermediaryRole_EnumType"/>
+			<xsd:element name="ID" type="cbc:PersonOrOrganisation_Type"/>
+			<xsd:element name="Role" type="cbc:IntermediaryRole_EnumType"/>
 		</xsd:sequence>
 	</xsd:complexType>
 	<!--  -->
@@ -754,56 +754,56 @@ In case of a company, this field can be used for the company name.</xsd:document
 			<xsd:element name="Arrangement">
 				<xsd:complexType>
 					<xsd:choice>
-						<xsd:element name="CrsAvoidance" type="mdr:CrsAvoidanceArrangement_Type"/>
-						<xsd:element name="OOS" type="mdr:OpaqueOffshoreStructure_Type"/>
+						<xsd:element name="CrsAvoidance" type="cbc:CrsAvoidanceArrangement_Type"/>
+						<xsd:element name="OOS" type="cbc:OpaqueOffshoreStructure_Type"/>
 					</xsd:choice>
 				</xsd:complexType>
 			</xsd:element>
 		</xsd:sequence>
 	</xsd:complexType>
 	<!-- -->
-	<!-- MDR Report -->
-	<xsd:complexType name="MdrReport_Type">
+	<!-- CBC Report -->
+	<xsd:complexType name="CbcReport_Type">
 		<xsd:sequence>
-			<xsd:element name="ReportableTaxPayer" type="mdr:TaxPayer_Type" maxOccurs="unbounded"/>
-			<xsd:element name="Intermediaries" type="mdr:Intermediary_Type" minOccurs="0" maxOccurs="unbounded"/>
-			<xsd:element name="Structure" type="mdr:Structure_Type"/>
+			<xsd:element name="ReportableTaxPayer" type="cbc:TaxPayer_Type" maxOccurs="unbounded"/>
+			<xsd:element name="Intermediaries" type="cbc:Intermediary_Type" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="Structure" type="cbc:Structure_Type"/>
 		</xsd:sequence>
 	</xsd:complexType>
 	<!-- -->
-	<!-- Correctable MDR Report -->
-	<xsd:complexType name="CorrectableMdrReport_Type">
+	<!-- Correctable CBC Report -->
+	<xsd:complexType name="CorrectableCbcReport_Type">
 		<xsd:complexContent>
-			<xsd:extension base="mdr:MdrReport_Type">
+			<xsd:extension base="cbc:CbcReport_Type">
 				<xsd:sequence>
-					<xsd:element name="DocSpec" type="mdr:DocSpec_Type"/>
+					<xsd:element name="DocSpec" type="cbc:DocSpec_Type"/>
 				</xsd:sequence>
 			</xsd:extension>
 		</xsd:complexContent>
 	</xsd:complexType>
 	<!--  -->
 	<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Body type  ++++++++++++++++++++++++++++++++++++++++++++ -->
-	<!-- mdr Body Type  -->
-	<xsd:complexType name="MdrBody_Type">
+	<!-- cbc Body Type  -->
+	<xsd:complexType name="CbcBody_Type">
 		<xsd:sequence>
-			<xsd:element name="Disclosing" type="mdr:CorrectableDisclosing_Type"/>
-			<xsd:element name="MdrReport" type="mdr:CorrectableMdrReport_Type" minOccurs="0"/>
+			<xsd:element name="Disclosing" type="cbc:CorrectableDisclosing_Type"/>
+			<xsd:element name="CbcReport" type="cbc:CorrectableCbcReport_Type" minOccurs="0"/>
 		</xsd:sequence>
 	</xsd:complexType>
 	<!--  -->
 	<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Schema top element ++++++++++++++++++++++++++++++++++++++++++++ -->
-	<!-- MDR OECD File Message structure  -->
+	<!-- CBC OECD File Message structure  -->
 	<!-- -->
-	<!-- MDR Message structure  -->
-	<xsd:element name="MDR_OECD">
+	<!-- CBC Message structure  -->
+	<xsd:element name="CBC_OECD">
 		<xsd:complexType>
 			<xsd:sequence>
-				<xsd:element name="MessageSpec" type="mdr:MessageSpec_Type"/>
-				<xsd:element name="MdrBody" type="mdr:MdrBody_Type" maxOccurs="unbounded"/>
+				<xsd:element name="MessageSpec" type="cbc:MessageSpec_Type"/>
+				<xsd:element name="CbcBody" type="cbc:CbcBody_Type" maxOccurs="unbounded"/>
 			</xsd:sequence>
-			<xsd:attribute name="version" type="mdr:StringMin1Max10_Type">
+			<xsd:attribute name="version" type="cbc:StringMin1Max10_Type">
 				<xsd:annotation>
-					<xsd:documentation xml:lang="en">MDR Version</xsd:documentation>
+					<xsd:documentation xml:lang="en">CBC Version</xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
 		</xsd:complexType>
