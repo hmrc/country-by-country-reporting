@@ -54,7 +54,7 @@ class SubmissionController @Inject() (
     val subscriptionId           = request.subscriptionId
     val submissionTime           = dateTimeNow()
     val conversationId           = ConversationId()
-    val uploadedXmlNode: NodeSeq = xml \ "file" \ "MDR_OECD"
+    val uploadedXmlNode: NodeSeq = xml \ "file" \ "CBC_OECD"
     val submissionDetails        = FileDetails(conversationId, subscriptionId, messageRefId, Pending, fileName, submissionTime, submissionTime)
 
     val submissionMetaData = SubmissionMetaData.build(submissionTime, conversationId, fileName)

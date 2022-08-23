@@ -24,36 +24,37 @@ import scala.xml._
 
 class TransformService @Inject() () {
 
+  //TODO update cadx  schemaLocation when recievd the spec DCT72a_CBCSubmissionRequest_v0.1.xsd
   def addSubscriptionDetailsToSubmission(
     uploadedFile: NodeSeq,
     subscriptionDetails: ResponseDetail,
     metaData: SubmissionMetaData
   ): NodeSeq =
-    <cadx:MDRSubmissionRequest xmlns:mdr="urn:oecd:ties:mdr:v1"
-                          xmlns:cadx="http://www.hmrc.gsi.gov.uk/mdr/cadx"
+    <cadx:CBCSubmissionRequest xmlns:cbc="urn:oecd:ties:cbc:v1"
+                          xmlns:cadx="http://www.hmrc.gsi.gov.uk/cbc/cadx"
                           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                          xsi:schemaLocation="http://www.hmrc.gsi.gov.uk/mdr/cadx DCT72a_MDRSubmissionRequest_v0.1.xsd">
+                          xsi:schemaLocation="http://www.hmrc.gsi.gov.uk/cbc/cadx DCT72a_CBCSubmissionRequest_v0.1.xsd"> 
 
       <requestCommon>
         <receiptDate>
           {metaData.submissionTime}
         </receiptDate>
-        <regime>MDR</regime>
+        <regime>CBC</regime>
         <conversationID>{metaData.conversationId.value}</conversationID>
         <schemaVersion>1.0.0</schemaVersion>
       </requestCommon>
       <requestDetail>
-        {addNameSpaces(addNameSpaceDefinitions(uploadedFile), Seq(NamespaceForNode("MDR_OECD", "mdr")))}
+        {addNameSpaces(addNameSpaceDefinitions(uploadedFile), Seq(NamespaceForNode("CBC_OECD", "cbc")))}
       </requestDetail>
       <requestAdditionalDetail>
         {transformSubscriptionDetails(subscriptionDetails, metaData.fileName)}
       </requestAdditionalDetail>
-    </cadx:MDRSubmissionRequest>
+    </cadx:CBCSubmissionRequest>
 
   def addNameSpaceDefinitions(submissionFile: NodeSeq): NodeSeq =
     for (node <- submissionFile) yield node match {
       case elem: Elem =>
-        elem.copy(scope = NamespaceBinding("xsi", "http://www.w3.org/2001/XMLSchema-instance", NamespaceBinding("mdr", "urn:oecd:ties:mdr:v1", TopScope)))
+        elem.copy(scope = NamespaceBinding("xsi", "http://www.w3.org/2001/XMLSchema-instance", NamespaceBinding("cbc", "urn:oecd:ties:cbc:v1", TopScope)))
     }
 
   def transformSubscriptionDetails(
