@@ -106,17 +106,17 @@ class TransformServiceSpec extends SpecBase with StreamlinedXmlEquality {
     expected == result
   }
 
-  "add namespace definitions for MDR-oecd" in {
+  "add namespace definitions for CBC-oecd" in {
     val service = app.injector.instanceOf[TransformService]
-    val file = <MDR_OECD version="1.0.0">
+    val file = <CBC_OECD version="1.0.0">
       <submission>Submitted Data</submission>
-    </MDR_OECD>
+    </CBC_OECD>
 
-    val expected = <MDR_OECD version="1.0.0"
-                                     xmlns:mdr="urn:oecd:ties:mdr:v1"
+    val expected = <CBC_OECD version="1.0.0"
+                                     xmlns:cbc="urn:oecd:ties:cbc:v1"
                                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
       <submission>Submitted Data</submission>
-    </MDR_OECD>
+    </CBC_OECD>
 
     val result = service.addNameSpaceDefinitions(file)
 

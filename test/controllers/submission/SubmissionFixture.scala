@@ -24,16 +24,16 @@ object SubmissionFixture {
       <fileName>my-file.xml</fileName>
       <enrolmentID>enrolmentID</enrolmentID>
       <file>
-        <MDR_OECD xmlns="urn:oecd:ties:mdr:v1" >
+        <CBC_OECD xmlns="urn:oecd:ties:cbc:v1" >
           <MessageSpec>
             <TransmittingCountry>AF</TransmittingCountry>
             <ReceivingCountry>AF</ReceivingCountry>
-            <MessageType>MDR</MessageType>
+            <MessageType>CBC</MessageType>
             <Language>EN</Language>
             <Warning>This is a warning</Warning>
             <Contact>This is a Contact</Contact>
-            <MessageRefId>GBXAMDR1234567</MessageRefId>
-            <MessageTypeIndic>MDR401</MessageTypeIndic>
+            <MessageRefId>GBXACBC1234567</MessageRefId>
+            <MessageTypeIndic>CBC401</MessageTypeIndic>
             <Timestamp>2020-05-14T17:10:00</Timestamp>
           </MessageSpec>
           <MdrBody>
@@ -61,9 +61,9 @@ object SubmissionFixture {
                   </Address>
                 </Organisation>
               </ID>
-              <Capacity>MDR501</Capacity>
-              <Nexus>MDR601</Nexus>
-              <Nexus>MDR602</Nexus>
+              <Capacity>CBC501</Capacity>
+              <Nexus>CBC601</Nexus>
+              <Nexus>CBC602</Nexus>
               <DocSpec>
                 <DocTypeIndic>OECD0</DocTypeIndic>
                 <DocRefId>GB123456</DocRefId>
@@ -165,7 +165,7 @@ object SubmissionFixture {
                     <BirthDate>2007-01-14</BirthDate>
                   </Individual>
                 </ID>
-                <Role>MDR1101</Role>
+                <Role>CBC1101</Role>
               </Intermediaries>
               <Intermediaries>
                 <ID>
@@ -191,14 +191,14 @@ object SubmissionFixture {
                     </Address>
                   </Organisation>
                 </ID>
-                <Role>MDR1102</Role>
+                <Role>CBC1102</Role>
               </Intermediaries>
               <Structure>
                 <Arrangement>
                   <CrsAvoidance>
                     <DisclosureDate>2021-12-04</DisclosureDate>
-                    <Reason>MDR701</Reason>
-                    <Type>MDR801</Type>
+                    <Reason>CBC701</Reason>
+                    <Type>CBC801</Type>
                     <OtherInfo>Other inforamtion</OtherInfo>
                     <StructureChart>
                       <ID>
@@ -291,7 +291,7 @@ object SubmissionFixture {
               </DocSpec>
             </MdrReport>
           </MdrBody>
-        </MDR_OECD>
+        </CBC_OECD>
       </file>
     </submission>
 
