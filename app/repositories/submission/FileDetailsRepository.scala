@@ -16,6 +16,8 @@
 
 package repositories.submission
 
+import metrics.MetricsService
+import models.submission.{ConversationId, FileDetails, FileStatus}
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.model.Indexes.ascending

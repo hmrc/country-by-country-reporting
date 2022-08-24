@@ -17,20 +17,22 @@
 package controllers
 
 import controllers.auth.IdentifierAuthAction
+import models.submission.{ConversationId, ResponseFileDetails}
 import play.api.Logging
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import repositories.submission.FileDetailsRepository
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class FileDetailsController @Inject()(
-  authenticate: IdentifierAuthAction,
-  cc: ControllerComponents,
-  fileDetailsRepository: FileDetailsRepository
-)(implicit ec: ExecutionContext)
-    extends BackendController(cc)
+class FileDetailsController @Inject() (
+                                        authenticate: IdentifierAuthAction,
+                                        cc: ControllerComponents,
+                                        fileDetailsRepository: FileDetailsRepository
+                                      )(implicit ec: ExecutionContext)
+  extends BackendController(cc)
     with Logging {
 
   def getFileDetails(conversationId: ConversationId): Action[AnyContent] = authenticate.async { _ =>

@@ -25,6 +25,10 @@ class AppConfig @Inject()(config: Configuration,
                           servicesConfig: ServicesConfig
                          ) {
 
+  val appName: String     = config.get[String]("appName")
+
+  val eisResponseWaitTime: Int = config.get[Int]("microservice.services.eis-response.wait-time")
+
   def serviceUrl(serviceName: String): String =
     s"${servicesConfig.baseUrl(serviceName)}${servicesConfig.getString(s"microservice.services.$serviceName.context")}"
 
@@ -33,4 +37,8 @@ class AppConfig @Inject()(config: Configuration,
 
   val enrolmentKey: String => String = (serviceName: String) => config.get[String](s"enrolmentKeys.$serviceName.key")
   val enrolmentId: String => String  = (serviceName: String) => config.get[String](s"enrolmentKeys.$serviceName.identifier")
+
+  val fileUploadXSDFilePath: String  = config.get[String]("xsd-files.fileUpload_CBC_XSDFile")
+  val submissionXSDFilePath: String  = config.get[String]("xsd-files.submission_DCT72a_XSDFile")
+  val eisResponseXSDFilePath: String = config.get[String]("xsd-files.eisResponse_DCT72B_XSDFile")
 }
