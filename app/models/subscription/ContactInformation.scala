@@ -35,7 +35,6 @@ object OrganisationDetails {
     contactName.map(OrganisationDetails(_))
 }
 
-
 case class ContactInformation(organisationDetails: OrganisationDetails, email: String, phone: Option[String], mobile: Option[String])
 
 object ContactInformation {
