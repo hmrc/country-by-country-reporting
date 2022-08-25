@@ -1,391 +1,163 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CBC_OECD xmlns="urn:oecd:ties:cbc:v1" >
-    <MessageSpec_Type>
-        <TransmittingCountry>AF</TransmittingCountry>
-        <ReceivingCountry>AF</ReceivingCountry>
+<CBC_OECD xmlns="urn:oecd:ties:cbc:v2" xmlns:urn1="urn:oecd:ties:cbcstf:v5">
+    <MessageSpec_Tyoe>
+        <!--Optional:-->
+        <SendingEntityIN>string</SendingEntityIN>
+        <TransmittingCountry>XK</TransmittingCountry>
+        <!--1 or more repetitions:-->
+        <ReceivingCountry>PY</ReceivingCountry>
         <MessageType>CBC</MessageType>
-        <Language>EN</Language>
-        <Warning>This is a warning</Warning>
-        <Contact>This is a Contact</Contact>
-        <MessageRefId>GBXACBC1234567</MessageRefId>
+        <!--Optional:-->
+        <Language>KR</Language>
+        <!--Optional:-->
+        <Warning>string</Warning>
+        <!--Optional:-->
+        <Contact>string</Contact>
+        <MessageRefId>string</MessageRefId>
         <MessageTypeIndic>CBC401</MessageTypeIndic>
-        <Timestamp>2020-05-14T17:10:00</Timestamp>
-    </MessageSpec_Type>
+        <!--Zero or more repetitions:-->
+        <CorrMessageRefId>string</CorrMessageRefId>
+        <ReportingPeriod>2014-06-09+01:00</ReportingPeriod>
+        <Timestamp>2008-11-15T16:52:58</Timestamp>
+    </MessageSpec_Tyoe>
+    <!--1 or more repetitions:-->
     <CbcBody>
-        <Disclosing>
-            <ID>
-                <Individual>
-                    <ResCountryCode>VU</ResCountryCode>
-                    <TIN>AA000000D</TIN>
-                    <Name>
-                        <PrecedingTitle>His Excellency</PrecedingTitle>
-                        <Title>MR</Title>
-                        <FirstName>Larry</FirstName>
-                        <MiddleName>David</MiddleName>
-                        <NamePrefix>van</NamePrefix>
-                        <LastName>David</LastName>
-                        <GenerationIdentifier>Jnr</GenerationIdentifier>
-                        <Suffix>(Cat)</Suffix>
-                        <GeneralSuffix>Deceased</GeneralSuffix>
-                    </Name>
-                    <Address>
-                        <CountryCode>GB</CountryCode>
-                        <AddressFree>Address is Free</AddressFree>
-                        <AddressFix>
-                            <Street>Downing Street</Street>
-                            <BuildingIdentifier>No 10</BuildingIdentifier>
-                            <SuiteIdentifier>Sir Humphrey Suite</SuiteIdentifier>
-                            <FloorIdentifier>Second</FloorIdentifier>
-                            <DistrictName>Westminster</DistrictName>
-                            <POB>48</POB>
-                            <PostCode>SW1A 4GG</PostCode>
-                            <City>London</City>
-                            <CountrySubentity>GB</CountrySubentity>
-                        </AddressFix>
-                    </Address>
-                    <BirthDate>2007-01-14</BirthDate>
-                </Individual>
-                <Organisation>
-                    <ResCountryCode>VU</ResCountryCode>
-                    <TIN>AA000000D</TIN>
-                    <IN>AA000000D</IN>
-                    <Name>organisationName</Name>
-                    <Address>
-                        <CountryCode>GB</CountryCode>
-                        <AddressFree>Address is Free</AddressFree>
-                        <AddressFix>
-                            <Street>Downing Street</Street>
-                            <BuildingIdentifier>No 10</BuildingIdentifier>
-                            <SuiteIdentifier>Sir Humphrey Suite</SuiteIdentifier>
-                            <FloorIdentifier>Second</FloorIdentifier>
-                            <DistrictName>Westminster</DistrictName>
-                            <POB>48</POB>
-                            <PostCode>SW1A 4GG</PostCode>
-                            <City>London</City>
-                            <CountrySubentity>GB</CountrySubentity>
-                        </AddressFix>
-                    </Address>
-                </Organisation>
-            </ID>
-            <Capacity>CBC501</Capacity>
-            <Nexus>CBC601</Nexus>
-            <Nexus>CBC602</Nexus>
+        <ReportingEntity>
+            <Entity>
+                <!--1 or more repetitions:-->
+                <ResCountryCode>12</ResCountryCode>
+                <TIN issuedBy="MD">string</TIN>
+                <!--Zero or more repetitions:-->
+                <IN issuedBy="VI" INType="string">string</IN>
+                <!--1 or more repetitions:-->
+                <Name>string</Name>
+                <!--Zero or more repetitions:-->
+                <Address legalAddressType="OECD303">
+                    <CountryCode>YT</CountryCode>
+                    <AddressFix>
+                        <!--Optional:-->
+                        <Street>string</Street>
+                        <!--Optional:-->
+                        <BuildingIdentifier>string</BuildingIdentifier>
+                        <!--Optional:-->
+                        <SuiteIdentifier>string</SuiteIdentifier>
+                        <!--Optional:-->
+                        <FloorIdentifier>string</FloorIdentifier>
+                        <!--Optional:-->
+                        <DistrictName>string</DistrictName>
+                        <!--Optional:-->
+                        <POB>string</POB>
+                        <!--Optional:-->
+                        <PostCode>string</PostCode>
+                        <City>string</City>
+                        <!--Optional:-->
+                        <CountrySubentity>string</CountrySubentity>
+                    </AddressFix>
+                </Address>
+            </Entity>
+            <!--Optional:-->
+            <NameMNEGroup>string</NameMNEGroup>
+            <ReportingRole>CBC7040</ReportingRole>
+            <ReportingPeriod>
+                <StartDate>2016-01-01</StartDate>
+                <EndDate>2012-01-07</EndDate>
+            </ReportingPeriod>
             <DocSpec>
-                <DocTypeIndic>OECD0</DocTypeIndic>
-                <DocRefID>GB123456</DocRefID>
-                <CorrDocRefId>This is corr ref ID</CorrDocRefId>
+                <urn1:DocTypeIndic>OECD1</urn1:DocTypeIndic>
+                <urn1:DocRefId>string</urn1:DocRefId>
+                <!--Optional:-->
+                <urn1:CorrMessageRefId>string</urn1:CorrMessageRefId>
+                <!--Optional:-->
+                <urn1:CorrDocRefId>string</urn1:CorrDocRefId>
             </DocSpec>
-        </Disclosing>
-        <CbcReport>
-            <ReportableTaxPayer>
-                <ID>
-                    <Individual>
-                        <ResCountryCode>VU</ResCountryCode>
-                        <TIN>AA000000D</TIN>
-                        <Name>
-                            <PrecedingTitle>His Excellency</PrecedingTitle>
-                            <Title>MR</Title>
-                            <FirstName>Larry</FirstName>
-                            <MiddleName>David</MiddleName>
-                            <NamePrefix>van</NamePrefix>
-                            <LastName>David</LastName>
-                            <GenerationIdentifier>Jnr</GenerationIdentifier>
-                            <Suffix>(Cat)</Suffix>
-                            <GeneralSuffix>Deceased</GeneralSuffix>
-                        </Name>
-                        <Address>
-                            <CountryCode>GB</CountryCode>
-                            <AddressFree>Address is Free</AddressFree>
-                            <AddressFix>
-                                <Street>Downing Street</Street>
-                                <BuildingIdentifier>No 10</BuildingIdentifier>
-                                <SuiteIdentifier>Sir Humphrey Suite</SuiteIdentifier>
-                                <FloorIdentifier>Second</FloorIdentifier>
-                                <DistrictName>Westminster</DistrictName>
-                                <POB>48</POB>
-                                <PostCode>SW1A 4GG</PostCode>
-                                <City>London</City>
-                                <CountrySubentity>GB</CountrySubentity>
-                            </AddressFix>
-                        </Address>
-                        <BirthDate>2007-01-14</BirthDate>
-                    </Individual>
-                </ID>
-            </ReportableTaxPayer>
-            <ReportableTaxPayer>
-                <ID>
-                    <Organisation>
-                        <ResCountryCode>VU</ResCountryCode>
-                        <TIN>AA000000D</TIN>
-                        <IN>AA000000D</IN>
-                        <Name>organisationName</Name>
-                        <Address>
-                            <CountryCode>GB</CountryCode>
-                            <AddressFree>Address is Free</AddressFree>
-                            <AddressFix>
-                                <Street>Downing Street</Street>
-                                <BuildingIdentifier>No 10</BuildingIdentifier>
-                                <SuiteIdentifier>Sir Humphrey Suite</SuiteIdentifier>
-                                <FloorIdentifier>Second</FloorIdentifier>
-                                <DistrictName>Westminster</DistrictName>
-                                <POB>48</POB>
-                                <PostCode>SW1A 4GG</PostCode>
-                                <City>London</City>
-                                <CountrySubentity>GB</CountrySubentity>
-                            </AddressFix>
-                        </Address>
-                    </Organisation>
-                </ID>
-            </ReportableTaxPayer>
-            <Intermediaries>
-                <ID>
-                    <Individual>
-                        <ResCountryCode>VU</ResCountryCode>
-                        <TIN>AA000000D</TIN>
-                        <Name>
-                            <PrecedingTitle>His Excellency</PrecedingTitle>
-                            <Title>MR</Title>
-                            <FirstName>Larry</FirstName>
-                            <MiddleName>David</MiddleName>
-                            <NamePrefix>van</NamePrefix>
-                            <LastName>David</LastName>
-                            <GenerationIdentifier>Jnr</GenerationIdentifier>
-                            <Suffix>(Cat)</Suffix>
-                            <GeneralSuffix>Deceased</GeneralSuffix>
-                        </Name>
-                        <Address>
-                            <CountryCode>GB</CountryCode>
-                            <AddressFree>Address is Free</AddressFree>
-                            <AddressFix>
-                                <Street>Downing Street</Street>
-                                <BuildingIdentifier>No 10</BuildingIdentifier>
-                                <SuiteIdentifier>Sir Humphrey Suite</SuiteIdentifier>
-                                <FloorIdentifier>Second</FloorIdentifier>
-                                <DistrictName>Westminster</DistrictName>
-                                <POB>48</POB>
-                                <PostCode>SW1A 4GG</PostCode>
-                                <City>London</City>
-                                <CountrySubentity>GB</CountrySubentity>
-                            </AddressFix>
-                        </Address>
-                        <BirthDate>2007-01-14</BirthDate>
-                    </Individual>
-                </ID>
-                <Role>CBC1101</Role>
-            </Intermediaries>
-            <Intermediaries>
-                <ID>
-                    <Organisation>
-                        <ResCountryCode>VU</ResCountryCode>
-                        <TIN>AA000000D</TIN>
-                        <IN>AA000000D</IN>
-                        <Name>organisationName</Name>
-                        <Address>
-                            <CountryCode>GB</CountryCode>
-                            <AddressFree>Address is Free</AddressFree>
-                            <AddressFix>
-                                <Street>Downing Street</Street>
-                                <BuildingIdentifier>No 10</BuildingIdentifier>
-                                <SuiteIdentifier>Sir Humphrey Suite</SuiteIdentifier>
-                                <FloorIdentifier>Second</FloorIdentifier>
-                                <DistrictName>Westminster</DistrictName>
-                                <POB>48</POB>
-                                <PostCode>SW1A 4GG</PostCode>
-                                <City>London</City>
-                                <CountrySubentity>GB</CountrySubentity>
-                            </AddressFix>
-                        </Address>
-                    </Organisation>
-                </ID>
-                <Role>CBC1102</Role>
-            </Intermediaries>
-            <Structure>
-                <Arrangement>
-                    <CrsAvoidance>
-                        <DisclosureDate>12-04-2021</DisclosureDate>
-                        <Reason>CBC701</Reason>
-                        <OtherInfo>Other inforamtion</OtherInfo>
-                        <StructureChart>
-                            <ID>
-                                <Individual>
-                                    <ResCountryCode>VU</ResCountryCode>
-                                    <TIN>AA000000D</TIN>
-                                    <Name>
-                                        <PrecedingTitle>His Excellency</PrecedingTitle>
-                                        <Title>MR</Title>
-                                        <FirstName>Larry</FirstName>
-                                        <MiddleName>David</MiddleName>
-                                        <NamePrefix>van</NamePrefix>
-                                        <LastName>David</LastName>
-                                        <GenerationIdentifier>Jnr</GenerationIdentifier>
-                                        <Suffix>(Cat)</Suffix>
-                                        <GeneralSuffix>Deceased</GeneralSuffix>
-                                    </Name>
-                                    <Address>
-                                        <CountryCode>GB</CountryCode>
-                                        <AddressFree>Address is Free</AddressFree>
-                                        <AddressFix>
-                                            <Street>Downing Street</Street>
-                                            <BuildingIdentifier>No 10</BuildingIdentifier>
-                                            <SuiteIdentifier>Sir Humphrey Suite</SuiteIdentifier>
-                                            <FloorIdentifier>Second</FloorIdentifier>
-                                            <DistrictName>Westminster</DistrictName>
-                                            <POB>48</POB>
-                                            <PostCode>SW1A 4GG</PostCode>
-                                            <City>London</City>
-                                            <CountrySubentity>GB</CountrySubentity>
-                                        </AddressFix>
-                                    </Address>
-                                    <BirthDate>2007-01-14</BirthDate>
-                                </Individual>
-                            </ID>
-                            &gt;
-                            <Ownership>90</Ownership>
-                            <InvestAmount>2000000</InvestAmount>
-                            <OtherInfo>Other inforamtion</OtherInfo>
-                            <ListChilds>
-                                <ChildRTP>
-                                    <ID>
-                                        <Individual>
-                                            <ResCountryCode>VU</ResCountryCode>
-                                            <TIN>AA000000D</TIN>
-                                            <Name>
-                                                <PrecedingTitle>His Excellency</PrecedingTitle>
-                                                <Title>MR</Title>
-                                                <FirstName>Larry</FirstName>
-                                                <MiddleName>David</MiddleName>
-                                                <NamePrefix>van</NamePrefix>
-                                                <LastName>David</LastName>
-                                                <GenerationIdentifier>Jnr</GenerationIdentifier>
-                                                <Suffix>(Cat)</Suffix>
-                                                <GeneralSuffix>Deceased</GeneralSuffix>
-                                            </Name>
-                                            <Address>
-                                                <CountryCode>GB</CountryCode>
-                                                <AddressFree>Address is Free</AddressFree>
-                                                <AddressFix>
-                                                    <Street>Downing Street</Street>
-                                                    <BuildingIdentifier>No 10</BuildingIdentifier>
-                                                    <SuiteIdentifier>Sir Humphrey Suite</SuiteIdentifier>
-                                                    <FloorIdentifier>Second</FloorIdentifier>
-                                                    <DistrictName>Westminster</DistrictName>
-                                                    <POB>48</POB>
-                                                    <PostCode>SW1A 4GG</PostCode>
-                                                    <City>London</City>
-                                                    <CountrySubentity>GB</CountrySubentity>
-                                                </AddressFix>
-                                            </Address>
-                                            <BirthDate>2007-01-14</BirthDate>
-                                        </Individual>
-                                    </ID>
-                                    &gt;
-                                    <Ownership>90</Ownership>
-                                    <InvestAmount>2000000</InvestAmount>
-                                    <OtherInfo>Other inforamtion</OtherInfo>
-                                </ChildRTP>
-                            </ListChilds>
-                        </StructureChart>
-                        <Narrative>this is narrative</Narrative>
-                        <Jurisdictions>IN</Jurisdictions>
-                        <Summary>this is a summary of narrative CSR AVOIDANCE</Summary>
-                    </CrsAvoidance>
-                    <OOS>
-                        <DisclosureDate>31-10-2021</DisclosureDate>
-                        <Reason>CBC7001</Reason>
-                        <Type>CBC1001</Type>
-                        <Type>CBC1002</Type>
-                        <OtherInfo>Other inforamtion</OtherInfo>
-                        <StructureChart>
-                            <ID>
-                                <Individual>
-                                    <ResCountryCode>VU</ResCountryCode>
-                                    <TIN>AA000000D</TIN>
-                                    <Name>
-                                        <PrecedingTitle>His Excellency</PrecedingTitle>
-                                        <Title>MR</Title>
-                                        <FirstName>Larry</FirstName>
-                                        <MiddleName>David</MiddleName>
-                                        <NamePrefix>van</NamePrefix>
-                                        <LastName>David</LastName>
-                                        <GenerationIdentifier>Jnr</GenerationIdentifier>
-                                        <Suffix>(Cat)</Suffix>
-                                        <GeneralSuffix>Deceased</GeneralSuffix>
-                                    </Name>
-                                    <Address>
-                                        <CountryCode>GB</CountryCode>
-                                        <AddressFree>Address is Free</AddressFree>
-                                        <AddressFix>
-                                            <Street>Downing Street</Street>
-                                            <BuildingIdentifier>No 10</BuildingIdentifier>
-                                            <SuiteIdentifier>Sir Humphrey Suite</SuiteIdentifier>
-                                            <FloorIdentifier>Second</FloorIdentifier>
-                                            <DistrictName>Westminster</DistrictName>
-                                            <POB>48</POB>
-                                            <PostCode>SW1A 4GG</PostCode>
-                                            <City>London</City>
-                                            <CountrySubentity>GB</CountrySubentity>
-                                        </AddressFix>
-                                    </Address>
-                                    <BirthDate>2007-01-14</BirthDate>
-                                </Individual>
-                            </ID>
-                            &gt;
-                            <Ownership>90</Ownership>
-                            <InvestAmount>2000000</InvestAmount>
-                            <OtherInfo>Other inforamtion</OtherInfo>
-                            <ListChilds>
-                                <ChildRTP>
-                                    <ID>
-                                        <Individual>
-                                            <ResCountryCode>VU</ResCountryCode>
-                                            <TIN>AA000000D</TIN>
-                                            <Name>
-                                                <PrecedingTitle>His Excellency</PrecedingTitle>
-                                                <Title>MR</Title>
-                                                <FirstName>Larry</FirstName>
-                                                <MiddleName>David</MiddleName>
-                                                <NamePrefix>van</NamePrefix>
-                                                <LastName>David</LastName>
-                                                <GenerationIdentifier>Jnr</GenerationIdentifier>
-                                                <Suffix>(Cat)</Suffix>
-                                                <GeneralSuffix>Deceased</GeneralSuffix>
-                                            </Name>
-                                            <Address>
-                                                <CountryCode>GB</CountryCode>
-                                                <AddressFree>Address is Free</AddressFree>
-                                                <AddressFix>
-                                                    <Street>Downing Street</Street>
-                                                    <BuildingIdentifier>No 10</BuildingIdentifier>
-                                                    <SuiteIdentifier>Sir Humphrey Suite</SuiteIdentifier>
-                                                    <FloorIdentifier>Second</FloorIdentifier>
-                                                    <DistrictName>Westminster</DistrictName>
-                                                    <POB>48</POB>
-                                                    <PostCode>SW1A 4GG</PostCode>
-                                                    <City>London</City>
-                                                    <CountrySubentity>GB</CountrySubentity>
-                                                </AddressFix>
-                                            </Address>
-                                            <BirthDate>2007-01-14</BirthDate>
-                                        </Individual>
-                                    </ID>
-                                    &gt;
-                                    <Ownership>90</Ownership>
-                                    <InvestAmount>2000000</InvestAmount>
-                                    <OtherInfo>Other inforamtion</OtherInfo>
-                                </ChildRTP>
-                            </ListChilds>
-                        </StructureChart>
-                        <Narrative>this is narrative</Narrative>
-                        <Jurisdictions>IN</Jurisdictions>
-                        <Summary>this is a summary of narrative in OOS</Summary>
-                    </OOS>
-                </Arrangement>
-            </Structure>
+        </ReportingEntity>
+        <!--Zero or more repetitions:-->
+        <CbcReports>
             <DocSpec>
-                <DocTypeIndic>OECD0</DocTypeIndic>
-                <DocRefID>GB123456</DocRefID>
-                <CorrDocRefId>This is corr ref ID</CorrDocRefId>
+                <urn1:DocTypeIndic>OECD2</urn1:DocTypeIndic>
+                <urn1:DocRefId>string</urn1:DocRefId>
+                <!--Optional:-->
+                <urn1:CorrMessageRefId>string</urn1:CorrMessageRefId>
+                <!--Optional:-->
+                <urn1:CorrDocRefId>string</urn1:CorrDocRefId>
             </DocSpec>
-        </CbcReport>
+            <ResCountryCode>IM</ResCountryCode>
+            <Summary>
+                <Revenues>
+                    <Unrelated currCode="XAG">100</Unrelated>
+                    <Related currCode="MMK">100</Related>
+                    <Total currCode="XPF">100</Total>
+                </Revenues>
+                <ProfitOrLoss>100</ProfitOrLoss>
+                <TaxPaid currCode="MXN">100</TaxPaid>
+                <TaxAccrued currCode="PKR">100</TaxAccrued>
+                <Capital currCode="MNT">100</Capital>
+                <Earnings currCode="EGP">100</Earnings>
+                <NbEmployees>100</NbEmployees>
+                <Assets currCode="MMK">100</Assets>
+            </Summary>
+            <!--1 or more repetitions:-->
+            <ConstEntities>
+                <ConstEntity>
+                    <!--1 or more repetitions:-->
+                    <ResCountryCode>GD</ResCountryCode>
+                    <TIN issuedBy="CN">string</TIN>
+                    <!--Zero or more repetitions:-->
+                    <IN issuedBy="MG" INType="string">string</IN>
+                    <!--1 or more repetitions:-->
+                    <Name>string</Name>
+                    <!--Zero or more repetitions:-->
+                    <Address legalAddressType="OECD301">
+                        <CountryCode>HN</CountryCode>
+                        <AddressFix>
+                            <!--Optional:-->
+                            <Street>string</Street>
+                            <!--Optional:-->
+                            <BuildingIdentifier>string</BuildingIdentifier>
+                            <!--Optional:-->
+                            <SuiteIdentifier>string</SuiteIdentifier>
+                            <!--Optional:-->
+                            <FloorIdentifier>string</FloorIdentifier>
+                            <!--Optional:-->
+                            <DistrictName>string</DistrictName>
+                            <!--Optional:-->
+                            <POB>string</POB>
+                            <!--Optional:-->
+                            <PostCode>string</PostCode>
+                            <City>string</City>
+                            <!--Optional:-->
+                            <CountrySubentity>string</CountrySubentity>
+                        </AddressFix>
+                        <!--Optional:-->
+                        <AddressFree>string</AddressFree>
+                    </Address>
+                </ConstEntity>
+                <!--Optional:-->
+                <Role>CBC802</Role>
+                <!--Optional:-->
+                <IncorpCountryCode>IR</IncorpCountryCode>
+                <!--1 or more repetitions:-->
+                <BizActivities>CBC505</BizActivities>
+                <!--Optional:-->
+                <OtherEntityInfo>string</OtherEntityInfo>
+            </ConstEntities>
+        </CbcReports>
+        <!--Zero or more repetitions:-->
+        <AdditionalInfo>
+            <DocSpec>
+                <urn1:DocTypeIndic>OECD0</urn1:DocTypeIndic>
+                <urn1:DocRefId>string</urn1:DocRefId>
+                <!--Optional:-->
+                <urn1:CorrMessageRefId>string</urn1:CorrMessageRefId>
+                <!--Optional:-->
+                <urn1:CorrDocRefId>string</urn1:CorrDocRefId>
+            </DocSpec>
+            <!--1 or more repetitions:-->
+            <OtherInfo language="HZ">string</OtherInfo>
+            <!--Zero or more repetitions:-->
+            <ResCountryCode>SM</ResCountryCode>
+            <!--Zero or more repetitions:-->
+            <SummaryRef>CBC607</SummaryRef>
+        </AdditionalInfo>
     </CbcBody>
 </CBC_OECD>

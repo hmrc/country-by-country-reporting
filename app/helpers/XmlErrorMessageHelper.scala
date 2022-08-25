@@ -88,7 +88,7 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
     }
 
   def extractMissingElementDeclaration(errorMessage1: String): Option[Message] = {
-    val declaration = "urn:oecd:ties:cbc:v1"
+    val declaration = "urn:oecd:ties:cbc:v2"
 
     errorMessage1 match {
       case missingDeclarationErrorFormat(element) =>
@@ -219,7 +219,7 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
 
     formattedError match {
       case missingTagErrorFormat(_, element) if element.contains(":") =>
-        val formattedElement = element.replaceAll("""(.*?), "urn:oecd:ties:cbc:v1":""", "")
+        val formattedElement = element.replaceAll("""(.*?), "urn:oecd:ties:cbc:v2":""", "")
         getErrorMessageForMissingTags(formattedElement)
       case missingTagErrorFormat(_, element) =>
         getErrorMessageForMissingTags(element)
@@ -232,7 +232,7 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
 
     formattedError match {
       case emptySubTagErrorFormat(parent, element) if parent == "Arrangement" | parent == "ID" =>
-        val formattedElement = element.replaceAll(", \"urn:oecd:ties:cbc:v1\":", " or ")
+        val formattedElement = element.replaceAll(", \"urn:oecd:ties:cbc:v2\":", " or ")
         Some(Message("xml.empty.tag", Seq(parent, formattedElement)))
       case emptySubTagErrorFormat(parent, element) =>
         val formattedElement = element.replaceAll("(.*?):", "")

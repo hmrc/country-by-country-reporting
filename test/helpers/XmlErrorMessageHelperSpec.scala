@@ -38,7 +38,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
         "must return correct error for missing element declaration'" in {
           val missingDeclaration = SaxParseError(lineNumber, "cvc-elt.1: Cannot find the declaration of element 'cbc:CBC_OECD'.")
           val result             = helper.generateErrorMessages(ListBuffer(missingDeclaration))
-          result mustBe List(GenericError(lineNumber, Message("xml.must.have.element.declaration", List("CBC_OECD", "urn:oecd:ties:cbc:v1"))))
+          result mustBe List(GenericError(lineNumber, Message("xml.must.have.element.declaration", List("CBC_OECD", "urn:oecd:ties:cbc:v2"))))
         }
 
         "must return correct error for missing attribute error'" in {
@@ -369,7 +369,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           elements.map { element =>
             val error1 = SaxParseError(
               lineNumber,
-              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'cbc:ABC'. One of '{\"urn:oecd:ties:cbc:v1\":cbc:$element}' is expected."""
+              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'cbc:ABC'. One of '{\"urn:oecd:ties:cbc:v2\":cbc:$element}' is expected."""
             )
             val result = helper.generateErrorMessages(ListBuffer(error1))
             result mustBe List(GenericError(lineNumber, Message("xml.add.line", Seq(element))))
@@ -387,7 +387,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           elements.map { element =>
             val error1 = SaxParseError(
               lineNumber,
-              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'cbc:ABC'. One of '{\"urn:oecd:ties:cbc:v1\":cbc:$element}' is expected."""
+              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'cbc:ABC'. One of '{\"urn:oecd:ties:cbc:v2\":cbc:$element}' is expected."""
             )
             val result = helper.generateErrorMessages(ListBuffer(error1))
             result mustBe List(GenericError(lineNumber, Message("xml.add.a.element", Seq(element))))
@@ -404,7 +404,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           elements.map { element =>
             val error1 = SaxParseError(
               lineNumber,
-              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'cbc:ABC'. One of '{\"urn:oecd:ties:cbc:v1\":cbc:$element}' is expected."""
+              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'cbc:ABC'. One of '{\"urn:oecd:ties:cbc:v2\":cbc:$element}' is expected."""
             )
             val result = helper.generateErrorMessages(ListBuffer(error1))
             result mustBe List(GenericError(lineNumber, Message("xml.add.an.element", Seq(element))))
@@ -415,7 +415,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
 
           val error1 = SaxParseError(
             lineNumber,
-            s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'cbc:ABC'. One of '{\"urn:oecd:ties:cbc:v1\":cbc:Disclosing}' is expected."""
+            s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'cbc:ABC'. One of '{\"urn:oecd:ties:cbc:v2\":cbc:Disclosing}' is expected."""
           )
           val result = helper.generateErrorMessages(ListBuffer(error1))
           result mustBe List(GenericError(lineNumber, Message("xml.add.element", Seq("Disclosing"))))
@@ -425,7 +425,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
 
           val error1 = SaxParseError(
             lineNumber,
-            s"""cvc-complex-type.2.4.b: The content of element 'cbc:ParentElement' is not complete. One of '{\"urn:oecd:ties:cbc:v1\":cbc:ChildElement}' is expected."""
+            s"""cvc-complex-type.2.4.b: The content of element 'cbc:ParentElement' is not complete. One of '{\"urn:oecd:ties:cbc:v2\":cbc:ChildElement}' is expected."""
           )
           val result = helper.generateErrorMessages(ListBuffer(error1))
           result mustBe List(GenericError(lineNumber, Message("xml.empty.tag", Seq("ParentElement", "ChildElement"))))
@@ -447,7 +447,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
         "must return correct error for missing element declaration'" in {
           val missingDeclaration = SaxParseError(lineNumber, "cvc-elt.1: Cannot find the declaration of element 'CBC_OECD'.")
           val result             = helper.generateErrorMessages(ListBuffer(missingDeclaration))
-          result mustBe List(GenericError(lineNumber, Message("xml.must.have.element.declaration", List("CBC_OECD", "urn:oecd:ties:cbc:v1"))))
+          result mustBe List(GenericError(lineNumber, Message("xml.must.have.element.declaration", List("CBC_OECD", "urn:oecd:ties:cbc:v2"))))
         }
 
         "must return correct error for missing attribute error'" in {
@@ -783,7 +783,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           elements.map { element =>
             val error1 = SaxParseError(
               lineNumber,
-              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'ABC'. One of '{\"urn:oecd:ties:cbc:v1\":$element}' is expected."""
+              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'ABC'. One of '{\"urn:oecd:ties:cbc:v2\":$element}' is expected."""
             )
             val result = helper.generateErrorMessages(ListBuffer(error1))
             result mustBe List(GenericError(lineNumber, Message("xml.add.line", Seq(element))))
@@ -801,7 +801,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           elements.map { element =>
             val error1 = SaxParseError(
               lineNumber,
-              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'ABC'. One of '{\"urn:oecd:ties:cbc:v1\":$element}' is expected."""
+              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'ABC'. One of '{\"urn:oecd:ties:cbc:v2\":$element}' is expected."""
             )
             val result = helper.generateErrorMessages(ListBuffer(error1))
             result mustBe List(GenericError(lineNumber, Message("xml.add.a.element", Seq(element))))
@@ -818,7 +818,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           elements.map { element =>
             val error1 = SaxParseError(
               lineNumber,
-              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'ABC'. One of '{\"urn:oecd:ties:cbc:v1\":$element}' is expected."""
+              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'ABC'. One of '{\"urn:oecd:ties:cbc:v2\":$element}' is expected."""
             )
             val result = helper.generateErrorMessages(ListBuffer(error1))
             result mustBe List(GenericError(lineNumber, Message("xml.add.an.element", Seq(element))))
@@ -829,7 +829,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
 
           val error1 = SaxParseError(
             lineNumber,
-            s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'ABC'. One of '{\"urn:oecd:ties:cbc:v1\":Disclosing}' is expected."""
+            s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'ABC'. One of '{\"urn:oecd:ties:cbc:v2\":Disclosing}' is expected."""
           )
           val result = helper.generateErrorMessages(ListBuffer(error1))
           result mustBe List(GenericError(lineNumber, Message("xml.add.element", Seq("Disclosing"))))
@@ -839,7 +839,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
 
           val error1 = SaxParseError(
             lineNumber,
-            s"""cvc-complex-type.2.4.b: The content of element 'ParentElement' is not complete. One of '{\"urn:oecd:ties:cbc:v1\":ChildElement}' is expected."""
+            s"""cvc-complex-type.2.4.b: The content of element 'ParentElement' is not complete. One of '{\"urn:oecd:ties:cbc:v2\":ChildElement}' is expected."""
           )
           val result = helper.generateErrorMessages(ListBuffer(error1))
           result mustBe List(GenericError(lineNumber, Message("xml.empty.tag", Seq("ParentElement", "ChildElement"))))
