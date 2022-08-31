@@ -7,9 +7,13 @@ POST        /validate-submission                        controllers.validation.S
 
 POST        /validation-result                          controllers.EISResponseController.processEISResponse
 
-POST       /callback                                    controllers.upscan.UploadCallbackController.callback
-GET        /upscan/details/:uploadId                    controllers.upscan.UploadFormController.getDetails(uploadId: String)
-GET        /upscan/status/:uploadId                     controllers.upscan.UploadFormController.getStatus(uploadId: String)
-POST       /upscan/upload                               controllers.upscan.UploadFormController.requestUpload
+POST        /callback                                   controllers.upscan.UploadCallbackController.callback
+GET         /upscan/details/:uploadId                   controllers.upscan.UploadFormController.getDetails(uploadId: String)
+GET         /upscan/status/:uploadId                    controllers.upscan.UploadFormController.getStatus(uploadId: String)
+POST        /upscan/upload                              controllers.upscan.UploadFormController.requestUpload
 
-POST       /submit                                     controllers.SubmissionController.submitDisclosure
+GET         /files/:conversationId/details              controllers.FileDetailsController.getFileDetails(conversationId: models.submission.ConversationId)
+GET         /files/details                              controllers.FileDetailsController.getAllFileDetails
+GET         /files/:conversationId/status               controllers.FileDetailsController.getStatus(conversationId: models.submission.ConversationId)
+
+POST        /submit                                     controllers.SubmissionController.submitDisclosure
