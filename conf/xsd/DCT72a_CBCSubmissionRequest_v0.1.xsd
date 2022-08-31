@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- edited with XMLSpy v2020 rel. 2 sp1 (x64) (http://www.altova.com) by  (HMRC - HM Revenue & Customs) -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:cadx="http://www.hmrc.gsi.gov.uk/cbc/cadx" xmlns:cbc="urn:oecd:ties:cbc:v1" targetNamespace="http://www.hmrc.gsi.gov.uk/cbc/cadx">
-	<xs:import namespace="urn:oecd:ties:cbc:v1" schemaLocation="CbcXML_v1.0.xsd"/>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:cadx="http://www.hmrc.gsi.gov.uk/cbc/cadx" xmlns:cbc="urn:oecd:ties:cbc:v2" targetNamespace="http://www.hmrc.gsi.gov.uk/cbc/cadx">
+	<xs:import namespace="urn:oecd:ties:cbc:v2" schemaLocation="CbcXML_v2.0.xsd"/>
 	<xs:element name="CBCSubmissionRequest" type="cadx:CBCSubmissionRequest_Type"/>
 	<xs:complexType name="CBCSubmissionRequest_Type">
 		<xs:sequence>

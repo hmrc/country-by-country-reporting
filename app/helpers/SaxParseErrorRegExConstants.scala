@@ -28,10 +28,10 @@ trait SaxParseErrorRegExConstants {
     """cvc-minLength-valid: Value '' with length = '0' is not facet-valid with respect to minLength '(.*?)' for type '(.*?)'.""".stripMargin.r
 
   final val emptySubTagErrorFormat =
-    """cvc-complex-type.2.4.b: The content of element '(?:cbc:)?(.*?)' is not complete. One of '"urn:oecd:ties:cbc:v1":(?:cbc:)?(.*?)' is expected.""".stripMargin.r
+    """cvc-complex-type.2.4.b: The content of element '(?:cbc:)?(.*?)' is not complete. One of '"urn:oecd:ties:cbc:v2":(?:cbc:)?(.*?)' is expected.""".stripMargin.r
 
   final val missingTagErrorFormat =
-    """cvc-complex-type.2.4.a: Invalid content was found starting with element '(?:cbc:)?(.*?)'. One of '"urn:oecd:ties:cbc:v1":(?:cbc:)?(.*?)' is expected.""".stripMargin.r
+    """cvc-complex-type.2.4.a: Invalid content was found starting with element '(?:cbc:)?(.*?)'. One of '"urn:oecd:ties:cbc:v2":(?:cbc:)?(.*?)' is expected.""".stripMargin.r
 
   final val fieldTooLongErrorFormat =
     """cvc-maxLength-valid: Value '((?s).*)' with length = '(.*?)' is not facet-valid with respect to maxLength '(.*?)' for type '(.*?)'.""".stripMargin.r

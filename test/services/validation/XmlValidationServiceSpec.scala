@@ -25,7 +25,7 @@ import scala.xml.XML
 class XmlValidationServiceSpec extends SpecBase {
   val noErrors: ListBuffer[SaxParseError] = ListBuffer()
 
-  val xsdPath = "/xsd/CbcXML_v1.0.xsd"
+  val xsdPath = "/xsd/CbcXML_v2.0.xsd"
 
   "Validation Service" - {
     "must pass back errors if a file is invalid" in {
