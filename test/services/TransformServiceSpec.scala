@@ -113,7 +113,8 @@ class TransformServiceSpec extends SpecBase with StreamlinedXmlEquality {
     </CBC_OECD>
 
     val expected = <CBC_OECD version="1.0.0"
-                                     xmlns:cbc="urn:oecd:ties:cbc:v1"
+                                     xmlns:cbc="urn:oecd:ties:cbc:v2"
+                                     xmlns:stf="urn:oecd:ties:cbcstf:v5"
                                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
       <submission>Submitted Data</submission>
     </CBC_OECD>
