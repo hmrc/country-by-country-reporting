@@ -33,7 +33,7 @@ class TransformService @Inject() () {
     <cadx:CBCSubmissionRequest xmlns:cbc="urn:oecd:ties:cbc:v1"
                           xmlns:cadx="http://www.hmrc.gsi.gov.uk/cbc/cadx"
                           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                          xsi:schemaLocation="http://www.hmrc.gsi.gov.uk/cbc/cadx DCT72a_CBCSubmissionRequest_v0.1.xsd"> 
+                          xsi:schemaLocation="http://www.hmrc.gsi.gov.uk/cbc/cadx DCT72a_CBCSubmissionRequest_v0.1.xsd">
 
       <requestCommon>
         <receiptDate>
@@ -44,7 +44,7 @@ class TransformService @Inject() () {
         <schemaVersion>1.0.0</schemaVersion>
       </requestCommon>
       <requestDetail>
-        {addNameSpaces(addNameSpaceDefinitions(uploadedFile), Seq(NamespaceForNode("CBC_OECD", "cbc")))}
+        {addNameSpaces(addNameSpaceDefinitions(uploadedFile), Seq(NamespaceForNode("CBC_OECD", "cbc"), NamespaceForNode("DocSpec", "stf")))}
       </requestDetail>
       <requestAdditionalDetail>
         {transformSubscriptionDetails(subscriptionDetails, metaData.fileName)}
@@ -54,7 +54,7 @@ class TransformService @Inject() () {
   def addNameSpaceDefinitions(submissionFile: NodeSeq): NodeSeq =
     for (node <- submissionFile) yield node match {
       case elem: Elem =>
-        elem.copy(scope = NamespaceBinding("xsi", "http://www.w3.org/2001/XMLSchema-instance", NamespaceBinding("cbc", "urn:oecd:ties:cbc:v1", TopScope)))
+        elem.copy(scope = NamespaceBinding("xsi", "http://www.w3.org/2001/XMLSchema-instance", NamespaceBinding("stf", "urn:oecd:ties:cbcstf:v5", NamespaceBinding("cbc", "urn:oecd:ties:cbc:v2", TopScope))))
     }
 
   def transformSubscriptionDetails(
@@ -102,6 +102,21 @@ class TransformService @Inject() () {
 
     def changeNS(el: NodeSeq): NodeSeq = {
       def fixSeq(ns: Seq[Node], currentPrefix: Option[String]): Seq[Node] = for (node <- ns) yield node match {
+        case elem: Elem if elem.label == "DocSpec" =>
+          namespaces
+            .find(n => n.nodeName == elem.label)
+            .map { n =>
+              elem.copy(
+                prefix = "cbc",
+                child = fixSeq(elem.child, Some(n.prefix))
+              )
+            }
+            .getOrElse(
+              elem.copy(
+                prefix = currentPrefix.orNull,
+                child = fixSeq(elem.child, currentPrefix)
+              )
+            )
         case elem: Elem =>
           namespaces
             .find(n => n.nodeName == elem.label)

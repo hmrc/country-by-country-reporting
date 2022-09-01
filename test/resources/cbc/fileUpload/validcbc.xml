@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CBC_OECD xmlns="urn:oecd:ties:cbc:v2" xmlns:urn1="urn:oecd:ties:cbcstf:v5">
+<CBC_OECD xmlns="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5">
     <MessageSpec>
         <!--Optional:-->
         <SendingEntityIN>string</SendingEntityIN>
@@ -13,7 +13,7 @@
         <Warning>string</Warning>
         <!--Optional:-->
         <Contact>string</Contact>
-        <MessageRefId>string</MessageRefId>
+        <MessageRefId>GBXACBC1234567</MessageRefId>
         <MessageTypeIndic>CBC401</MessageTypeIndic>
         <!--Zero or more repetitions:-->
         <CorrMessageRefId>string</CorrMessageRefId>
@@ -63,23 +63,23 @@
                 <EndDate>2012-01-07</EndDate>
             </ReportingPeriod>
             <DocSpec>
-                <urn1:DocTypeIndic>OECD1</urn1:DocTypeIndic>
-                <urn1:DocRefId>string</urn1:DocRefId>
+                <stf:DocTypeIndic>OECD1</stf:DocTypeIndic>
+                <stf:DocRefId>string</stf:DocRefId>
                 <!--Optional:-->
-                <urn1:CorrMessageRefId>string</urn1:CorrMessageRefId>
+                <stf:CorrMessageRefId>string</stf:CorrMessageRefId>
                 <!--Optional:-->
-                <urn1:CorrDocRefId>string</urn1:CorrDocRefId>
+                <stf:CorrDocRefId>string</stf:CorrDocRefId>
             </DocSpec>
         </ReportingEntity>
         <!--Zero or more repetitions:-->
         <CbcReports>
             <DocSpec>
-                <urn1:DocTypeIndic>OECD2</urn1:DocTypeIndic>
-                <urn1:DocRefId>string</urn1:DocRefId>
+                <stf:DocTypeIndic>OECD2</stf:DocTypeIndic>
+                <stf:DocRefId>string</stf:DocRefId>
                 <!--Optional:-->
-                <urn1:CorrMessageRefId>string</urn1:CorrMessageRefId>
+                <stf:CorrMessageRefId>string</stf:CorrMessageRefId>
                 <!--Optional:-->
-                <urn1:CorrDocRefId>string</urn1:CorrDocRefId>
+                <stf:CorrDocRefId>string</stf:CorrDocRefId>
             </DocSpec>
             <ResCountryCode>IM</ResCountryCode>
             <Summary>
@@ -145,12 +145,12 @@
         <!--Zero or more repetitions:-->
         <AdditionalInfo>
             <DocSpec>
-                <urn1:DocTypeIndic>OECD0</urn1:DocTypeIndic>
-                <urn1:DocRefId>string</urn1:DocRefId>
+                <stf:DocTypeIndic>OECD0</stf:DocTypeIndic>
+                <stf:DocRefId>string</stf:DocRefId>
                 <!--Optional:-->
-                <urn1:CorrMessageRefId>string</urn1:CorrMessageRefId>
+                <stf:CorrMessageRefId>string</stf:CorrMessageRefId>
                 <!--Optional:-->
-                <urn1:CorrDocRefId>string</urn1:CorrDocRefId>
+                <stf:CorrDocRefId>string</stf:CorrDocRefId>
             </DocSpec>
             <!--1 or more repetitions:-->
             <OtherInfo language="HZ">string</OtherInfo>
