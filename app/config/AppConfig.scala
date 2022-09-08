@@ -41,4 +41,9 @@ class AppConfig @Inject()(config: Configuration,
   val fileUploadXSDFilePath: String  = config.get[String]("xsd-files.fileUpload_CBC_XSDFile")
   val submissionXSDFilePath: String  = config.get[String]("xsd-files.submission_DCT72a_XSDFile")
   val eisResponseXSDFilePath: String = config.get[String]("xsd-files.eisResponse_DCT72B_XSDFile")
+
+  lazy val sendEmailUrl: String = servicesConfig.baseUrl("email")
+
+  lazy val emailSuccessfulTemplate: String = config.get[String]("emailTemplates.fileUploadSuccessful")
+  lazy val emailUnsuccessfulTemplate: String = config.get[String]("emailTemplates.fileUploadUnsuccessful")
 }
