@@ -116,7 +116,7 @@ class UploadedXmlValidationEngineSpec extends SpecBase {
     "cvc-enumeration-valid: Value '' is not facet-valid with respect to enumeration '[CBC801, CBC802, CBC803, CBC804, CBC805, CBC806]'. It must be a value from the enumeration."
   )
 
-  val typeError2 = SaxParseError(176, "cvc-type.3.1.3: The value '' of element 'Type' is not valid.")
+  val typeError2 = SaxParseError(176, "cvc-type.3.1.3: The value '' of element 'Entity' is not valid.")
 
   val summaryError1 =
     SaxParseError(258, "cvc-minLength-valid: Value '' with length = '0' is not facet-valid with respect to minLength '1' for type 'StringMin1Max4000_Type'.")
@@ -156,7 +156,7 @@ class UploadedXmlValidationEngineSpec extends SpecBase {
         .thenReturn(Left(ListBuffer(typeError1, typeError2, summaryError1, summaryError2)))
 
       val expectedErrors =
-        Seq(GenericError(176, Message("xml.add.a.element", List("Type"))), GenericError(258, Message("xml.add.a.element", List("Summary"))))
+        Seq(GenericError(176, Message("xml.empty.field", List("Entity"))), GenericError(258, Message("xml.add.a.element", List("Summary"))))
 
       Await.result(validationEngine.validateUploadSubmission(source), 10.seconds) mustBe SubmissionValidationFailure(ValidationErrors(expectedErrors))
     }
@@ -167,7 +167,7 @@ class UploadedXmlValidationEngineSpec extends SpecBase {
 
       when(mockXmlValidationService.validate(any[String](), any[String]())).thenReturn(Left(ListBuffer(missingAttributeError)))
 
-      val expectedErrors = Seq(GenericError(175, Message("xml.add.an.element", List("Amount currCode"))))
+      val expectedErrors = Seq(GenericError(175, Message("xml.add.attribute", List("Amount currCode"))))
 
       Await.result(validationEngine.validateUploadSubmission(source), 10.seconds) mustBe SubmissionValidationFailure(ValidationErrors(expectedErrors))
     }
