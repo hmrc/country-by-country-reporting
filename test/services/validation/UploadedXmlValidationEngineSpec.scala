@@ -63,7 +63,7 @@ class UploadedXmlValidationEngineSpec extends SpecBase {
     123,
     "cvc-enumeration-valid: Value 'Invalid code' is not facet-valid with respect to enumeration '[AF, AX, AL, DZ]'. It must be a value from the enumeration."
   )
-  val countryCodeError2 = SaxParseError(123, "cvc-type.3.1.3: The value 'Raneevev' of element 'Country' is not valid.")
+  val countryCodeError2 = SaxParseError(123, "cvc-type.3.1.3: The value 'Raneevev' of element 'CountryCode' is not valid.")
 
   val concernedMsError1 = SaxParseError(
     177,
@@ -75,13 +75,13 @@ class UploadedXmlValidationEngineSpec extends SpecBase {
     133,
     "cvc-enumeration-valid: Value 'eevev' is not facet-valid with respect to enumeration '[AF, VE, VN, VG, VI, WF, EH, YE, ZM, ZW, XK, XX]'. It must be a value from the enumeration."
   )
-  val countryExemptionError2 = SaxParseError(133, "cvc-type.3.1.3: The value 'eevev' of element 'CountryExemption' is not valid.")
+  val countryExemptionError2 = SaxParseError(133, "cvc-type.3.1.3: The value 'eevev' of element 'ResCountryCode' is not valid.")
 
   val reasonError1 = SaxParseError(
     169,
     "cvc-enumeration-valid: Value 'DAC670vdvdvd4' is not facet-valid with respect to enumeration '[DAC6701, DAC6702, DAC6703, DAC6704]'. It must be a value from the enumeration."
   )
-  val reasonError2 = SaxParseError(169, "cvc-type.3.1.3: The value 'DAC670vdvdvd4' of element 'Reason' is not valid.")
+  val reasonError2 = SaxParseError(169, "cvc-type.3.1.3: The value 'DAC670vdvdvd4' of element 'ReportingRole' is not valid.")
 
   val intermediaryCapacityError1 = SaxParseError(
     129,
@@ -197,27 +197,27 @@ class UploadedXmlValidationEngineSpec extends SpecBase {
       when(mockXmlValidationService.validate(any[String](), any[String]()))
         .thenReturn(Left(ListBuffer(countryCodeError1, countryCodeError2)))
 
-      val expectedErrors = Seq(GenericError(123, Message("xml.not.ISO.code", List("Country"))))
+      val expectedErrors = Seq(GenericError(123, Message("xml.not.ISO.code", List("CountryCode"))))
 
       Await.result(validationEngine.validateUploadSubmission(source), 10.seconds) mustBe SubmissionValidationFailure(ValidationErrors(expectedErrors))
     }
 
-    "must return ValidationFailure for file with invalid countryExemption code" in new SetUp {
+    "must return ValidationFailure for file with invalid ResCountryCode" in new SetUp {
 
       when(mockXmlValidationService.validate(any[String](), any[String]()))
         .thenReturn(Left(ListBuffer(countryExemptionError1, countryExemptionError2)))
 
-      val expectedErrors = Seq(GenericError(133, Message("xml.not.ISO.code", List("CountryExemption"))))
+      val expectedErrors = Seq(GenericError(133, Message("xml.not.ISO.code", List("ResCountryCode"))))
 
       Await.result(validationEngine.validateUploadSubmission(source), 10.seconds) mustBe SubmissionValidationFailure(ValidationErrors(expectedErrors))
     }
 
-    "must return ValidationFailure for file with invalid Reason entry code" in new SetUp {
+    "must return ValidationFailure for file with invalid ReportingRole code" in new SetUp {
 
       when(mockXmlValidationService.validate(any[String](), any[String]()))
         .thenReturn(Left(ListBuffer(reasonError1, reasonError2)))
 
-      val expectedErrors = Seq(GenericError(169, Message("xml.not.allowed.value", List("Reason"))))
+      val expectedErrors = Seq(GenericError(169, Message("xml.not.allowed.value", List("ReportingRole"))))
 
       Await.result(validationEngine.validateUploadSubmission(source), 10.seconds) mustBe SubmissionValidationFailure(ValidationErrors(expectedErrors))
     }
