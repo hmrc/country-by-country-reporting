@@ -19,25 +19,69 @@ package services
 import connectors.EmailConnector
 import models.email.{EmailRequest, EmailTemplate}
 import models.error.ReadSubscriptionError
-import models.subscription.OrganisationDetails
 import play.api.Logging
 import play.api.http.Status.{ACCEPTED, BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND}
+import uk.gov.hmrc.emailaddress.EmailAddress
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: EmailTemplate, subscriptionService: SubscriptionService)(implicit
-                                                                                                                                     executionContext: ExecutionContext
+class EmailService @Inject() (emailConnector: EmailConnector, emailTemplate: EmailTemplate, subscriptionService: SubscriptionService)(implicit
+  executionContext: ExecutionContext
 ) extends Logging {
 
   def sendAndLogEmail(subscriptionId: String, submissionTime: String, messageRefId: String, isUploadSuccessful: Boolean)(implicit
     hc: HeaderCarrier
-  ): Future[Int] = ???
-
+  ): Future[Int] =
+    sendEmail(subscriptionId, submissionTime, messageRefId, isUploadSuccessful) map {
+      case Some(resp) =>
+        resp.status match {
+          case NOT_FOUND   => logger.warn("The template cannot be found within the email service")
+          case BAD_REQUEST => logger.warn("Missing email or name parameter")
+          case ACCEPTED    => logger.info("Email queued")
+          case _           => logger.warn(s"Unhandled status received from email service ${resp.status}")
+        }
+        resp.status
+      case _ =>
+        logger.warn("Failed to send email")
+        INTERNAL_SERVER_ERROR
+    }
 
   def sendEmail(subscriptionId: String, submissionTime: String, messageRefId: String, isUploadSuccessful: Boolean)(implicit
     hc: HeaderCarrier
-  ): Future[Option[HttpResponse]] = ???
+  ): Future[Option[HttpResponse]] =
+    subscriptionService.getContactInformation(subscriptionId).flatMap {
+      case Right(responseDetail) =>
+        val emailAddress          = Option(responseDetail.primaryContact.email)
+        val contactName           = Option(responseDetail.primaryContact.organisationDetails.organisationName)
+        val secondaryEmailAddress = responseDetail.secondaryContact.map(_.email)
+        val secondaryName         = responseDetail.secondaryContact.map(_.organisationDetails.organisationName)
+
+        for {
+          primaryResponse <- send(emailAddress, contactName, submissionTime, messageRefId, isUploadSuccessful)
+          _               <- send(secondaryEmailAddress, secondaryName, submissionTime, messageRefId, isUploadSuccessful)
+        } yield primaryResponse
+      case Left(ReadSubscriptionError(value)) =>
+        logger.warn(s"Failed to get contact information, received ReadSubscriptionError: $value")
+        Future.successful(None)
+    }
+
+  def send(
+    emailAddress: Option[String],
+    contactName: Option[String],
+    submissionTime: String,
+    messageRefId: String,
+    isUploadSuccessful: Boolean
+  )(implicit headerCarrier: HeaderCarrier): Future[Option[HttpResponse]] =
+    emailAddress
+      .filter(EmailAddress.isValid)
+      .map { email =>
+        emailConnector
+          .sendEmail(
+            EmailRequest.fileUploadSubmission(email, contactName, emailTemplate.getTemplate(isUploadSuccessful), submissionTime, messageRefId)
+          )
+      }
+      .fold(Future(Option.empty[HttpResponse]))(_.map(Option(_)))
 }
