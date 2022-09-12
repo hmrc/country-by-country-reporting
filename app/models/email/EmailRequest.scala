@@ -30,7 +30,7 @@ object EmailRequest {
     EmailRequest(
       List(email),
       emailTemplate,
-      Map("dateAndTime" -> submissionTime, "messageRefId" -> messageRefId, "contactName" -> contactName)
+      Map("dateSubmitted" -> submissionTime, "messageRefId" -> messageRefId, "contactName" -> contactName)
     )
   }
 }

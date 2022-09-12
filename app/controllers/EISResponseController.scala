@@ -20,12 +20,13 @@ import config.AppConfig
 import controllers.actions.EISResponsePreConditionCheckActionRefiner
 import controllers.auth.ValidateAuthTokenAction
 import models.audit.AuditType
-import models.submission.{Accepted => FileStatusAccepted, FileStatus, Rejected}
+import models.submission.{FileStatus, Rejected, Accepted => FileStatusAccepted}
 import models.xml.{BREResponse, ValidationStatus}
 import play.api.Logging
 import play.api.libs.json.Json
 import play.api.mvc.{Action, ControllerComponents}
 import repositories.submission.FileDetailsRepository
+import services.EmailService
 import services.audit.AuditService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import utils.{CustomAlertUtil, DateTimeFormatUtil}
@@ -38,7 +39,7 @@ class EISResponseController @Inject() (cc: ControllerComponents,
                                        validateAuth: ValidateAuthTokenAction,
                                        actionRefiner: EISResponsePreConditionCheckActionRefiner,
                                        fileDetailsRepository: FileDetailsRepository,
-//                                       emailService: EmailService,
+                                       emailService: EmailService,
                                        appConfig: AppConfig,
                                        customAlertUtil: CustomAlertUtil,
                                        auditService: AuditService
@@ -65,13 +66,12 @@ class EISResponseController @Inject() (cc: ControllerComponents,
 
         (fastJourney, updatedFileDetails.status) match {
           case (_, FileStatusAccepted) | (false, Rejected(_)) =>
-            //TODO: Send email using code below when implemented
-//            emailService.sendAndLogEmail(
-//              updatedFileDetails.subscriptionId,
-//              DateTimeFormatUtil.displayFormattedDate(updatedFileDetails.submitted),
-//              updatedFileDetails.messageRefId,
-//              updatedFileDetails.status == FileStatusAccepted
-//            )
+            emailService.sendAndLogEmail(
+              updatedFileDetails.subscriptionId,
+              DateTimeFormatUtil.displayFormattedDate(updatedFileDetails.submitted),
+              updatedFileDetails.messageRefId,
+              updatedFileDetails.status == FileStatusAccepted
+            )
           case _ =>
             logger.warn("Upload file status is rejected on fast journey. No email has been sent")
         }
