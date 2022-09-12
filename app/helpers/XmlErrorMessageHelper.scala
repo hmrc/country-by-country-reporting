@@ -275,8 +275,8 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
 
   private def getErrorMessageForMissingTags(element: String): Option[Message] =
     element match {
-      case "ConstEntity" | "ReportingEntity" | "DocSpec" | "Address" | "MessageSpec" | "CbcBody" => Some(missingInfoMessage(element))
-      case "Entity" => Some(Message("xml.add.element", Seq(element)))
+      case "ConstEntity" | "ReportingEntity" | "DocSpec" | "Address" | "MessageSpec" => Some(missingInfoMessage(element))
+      case "Entity" | "CbcBody" => Some(Message("xml.add.element", Seq(element)))
       case "ReceivingCountry" => Some(Message("xml.add.receivingCountry"))
       case "MessageType" => Some(Message("xml.add.line.messageType", Seq(element)))
       case "ReportingPeriod" => Some(Message("xml.add.line.reportingPeriod", Seq(element)))
