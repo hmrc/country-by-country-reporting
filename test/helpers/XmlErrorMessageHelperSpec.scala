@@ -383,8 +383,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
 
         "must return 'Add an' message for relevant missing tag values" in {
           val elements = List(
-            "Address",
-            "CbcBody"
+            "Address"
           )
 
           elements.map { element =>
@@ -783,8 +782,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
 
         "must return 'Add an' message for relevant missing tag values" in {
           val elements = List(
-            "Address",
-            "CbcBody"
+            "Address"
           )
 
           elements.map { element =>
