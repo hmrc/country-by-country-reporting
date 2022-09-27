@@ -18,7 +18,7 @@ package helpers
 
 trait SaxParseErrorRegExConstants {
   final val missingDeclarationErrorFormat =
-    """cvc-elt.1: Cannot find the declaration of element '(?:.*:)?(.*?)'.""".stripMargin.r
+    """cvc-elt.1.a: Cannot find the declaration of element '(?:.*:)?(.*?)'.""".stripMargin.r
 
   final val missingAttributeErrorFormat = """cvc-complex-type.4: Attribute '(.*?)' must appear on element '(?:.*:)?(.*?)'.""".stripMargin.r
 
