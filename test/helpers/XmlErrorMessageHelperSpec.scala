@@ -36,7 +36,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
       "when element contains 'cbc:' prefix" - {
 
         "must return correct error for missing element declaration'" in {
-          val missingDeclaration = SaxParseError(lineNumber, "cvc-elt.1: Cannot find the declaration of element 'cbc:CBC_OECD'.")
+          val missingDeclaration = SaxParseError(lineNumber, "cvc-elt.1.a: Cannot find the declaration of element 'cbc:CBC_OECD'.")
           val result             = helper.generateErrorMessages(ListBuffer(missingDeclaration))
           result mustBe List(GenericError(lineNumber, Message("xml.must.have.element.declaration", List("CBC_OECD", "urn:oecd:ties:cbc:v2"))))
         }
@@ -431,7 +431,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
       "when element does not contain 'cbc:' prefix" - {
 
         "must return correct error for missing element declaration'" in {
-          val missingDeclaration = SaxParseError(lineNumber, "cvc-elt.1: Cannot find the declaration of element 'CBC_OECD'.")
+          val missingDeclaration = SaxParseError(lineNumber, "cvc-elt.1.a: Cannot find the declaration of element 'CBC_OECD'.")
           val result             = helper.generateErrorMessages(ListBuffer(missingDeclaration))
           result mustBe List(GenericError(lineNumber, Message("xml.must.have.element.declaration", List("CBC_OECD", "urn:oecd:ties:cbc:v2"))))
         }
