@@ -30,6 +30,9 @@ trait SaxParseErrorRegExConstants {
   final val emptySubTagErrorFormat =
     """cvc-complex-type.2.4.b: The content of element '(?:.*:)?(.*?)' is not complete. One of '"urn:oecd:ties:cbc:v2":(?:.*:)?(.*?)' is expected.""".stripMargin.r
 
+  final val emptySubTagDocSpecErrorFormat =
+    """cvc-complex-type.2.4.b: The content of element '(?:.*:)?(.*?)' is not complete. One of '"urn:oecd:ties:cbcstf:v5":(?:.*:)?(.*?)' is expected.""".stripMargin.r
+
   final val missingTagErrorFormat =
     """cvc-complex-type.2.4.a: Invalid content was found starting with element '(?:.*:)?(.*?)'. One of '"urn:oecd:ties:cbc:v2":(?:.*:)?(.*?)' is expected.""".stripMargin.r
 

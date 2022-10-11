@@ -239,6 +239,9 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
       case emptySubTagErrorFormat(parent, element) =>
         val formattedElement = element.replaceAll("(.*?):", "")
         Some(Message("xml.empty.tag", Seq(parent, formattedElement)))
+      case emptySubTagDocSpecErrorFormat(parent, element) =>
+        val formattedElement = element.replaceAll("(.*?):", "")
+        Some(Message("xml.empty.tag", Seq(parent, formattedElement)))
       case _ => None
     }
   }
