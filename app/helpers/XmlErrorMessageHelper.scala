@@ -123,6 +123,8 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
         formattedError(errorMessage2) match {
           case missingOrInvalidErrorFormat("", element) =>
             Some(missingInfoMessage(element))
+          case invalidTypeErrorFormat(_, _, element, _) =>
+            Some(missingInfoMessage(element))
           case _ => None
         }
       case _ => None
