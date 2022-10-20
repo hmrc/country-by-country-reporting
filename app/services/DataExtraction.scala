@@ -28,6 +28,7 @@ class DataExtraction()() {
     for {
       messageID <- (xml \\ "MessageRefId").headOption
       typeIndic <- (xml \\ "MessageTypeIndic").headOption.map(node => MessageTypeIndic.fromString(node.text))
-    } yield MessageSpecData(messageID.text, typeIndic)
+      reportingEntityName <- (xml \\ "ReportingEntity" \\ "Entity" \\ "Name").headOption
+    } yield MessageSpecData(messageID.text, typeIndic, reportingEntityName.text)
 
 }

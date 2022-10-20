@@ -35,7 +35,7 @@ class UploadedXmlValidationEngineSpec extends SpecBase {
   val defaultError                        = "There is a problem with this line number"
   val lineNumber                          = 0
   val noErrors: ListBuffer[SaxParseError] = ListBuffer()
-  val messageSpecData: MessageSpecData    = MessageSpecData("XBC99999999999", CBC401)
+  val messageSpecData: MessageSpecData    = MessageSpecData("XBC99999999999", CBC401, "Reporting Entity")
 
   val addressError1: SaxParseError = SaxParseError(20,
                                                    "cvc-minLength-valid: Value '' with length = '0' is " +
