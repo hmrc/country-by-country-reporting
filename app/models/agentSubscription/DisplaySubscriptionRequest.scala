@@ -80,7 +80,7 @@ object DisplayAgentSubscriptionDetails {
 }
 
 case class DisplayAgentSubscriptionForCBCRequest(
-    displaySubscriptionForCBCRequest: DisplayAgentSubscriptionDetails
+   displayAgentSubscriptionForCBCRequest: DisplayAgentSubscriptionDetails
 )
 
 object DisplayAgentSubscriptionForCBCRequest {

@@ -86,7 +86,7 @@ object UpdateAgentSubscriptionDetails {
   implicit val format: OFormat[UpdateAgentSubscriptionDetails] = Json.format[UpdateAgentSubscriptionDetails]
 }
 
-case class UpdateAgentSubscriptionForCBCRequest(updateSubscriptionForCBCRequest: UpdateAgentSubscriptionDetails)
+case class UpdateAgentSubscriptionForCBCRequest(updateAgentSubscriptionForCBCRequest: UpdateAgentSubscriptionDetails)
 
 object UpdateAgentSubscriptionForCBCRequest {
   implicit val format: OFormat[UpdateAgentSubscriptionForCBCRequest] = Json.format[UpdateAgentSubscriptionForCBCRequest]

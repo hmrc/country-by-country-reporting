@@ -29,13 +29,13 @@ class AgentSubscriptionConnector @Inject()(
   val http: HttpClient
 ) {
 
-  def createSubscription(subscription: CreateAgentSubscriptionRequest)
+  def createSubscription(agentSubscription: CreateAgentSubscriptionRequest)
                         (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
     val serviceName = "create-agent-subscription"
 
     http.POST[CreateAgentSubscriptionRequest, HttpResponse](
       config.serviceUrl(serviceName),
-      subscription,
+      agentSubscription,
       headers = extraHeaders(serviceName)
     )(
       wts = CreateAgentSubscriptionRequest.format,

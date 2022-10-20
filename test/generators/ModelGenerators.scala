@@ -16,6 +16,7 @@
 
 package generators
 
+import models.agentSubscription._
 import models.subscription._
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
@@ -43,6 +44,20 @@ trait ModelGenerators {
       )
     }
 
+  implicit val arbitraryAgentRequestCommonForSubscription: Arbitrary[AgentRequestCommonForSubscription] =
+    Arbitrary {
+      for {
+        receiptDate <- arbitrary[String]
+        acknowledgementRef <- stringsWithMaxLength(32)
+      } yield AgentRequestCommonForSubscription(
+        regime = "CBC",
+        receiptDate = receiptDate,
+        acknowledgementReference = acknowledgementRef,
+        originatingSystem = "MDTP",
+        None
+      )
+    }
+
   implicit val arbitraryReadSubscriptionRequestDetail: Arbitrary[ReadSubscriptionRequestDetail] = Arbitrary {
     for {
       idType   <- arbitrary[String]
@@ -52,6 +67,16 @@ trait ModelGenerators {
       IDNumber = idNumber
     )
   }
+
+  implicit val arbitraryAgentReadSubscriptionRequestDetail: Arbitrary[AgentReadSubscriptionRequestDetail] = Arbitrary {
+    for {
+      idNumber <- arbitrary[String]
+    } yield AgentReadSubscriptionRequestDetail(
+      IDType = "ARN",
+      IDNumber = idNumber
+    )
+  }
+
   implicit val arbitraryReadSubscriptionForCBCRequest: Arbitrary[DisplaySubscriptionForCBCRequest] =
     Arbitrary {
       for {
@@ -62,12 +87,27 @@ trait ModelGenerators {
       )
     }
 
+  implicit val arbitraryReadAgentSubscriptionForCBCRequest: Arbitrary[DisplayAgentSubscriptionForCBCRequest] =
+    Arbitrary {
+      for {
+        requestCommon <- arbitrary[AgentRequestCommonForSubscription]
+        requestDetail <- arbitrary[AgentReadSubscriptionRequestDetail]
+      } yield DisplayAgentSubscriptionForCBCRequest(
+        DisplayAgentSubscriptionDetails(requestCommon, requestDetail)
+      )
+    }
+
   implicit val arbitraryOrganisationDetails: Arbitrary[OrganisationDetails] = Arbitrary {
     for {
       orgName <- arbitrary[String]
     } yield OrganisationDetails(orgName)
   }
 
+  implicit val arbitraryAgentDetails: Arbitrary[AgentDetails] = Arbitrary {
+    for {
+      orgName <- arbitrary[String]
+    } yield AgentDetails(orgName)
+  }
 
   implicit val arbitraryContactInformation: Arbitrary[ContactInformation] = Arbitrary {
     for {
@@ -76,6 +116,15 @@ trait ModelGenerators {
       phone       <- Gen.option(arbitrary[String])
       mobile      <- Gen.option(arbitrary[String])
     } yield ContactInformation(contactType, email, phone, mobile)
+  }
+
+  implicit val arbitraryAgentContactInformation: Arbitrary[AgentContactInformation] = Arbitrary {
+    for {
+      contactType <- arbitrary[AgentDetails]
+      email <- arbitrary[String]
+      phone <- Gen.option(arbitrary[String])
+      mobile <- Gen.option(arbitrary[String])
+    } yield AgentContactInformation(contactType, email, phone, mobile)
   }
 
   implicit val arbitraryRequestDetail: Arbitrary[RequestDetailForUpdate] = Arbitrary {
@@ -89,12 +138,36 @@ trait ModelGenerators {
     } yield RequestDetailForUpdate(idType, idNumber, tradingName, isGBUser, primaryContact, secondaryContact)
   }
 
+  implicit val arbitraryAgentRequestDetailForUpdate: Arbitrary[AgentRequestDetailForUpdate] = Arbitrary {
+    for {
+      idNumber <- arbitrary[String]
+      tradingName <- Gen.option(arbitrary[String])
+      isGBUser <- arbitrary[Boolean]
+      primaryContact <- arbitrary[AgentContactInformation]
+      secondaryContact <- Gen.option(arbitrary[AgentContactInformation])
+    } yield AgentRequestDetailForUpdate("ARN", idNumber, tradingName, isGBUser, primaryContact, secondaryContact)
+  }
+
   implicit val arbitraryRequestCommonForUpdateSubscription: Arbitrary[RequestCommonForUpdate] =
     Arbitrary {
       for {
         receiptDate        <- arbitrary[String]
         acknowledgementRef <- stringsWithMaxLength(32)
       } yield RequestCommonForUpdate(
+        regime = "CBC",
+        receiptDate = receiptDate,
+        acknowledgementReference = acknowledgementRef,
+        originatingSystem = "MDTP",
+        None
+      )
+    }
+
+  implicit val arbitraryAgentRequestCommonForUpdate: Arbitrary[AgentRequestCommonForUpdate] =
+    Arbitrary {
+      for {
+        receiptDate <- arbitrary[String]
+        acknowledgementRef <- stringsWithMaxLength(32)
+      } yield AgentRequestCommonForUpdate(
         regime = "CBC",
         receiptDate = receiptDate,
         acknowledgementReference = acknowledgementRef,
@@ -113,6 +186,16 @@ trait ModelGenerators {
     )
   }
 
+  implicit val arbitraryUpdateAgentSubscriptionDetails: Arbitrary[UpdateAgentSubscriptionDetails] = Arbitrary {
+    for {
+      reqCommonForUpdate <- arbitrary[AgentRequestCommonForUpdate]
+      reqRequestDetailForUpdate <- arbitrary[AgentRequestDetailForUpdate]
+    } yield UpdateAgentSubscriptionDetails(
+      reqCommonForUpdate,
+      reqRequestDetailForUpdate
+    )
+  }
+
   implicit val arbitraryUpdateSubscriptionForCBCRequest: Arbitrary[UpdateSubscriptionForCBCRequest] =
     Arbitrary {
       for {
@@ -122,5 +205,34 @@ trait ModelGenerators {
       )
     }
 
+  implicit val arbitraryAgentUpdateSubscriptionForCBCRequest: Arbitrary[UpdateAgentSubscriptionForCBCRequest] =
+    Arbitrary {
+      for {
+        request <- arbitrary[UpdateAgentSubscriptionDetails]
+      } yield UpdateAgentSubscriptionForCBCRequest(
+        request
+      )
+    }
+
+  implicit val arbitraryCreateAgentSubscriptionRequest
+  : Arbitrary[CreateAgentSubscriptionRequest] =
+    Arbitrary {
+      for {
+        requestCommon <- arbitrary[AgentRequestCommonForSubscription]
+        requestDetail <- arbitrary[AgentRequestDetail]
+      } yield CreateAgentSubscriptionRequest(
+        AgentCreateSubscriptionRequest(requestCommon, requestDetail)
+      )
+    }
+
+  implicit val arbitraryAgentRequestDetail: Arbitrary[AgentRequestDetail] = Arbitrary {
+    for {
+      idNumber <- arbitrary[String]
+      tradingName <- Gen.option(arbitrary[String])
+      isGBUser <- arbitrary[Boolean]
+      primaryContact <- arbitrary[AgentContactInformation]
+      secondaryContact <- Gen.option(arbitrary[AgentContactInformation])
+    } yield AgentRequestDetail("ARN", idNumber, tradingName, isGBUser, primaryContact, secondaryContact)
+  }
 
 }
