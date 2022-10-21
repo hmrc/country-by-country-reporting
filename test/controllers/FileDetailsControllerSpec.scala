@@ -46,9 +46,9 @@ class FileDetailsControllerSpec extends SpecBase with BeforeAndAfterEach {
     .build()
 
   val submissionTime1 = LocalDateTime.now()
-  val fileDetails1    = FileDetails(ConversationId(), "subscriptionId1", "messageRefId1", Pending, "fileName1", submissionTime1, submissionTime1)
+  val fileDetails1    = FileDetails(ConversationId(), "subscriptionId1", "messageRefId1", "Reporting Entity", Pending, "fileName1", submissionTime1, submissionTime1)
   val submissionTime2 = LocalDateTime.now()
-  val fileDetails2    = FileDetails(ConversationId(), "subscriptionId1", "messageRefId1", Accepted, "fileName2", submissionTime2, submissionTime2)
+  val fileDetails2    = FileDetails(ConversationId(), "subscriptionId1", "messageRefId1", "Reporting Entity", Accepted, "fileName2", submissionTime2, submissionTime2)
   val files           = Seq(fileDetails1, fileDetails2)
 
   val conversationId = ConversationId()
@@ -56,6 +56,7 @@ class FileDetailsControllerSpec extends SpecBase with BeforeAndAfterEach {
     conversationId,
     subscriptionId = "subscriptionId",
     messageRefId = "messageRefId",
+    reportingEntityName =  "Reporting Entity",
     status = Pending,
     name = "test.xml",
     submitted = LocalDateTime.now(),
@@ -69,6 +70,7 @@ class FileDetailsControllerSpec extends SpecBase with BeforeAndAfterEach {
         conversationId,
         subscriptionId = "subscriptionId",
         messageRefId = "messageRefId",
+        reportingEntityName = "Reporting Entity",
         status = Pending,
         name = "test.xml",
         submitted = LocalDateTime.now(),

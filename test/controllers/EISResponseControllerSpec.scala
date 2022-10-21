@@ -18,7 +18,6 @@ package controllers
 
 import base.SpecBase
 import models.submission._
-import models.xml.ValidationErrors
 import org.mockito.ArgumentMatchers.any
 import org.scalatest.BeforeAndAfterEach
 import play.api.Application
@@ -89,7 +88,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
   "EISResponseController" - {
     "must return NoContent when input xml is valid" in {
       val fileDetails =
-        FileDetails(ConversationId("conversationId123456"), "subscriptionId", "messageRefId", Accepted, "file1.xml", LocalDateTime.now(), LocalDateTime.now())
+        FileDetails(ConversationId("conversationId123456"), "subscriptionId", "messageRefId", "Reporting Entity", Accepted, "file1.xml", LocalDateTime.now(), LocalDateTime.now())
 
       when(mockFileDetailsRepository.updateStatus(any[String], any[FileStatus])).thenReturn(Future.successful(Some(fileDetails)))
       //TODO: Uncomment all code relating to emailService and add additional email tests when implemented
