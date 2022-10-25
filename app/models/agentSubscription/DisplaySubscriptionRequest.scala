@@ -64,7 +64,7 @@ object AgentReadSubscriptionRequestDetail {
   implicit val format: OFormat[AgentReadSubscriptionRequestDetail] =
     Json.format[AgentReadSubscriptionRequestDetail]
 
-  def apply(subscriptionId: String): AgentReadSubscriptionRequestDetail           = new AgentReadSubscriptionRequestDetail("ARN", subscriptionId)
+  def apply(agentRefNo: String): AgentReadSubscriptionRequestDetail           = new AgentReadSubscriptionRequestDetail("ARN", agentRefNo)
   def apply(IDType: String, IDNumber: String): AgentReadSubscriptionRequestDetail = new AgentReadSubscriptionRequestDetail(IDType, IDNumber)
 
 }

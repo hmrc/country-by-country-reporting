@@ -38,3 +38,12 @@ class FakeIdentifierAuthAction @Inject() (
   override def invokeBlock[A](request: Request[A], block: UserRequest[A] => Future[Result]): Future[Result] =
     block(UserRequest("XACBC0009234568", request))
 }
+
+class FakeAgentOnlyAuthAction @Inject() (
+                                           val parser: BodyParsers.Default
+                                         )(implicit val executionContext: ExecutionContext)
+  extends AgentOnlyAuthAction {
+
+  override def invokeBlock[A](request: Request[A], block: AgentOnlyRequest[A] => Future[Result]): Future[Result] =
+    block(AgentOnlyRequest("ARN12345", request))
+}

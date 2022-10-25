@@ -64,7 +64,7 @@ object DisplayAgentSubscriptionResponse {
   implicit val format: OFormat[DisplayAgentSubscriptionResponse] = Json.format[DisplayAgentSubscriptionResponse]
 }
 
-case class DisplayAgentSubscriptionForCBCResponse(displaySubscriptionForCBCResponse: DisplayAgentSubscriptionResponse)
+case class DisplayAgentSubscriptionForCBCResponse(displayAgentSubscriptionForCBCResponse: DisplayAgentSubscriptionResponse)
 
 object DisplayAgentSubscriptionForCBCResponse {
   implicit val format: OFormat[DisplayAgentSubscriptionForCBCResponse] = Json.format[DisplayAgentSubscriptionForCBCResponse]
