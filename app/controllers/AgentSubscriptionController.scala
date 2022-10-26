@@ -54,6 +54,9 @@ class AgentSubscriptionController @Inject()(
   def readSubscription(): Action[AnyContent] = authenticate.async { implicit request =>
     agentSubscriptionService.getContactInformation(request.arn).map {
       case Right(value) => Ok(Json.toJson(value))
+      case Left(ReadSubscriptionError(NOT_FOUND)) =>
+        logger.warn("AgentReadSubscriptionNotFound ")
+        NotFound("AgentReadSubscriptionNotFound")
       case Left(ReadSubscriptionError(value)) =>
         logger.warn(s"AgentReadSubscriptionError $value")
         InternalServerError(s"AgentReadSubscriptionError $value")
