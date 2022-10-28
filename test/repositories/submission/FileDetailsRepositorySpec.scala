@@ -38,6 +38,7 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
       ConversationId("conversationId123456"),
       "subscriptionId",
       "messageRefId",
+      "Reporting Entity",
       Pending,
       "file1.xml",
       dateTimeNow,
@@ -93,7 +94,7 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
       val res = repository.updateStatus("conversationId123456", Accepted)
       whenReady(res) { result =>
         result must matchPattern {
-          case Some(FileDetails(ConversationId("conversationId123456"), "subscriptionId", "messageRefId", Accepted, "file1.xml", _, _)) =>
+          case Some(FileDetails(ConversationId("conversationId123456"), "subscriptionId", "messageRefId", "Reporting Entity", Accepted, "file1.xml", _, _)) =>
         }
       }
     }
@@ -113,6 +114,7 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
                 FileDetails(ConversationId("conversationId123456"),
                             "subscriptionId",
                             "messageRefId",
+                            "Reporting Entity",
                             Rejected(ValidationErrors(Some(Seq(FileErrors(FileErrorCode.FailedSchemaValidation, Some("details")))), None)),
                             "file1.xml",
                             _,

@@ -37,7 +37,8 @@ class FileDetailsController @Inject() (
 
   def getFileDetails(conversationId: ConversationId): Action[AnyContent] = authenticate.async { _ =>
     fileDetailsRepository.findByConversationId(conversationId) map {
-      case Some(fileDetails) => Ok(Json.toJson(ResponseFileDetails.build(fileDetails)))
+      case Some(fileDetails) =>
+        Ok(Json.toJson(ResponseFileDetails.build(fileDetails)))
       case _ =>
         logger.warn(s"No record found for the conversationId: ${conversationId.value}")
         NotFound
