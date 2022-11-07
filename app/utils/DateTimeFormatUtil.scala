@@ -29,6 +29,6 @@ object DateTimeFormatUtil {
   def zonedDateTimeNow: ZonedDateTime = ZonedDateTime.now(euLondonZoneId)
 
   def displayFormattedDate(dateTime: LocalDateTime): String =
-    s"${dateTime.atZone(euLondonZoneId).format(timeFormatter).toLowerCase} on ${dateTime.atZone(euLondonZoneId).format(dateFormatter)}"
+    s"${dateTime.atZone(euLondonZoneId).format(dateFormatter).toLowerCase} at ${dateTime.atZone(euLondonZoneId).format(timeFormatter)}"
 
 }

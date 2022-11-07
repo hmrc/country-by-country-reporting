@@ -26,9 +26,10 @@ import play.api.Logging
 import play.api.libs.json.Json
 import play.api.mvc.{Action, ControllerComponents}
 import repositories.submission.FileDetailsRepository
+import services.EmailService
 import services.audit.AuditService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import utils.CustomAlertUtil
+import utils.{CustomAlertUtil, DateTimeFormatUtil}
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
@@ -38,7 +39,7 @@ class EISResponseController @Inject() (cc: ControllerComponents,
                                        validateAuth: ValidateAuthTokenAction,
                                        actionRefiner: EISResponsePreConditionCheckActionRefiner,
                                        fileDetailsRepository: FileDetailsRepository,
-//                                       emailService: EmailService,
+                                       emailService: EmailService,
                                        appConfig: AppConfig,
                                        customAlertUtil: CustomAlertUtil,
                                        auditService: AuditService
@@ -65,13 +66,12 @@ class EISResponseController @Inject() (cc: ControllerComponents,
 
         (fastJourney, updatedFileDetails.status) match {
           case (_, FileStatusAccepted) | (false, Rejected(_)) =>
-            //TODO: Send email using code below when implemented
-//            emailService.sendAndLogEmail(
-//              updatedFileDetails.subscriptionId,
-//              DateTimeFormatUtil.displayFormattedDate(updatedFileDetails.submitted),
-//              updatedFileDetails.messageRefId,
-//              updatedFileDetails.status == FileStatusAccepted
-//            )
+            emailService.sendAndLogEmail(
+              updatedFileDetails.subscriptionId,
+              DateTimeFormatUtil.displayFormattedDate(updatedFileDetails.submitted),
+              updatedFileDetails.messageRefId,
+              updatedFileDetails.status == FileStatusAccepted
+            )
           case _ =>
             logger.warn("Upload file status is rejected on fast journey. No email has been sent")
         }

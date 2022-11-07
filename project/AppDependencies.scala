@@ -9,7 +9,8 @@ object AppDependencies {
     "uk.gov.hmrc"             %% "bootstrap-backend-play-28"  % "5.24.0",
     "org.julienrf"            %% "play-json-derived-codecs"   % "7.0.0",
     "com.lucidchart"          %% "xtract"                     % "2.3.0-alpha3",
-    "uk.gov.hmrc.mongo"       %% "hmrc-mongo-play-28"         % "0.68.0"
+    "uk.gov.hmrc.mongo"       %% "hmrc-mongo-play-28"         % "0.68.0",
+    "uk.gov.hmrc" %% "emailaddress" % "3.6.0"
   )
 
   val test = Seq(
