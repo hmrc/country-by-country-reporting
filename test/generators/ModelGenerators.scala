@@ -17,6 +17,7 @@
 package generators
 
 import models.agentSubscription._
+import models.email.EmailRequest
 import models.subscription._
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
@@ -235,4 +236,12 @@ trait ModelGenerators {
     } yield AgentRequestDetail("ARN", idNumber, tradingName, isGBUser, primaryContact, secondaryContact)
   }
 
+  implicit val arbitraryEmailRequest: Arbitrary[EmailRequest] = Arbitrary {
+    for {
+      to <- arbitrary[List[String]]
+      id <- arbitrary[String]
+      params <- arbitrary[Map[String, String]]
+
+    } yield EmailRequest(to, id, params)
+  }
 }
