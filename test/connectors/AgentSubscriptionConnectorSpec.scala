@@ -51,7 +51,7 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockServerHandler
     "create subscription" - {
       "must return status as OK for read Subscription" in {
         stubResponse(
-          "/dac/DCTxxc/v1",
+          "/dac6/DCTxxc/v1",
           OK
         )
 
@@ -66,7 +66,7 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockServerHandler
 
         forAll(arbitrary[CreateAgentSubscriptionRequest], errorCodes) { (sub, errorCode) =>
           stubResponse(
-            "/dac/DCTxxc/v1",
+            "/dac6/DCTxxc/v1",
             errorCode
           )
 
@@ -79,7 +79,7 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockServerHandler
     "read subscription" - {
       "must return status as OK for read Subscription" in {
         stubResponse(
-          "/dac/DCTxxd/v1",
+          "/dac6/DCTxxd/v1",
           OK
         )
 
@@ -94,7 +94,7 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockServerHandler
 
         forAll(arbitrary[DisplayAgentSubscriptionForCBCRequest], errorCodes) { (sub, errorCode) =>
           stubResponse(
-            "/dac/DCTxxd/v1",
+            "/dac6/DCTxxd/v1",
             errorCode
           )
 
@@ -107,7 +107,7 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockServerHandler
     "update subscription" - {
       "must return status as OK for update Subscription" in {
         stubResponse(
-          "/dac/DCTxxe/v1",
+          "/dac6/DCTxxe/v1",
           OK
         )
 
@@ -121,7 +121,7 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockServerHandler
 
         forAll(arbitrary[UpdateAgentSubscriptionForCBCRequest], errorCodes) { (sub, errorCode) =>
           stubResponse(
-            "/dac/DCTxxe/v1",
+            "/dac6/DCTxxe/v1",
             errorCode
           )
 
