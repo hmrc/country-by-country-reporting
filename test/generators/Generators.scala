@@ -138,6 +138,12 @@ trait Generators extends ModelGenerators {
   val apiOrgName                = "^([a-zA-Z0-9_.]{1,105})\\$"
   def validOrgName: Gen[String] = RegexpGen.from(apiOrgName)
 
+  def validEmailAddress: Gen[String] = {
+    val emailRegexWithQuantifier = """^([a-zA-Z0-9.!#$%&’'*+/=?^_`{|}~-]+)@([a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*)$"""
+
+    RegexpGen.from(emailRegexWithQuantifier)
+  }
+
   def listWithMaxLength[T](maxSize: Int, gen: Gen[T]): Gen[Seq[T]] =
     for {
       size  <- Gen.choose(1, maxSize)

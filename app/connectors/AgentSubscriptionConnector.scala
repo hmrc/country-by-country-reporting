@@ -19,7 +19,6 @@ package connectors
 import com.google.inject.Inject
 import config.AppConfig
 import models.agentSubscription.{CreateAgentSubscriptionRequest, DisplayAgentSubscriptionForCBCRequest, UpdateAgentSubscriptionForCBCRequest}
-import models.subscription.{DisplaySubscriptionForCBCRequest, UpdateSubscriptionForCBCRequest}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}

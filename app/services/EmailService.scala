@@ -17,12 +17,10 @@
 package services
 
 import connectors.EmailConnector
-import models.email.{EmailRequest, EmailTemplate}
+import models.email.{EmailAddress, EmailRequest, EmailTemplate}
 import models.error.ReadSubscriptionError
-import models.subscription.OrganisationDetails
 import play.api.Logging
 import play.api.http.Status.{ACCEPTED, BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND}
-import uk.gov.hmrc.emailaddress.EmailAddress
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import javax.inject.{Inject, Singleton}
