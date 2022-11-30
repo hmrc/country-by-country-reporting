@@ -1,23 +1,23 @@
 # microservice specific routes
 
-POST        /subscription/read-subscription             controllers.SubscriptionController.readSubscription
-POST        /subscription/update-subscription           controllers.SubscriptionController.updateSubscription
+POST        /subscription/read-subscription/:subscriptionId             controllers.SubscriptionController.readSubscription(subscriptionId: String)
+POST        /subscription/update-subscription                           controllers.SubscriptionController.updateSubscription
 
-POST        /validate-submission                        controllers.validation.SubmissionValidationController.validateSubmission
+POST        /validate-submission                                        controllers.validation.SubmissionValidationController.validateSubmission
 
-POST        /validation-result                          controllers.EISResponseController.processEISResponse
+POST        /validation-result                                          controllers.EISResponseController.processEISResponse
 
-POST        /callback                                   controllers.upscan.UploadCallbackController.callback
-GET         /upscan/details/:uploadId                   controllers.upscan.UploadFormController.getDetails(uploadId: String)
-GET         /upscan/status/:uploadId                    controllers.upscan.UploadFormController.getStatus(uploadId: String)
-POST        /upscan/upload                              controllers.upscan.UploadFormController.requestUpload
+POST        /callback                                                   controllers.upscan.UploadCallbackController.callback
+GET         /upscan/details/:uploadId                                   controllers.upscan.UploadFormController.getDetails(uploadId: String)
+GET         /upscan/status/:uploadId                                    controllers.upscan.UploadFormController.getStatus(uploadId: String)
+POST        /upscan/upload                                              controllers.upscan.UploadFormController.requestUpload
 
-GET         /files/:conversationId/details              controllers.FileDetailsController.getFileDetails(conversationId: models.submission.ConversationId)
-GET         /files/details                              controllers.FileDetailsController.getAllFileDetails
-GET         /files/:conversationId/status               controllers.FileDetailsController.getStatus(conversationId: models.submission.ConversationId)
+GET         /files/:conversationId/details                              controllers.FileDetailsController.getFileDetails(conversationId: models.submission.ConversationId)
+GET         /files/details/:subscriptionId                              controllers.FileDetailsController.getAllFileDetails(subscriptionId: String)
+GET         /files/:conversationId/status                               controllers.FileDetailsController.getStatus(conversationId: models.submission.ConversationId)
 
-POST        /submit                                     controllers.SubmissionController.submitDisclosure
+POST        /submit                                                     controllers.SubmissionController.submitDisclosure
 
-POST        /agent/subscription/create-subscription     controllers.AgentSubscriptionController.createSubscription
-POST        /agent/subscription/read-subscription       controllers.AgentSubscriptionController.readSubscription
-POST        /agent/subscription/update-subscription     controllers.AgentSubscriptionController.updateSubscription
+POST        /agent/subscription/create-subscription                     controllers.AgentSubscriptionController.createSubscription
+POST        /agent/subscription/read-subscription                       controllers.AgentSubscriptionController.readSubscription
+POST        /agent/subscription/update-subscription                     controllers.AgentSubscriptionController.updateSubscription

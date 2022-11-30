@@ -47,12 +47,13 @@ class SubmissionController @Inject() (
     extends BackendController(cc)
     with Logging {
 
+
   def submitDisclosure: Action[NodeSeq] = authenticate.async(parse.xml) { implicit request =>
     val xml                      = request.body
     val fileName                 = (xml \ "fileName").text
     val messageRefId             = (xml \\ "MessageRefId").text
     val reportingEntityName      =  (xml \\ "ReportingEntity" \\ "Entity" \\ "Name").head.text
-    val subscriptionId           = request.subscriptionId
+    val subscriptionId           = (xml \\ "enrolmentID").text
     val submissionTime           = dateTimeNow()
     val conversationId           = ConversationId()
     val uploadedXmlNode: NodeSeq = xml \ "file" \ "CBC_OECD"

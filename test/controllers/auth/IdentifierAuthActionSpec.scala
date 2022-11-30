@@ -28,9 +28,10 @@ import play.api.mvc.{Action, AnyContent, InjectedController}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.status
 import play.api.{Application, Configuration}
+import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve.Retrieval
+import uk.gov.hmrc.auth.core.retrieve.{Retrieval, ~}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.duration._
@@ -38,6 +39,8 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 
 class IdentifierAuthActionSpec extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar {
+
+  type RetrievalType = Enrolments ~ Option[AffinityGroup]
 
   class Harness(authAction: IdentifierAuthAction) extends InjectedController {
 
@@ -69,24 +72,34 @@ class IdentifierAuthActionSpec extends PlaySpec with GuiceOneAppPerSuite with Mo
         status(result) mustBe UNAUTHORIZED
 
       }
-      "must return IllegalAccessException for not known enrolment" in {
-        val retrieval = Enrolments(Set(Enrolment("HMRC-TEST-ORG", Seq(EnrolmentIdentifier("TESTID", "subscriptionID")), "ACTIVE")))
-        when(mockAuthConnector.authorise[Enrolments](any[Predicate](), any[Retrieval[Enrolments]]())(any[HeaderCarrier](), any[ExecutionContext]()))
+      "must return UNAUTHORIZED for not known enrolment" in {
+        val retrieval: RetrievalType = new ~(Enrolments(Set(Enrolment("HMRC-TEST-ORG", Seq(EnrolmentIdentifier("TESTID", "subscriptionID")), "ACTIVE"))), Some(Organisation))
+        when(mockAuthConnector.authorise(any[Predicate](), any[Retrieval[RetrievalType]]())(any[HeaderCarrier](), any[ExecutionContext]()))
           .thenReturn(Future.successful(retrieval))
 
         val authAction = application.injector.instanceOf[IdentifierAuthAction]
         val controller = new Harness(authAction)
-        intercept[IllegalAccessException] {
-          val result = controller.onPageLoad()(FakeRequest("", ""))
-          status(result)
-        }
+        val result = controller.onPageLoad()(FakeRequest("", ""))
+        status(result) mustBe UNAUTHORIZED
       }
     }
 
     "the user is logged in" must {
-      "must return the request" in {
-        val retrieval = Enrolments(Set(Enrolment("HMRC-CBC-ORG", Seq(EnrolmentIdentifier("cbcId", "subscriptionID")), "ACTIVE")))
-        when(mockAuthConnector.authorise[Enrolments](any[Predicate](), any[Retrieval[Enrolments]]())(any[HeaderCarrier](), any[ExecutionContext]()))
+      "for an Organisation must return the request" in {
+        val retrieval: RetrievalType = new ~(Enrolments(Set(Enrolment("HMRC-CBC-ORG", Seq(EnrolmentIdentifier("cbcId", "subscriptionID")), "ACTIVE"))), Some(Organisation))
+        when(mockAuthConnector.authorise(any[Predicate](), any[Retrieval[RetrievalType]]())(any[HeaderCarrier](), any[ExecutionContext]()))
+          .thenReturn(Future.successful(retrieval))
+
+        val authAction = application.injector.instanceOf[IdentifierAuthAction]
+        val controller = new Harness(authAction)
+
+        val result = controller.onPageLoad()(FakeRequest("", ""))
+        status(result) mustBe OK
+      }
+
+      "for an Agent must return the request" in {
+        val retrieval: RetrievalType = new ~(Enrolments(Set(Enrolment("HMRC-AS-AGENT", Seq(EnrolmentIdentifier("AgentReferenceNumber", "arn")), "ACTIVE"))), Some(Agent))
+        when(mockAuthConnector.authorise(any[Predicate](), any[Retrieval[RetrievalType]]())(any[HeaderCarrier](), any[ExecutionContext]()))
           .thenReturn(Future.successful(retrieval))
 
         val authAction = application.injector.instanceOf[IdentifierAuthAction]
