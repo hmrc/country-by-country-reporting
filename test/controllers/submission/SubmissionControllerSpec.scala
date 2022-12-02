@@ -34,7 +34,7 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{status, _}
 import repositories.submission.FileDetailsRepository
-import services.{SubscriptionService, TransformService}
+import services.{AgentSubscriptionService, SubscriptionService, TransformService}
 import services.validation.XMLValidationService
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -43,10 +43,12 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.xml.NodeSeq
 class SubmissionControllerSpec extends SpecBase with MockitoSugar with ScalaCheckDrivenPropertyChecks with BeforeAndAfterEach {
 
-  val mockTransformService                             = mock[TransformService]
-  val mockSubmissionConnector: SubmissionConnector     = mock[SubmissionConnector]
-  val mockSubscriptionConnector: SubscriptionConnector = mock[SubscriptionConnector]
-  val mockReadSubscriptionService: SubscriptionService = mock[SubscriptionService]
+  val mockTransformService                                       = mock[TransformService]
+  val mockSubmissionConnector: SubmissionConnector               = mock[SubmissionConnector]
+  val mockSubscriptionConnector: SubscriptionConnector           = mock[SubscriptionConnector]
+  val mockReadSubscriptionService: SubscriptionService           = mock[SubscriptionService]
+  val mockAgentReadSubscriptionService: AgentSubscriptionService = mock[AgentSubscriptionService]
+
   val mockFileDetailsRepository: FileDetailsRepository = mock[FileDetailsRepository]
   val mockXMLValidationService: XMLValidationService   = mock[XMLValidationService]
   val mockAppConf: AppConfig                           = mock[AppConfig]
@@ -54,7 +56,15 @@ class SubmissionControllerSpec extends SpecBase with MockitoSugar with ScalaChec
   val errorStatusCodes: Seq[Int] = Seq(BAD_REQUEST, FORBIDDEN, NOT_FOUND, METHOD_NOT_ALLOWED, CONFLICT, INTERNAL_SERVER_ERROR, SERVICE_UNAVAILABLE)
 
   override def beforeEach(): Unit =
-    reset(mockAppConf, mockXMLValidationService, mockReadSubscriptionService, mockSubscriptionConnector, mockSubmissionConnector, mockFileDetailsRepository)
+    reset(
+      mockAppConf,
+      mockXMLValidationService,
+      mockReadSubscriptionService,
+      mockSubscriptionConnector,
+      mockSubmissionConnector,
+      mockFileDetailsRepository,
+      mockAgentReadSubscriptionService
+    )
 
   "submission controller" - {
 
@@ -63,6 +73,7 @@ class SubmissionControllerSpec extends SpecBase with MockitoSugar with ScalaChec
         bind[SubscriptionConnector].toInstance(mockSubscriptionConnector),
         bind[SubmissionConnector].toInstance(mockSubmissionConnector),
         bind[SubscriptionService].toInstance(mockReadSubscriptionService),
+        bind[AgentSubscriptionService].toInstance(mockAgentReadSubscriptionService),
         bind[FileDetailsRepository].toInstance(mockFileDetailsRepository),
         bind[XMLValidationService].toInstance(mockXMLValidationService),
         bind[AppConfig].toInstance(mockAppConf),
@@ -99,6 +110,32 @@ class SubmissionControllerSpec extends SpecBase with MockitoSugar with ScalaChec
         .thenReturn(Future.successful(true))
       when(mockReadSubscriptionService.getContactInformation(any[String]())(any[HeaderCarrier](), any[ExecutionContext]()))
         .thenReturn(Future.successful(Right(responseDetail)))
+      when(mockSubmissionConnector.submitDisclosure(any[NodeSeq](), any[ConversationId])(any[HeaderCarrier]()))
+        .thenReturn(Future.successful(HttpResponse(NO_CONTENT, "")))
+      when(mockXMLValidationService.validate(any[NodeSeq], any[String]))
+        .thenReturn(Right(basicXml))
+      val submission = basicXml
+
+      val request                = FakeRequest(POST, SubmissionController.submitDisclosure.url).withXmlBody(submission)
+      val result: Future[Result] = route(application, request).value
+
+      status(result) mustBe OK
+
+      val argumentCaptor: ArgumentCaptor[NodeSeq]                      = ArgumentCaptor.forClass(classOf[NodeSeq])
+      val argumentCaptorSubmissionDetails: ArgumentCaptor[FileDetails] = ArgumentCaptor.forClass(classOf[FileDetails])
+      val argumentCaptorConversationId: ArgumentCaptor[ConversationId] = ArgumentCaptor.forClass(classOf[ConversationId])
+
+      verify(mockFileDetailsRepository, times(1)).insert(argumentCaptorSubmissionDetails.capture())
+      verify(mockSubmissionConnector, times(1)).submitDisclosure(argumentCaptor.capture(), argumentCaptorConversationId.capture())(any[HeaderCarrier]())
+    }
+
+    "when a file is posted we transform it and trim and blank spaces on the node send it to the HOD expect return OK for Agent" in {
+      when(mockFileDetailsRepository.insert(any[FileDetails]()))
+        .thenReturn(Future.successful(true))
+      when(mockReadSubscriptionService.getContactInformation(any[String]())(any[HeaderCarrier](), any[ExecutionContext]()))
+        .thenReturn(Future.successful(Right(responseDetail)))
+      when(mockAgentReadSubscriptionService.getContactInformation(any[String]())(any[HeaderCarrier](), any[ExecutionContext]()))
+        .thenReturn(Future.successful(Right(agentResponseDetail)))
       when(mockSubmissionConnector.submitDisclosure(any[NodeSeq](), any[ConversationId])(any[HeaderCarrier]()))
         .thenReturn(Future.successful(HttpResponse(NO_CONTENT, "")))
       when(mockXMLValidationService.validate(any[NodeSeq], any[String]))

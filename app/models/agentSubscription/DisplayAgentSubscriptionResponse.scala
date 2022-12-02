@@ -16,14 +16,15 @@
 
 package models.agentSubscription
 
+import models.subscription.ContactInformation
 import play.api.Logger
 import play.api.libs.json._
 
 case class AgentResponseDetail(subscriptionID: String,
                                tradingName: Option[String],
                                isGBUser: Boolean,
-                               primaryContact: AgentContactInformation,
-                               secondaryContact: Option[AgentContactInformation]
+                               primaryContact: ContactInformation,
+                               secondaryContact: Option[ContactInformation]
 )
 
 object AgentResponseDetail {
@@ -35,8 +36,8 @@ object AgentResponseDetail {
       (__ \ "subscriptionID").read[String] and
         (__ \ "tradingName").readNullable[String] and
         (__ \ "isGBUser").read[Boolean] and
-        (__ \ "primaryContact").read[Seq[AgentContactInformation]] and
-        (__ \ "secondaryContact").readNullable[Seq[AgentContactInformation]]
+        (__ \ "primaryContact").read[Seq[ContactInformation]] and
+        (__ \ "secondaryContact").readNullable[Seq[ContactInformation]]
     ) { (subscriptionID, tradingName, isGBUser, primaryContact, secondaryContact) =>
       logger.warn(s"AgentResponseDetail: received ${primaryContact.size} primary contacts and ${secondaryContact.getOrElse(0)} secondaryContacts")
       AgentResponseDetail(subscriptionID, tradingName, isGBUser, primaryContact.head, secondaryContact.map(_.head))
