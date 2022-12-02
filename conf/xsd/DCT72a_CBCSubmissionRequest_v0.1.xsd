@@ -80,6 +80,7 @@
 			<xs:element name="isGBUser" type="xs:boolean"/>
 			<xs:element name="primaryContact" type="cadx:contactInformationType"/>
 			<xs:element name="secondaryContact" type="cadx:contactInformationType" minOccurs="0"/>
+			<xs:element name="agentDetails" type="cadx:agentInformationType" minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="contactInformationType">
@@ -148,6 +149,20 @@
 					</xs:complexType>
 				</xs:element>
 			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="agentInformationType">
+		<xs:sequence>
+			<xs:element name="agentReferenceNumber">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+						<xs:maxLength value="11"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="agentPrimaryContact" type="cadx:contactInformationType"/>
+			<xs:element name="agentSecondaryContact" type="cadx:contactInformationType" minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>
 	<xs:simpleType name="telephoneType">
