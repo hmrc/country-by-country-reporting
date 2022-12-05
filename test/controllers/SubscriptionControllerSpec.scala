@@ -124,7 +124,7 @@ class SubscriptionControllerSpec extends SpecBase with Generators with ScalaChec
       val request =
         FakeRequest(
           POST,
-          routes.SubscriptionController.readSubscription.url
+          routes.SubscriptionController.readSubscription("XACBC0009234568").url
         )
 
       val result = route(application, request).value
@@ -148,7 +148,7 @@ class SubscriptionControllerSpec extends SpecBase with Generators with ScalaChec
       val request =
         FakeRequest(
           POST,
-          routes.SubscriptionController.readSubscription.url
+          routes.SubscriptionController.readSubscription("XACBC0009234568").url
         )
 
       val result = route(application, request).value
