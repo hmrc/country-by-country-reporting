@@ -85,7 +85,7 @@ class SubmissionController @Inject() (
                                      submissionDetails: FileDetails,
                                      agentDetails: Option[AgentDetails]
   )(implicit request: Request[NodeSeq]) = {
-    val submissionXml: NodeSeq = transformService.addSubscriptionDetailsToSubmission(uploadedXmlNode, value, submissionMetaData)
+    val submissionXml: NodeSeq = transformService.addSubscriptionDetailsToSubmission(uploadedXmlNode, value, submissionMetaData, agentDetails)
     val sanitisedXml           = scala.xml.Utility.trim(scala.xml.XML.loadString(submissionXml.mkString)) //trim only behaves correctly with xml.Elem
     val validatedResponse      = xmlValidationService.validate(xml = sanitisedXml, filePath = appConfig.submissionXSDFilePath)
 
