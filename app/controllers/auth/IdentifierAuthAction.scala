@@ -40,15 +40,18 @@ class IdentifierAuthActionImpl @Inject() (
     with AuthorisedFunctions {
 
   val enrolmentKey: String        = config.enrolmentKey("cbc")
+  val nonUkEnrolmentKey: String   = config.enrolmentKey("cbcNonUK")
   val agentEnrolmentKey: String   = config.enrolmentKey("agent")
 
   override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
-    authorised(Enrolment(enrolmentKey) or Enrolment(agentEnrolmentKey)).retrieve(Retrievals.authorisedEnrolments and Retrievals.affinityGroup) {
+    authorised(Enrolment(enrolmentKey) or Enrolment(nonUkEnrolmentKey) or Enrolment(agentEnrolmentKey)).retrieve(Retrievals.authorisedEnrolments and Retrievals.affinityGroup) {
       case Enrolments(enrolments) ~ Some(Agent) if enrolments.exists(_.key.equals(agentEnrolmentKey)) =>
         block(IdentifierRequest(request, Agent))
       case Enrolments(enrolments) ~ Some(Organisation) if enrolments.exists(_.key.equals(enrolmentKey)) =>
+        block(IdentifierRequest(request, Organisation))
+      case Enrolments(enrolments) ~ Some(Organisation) if enrolments.exists(_.key.equals(nonUkEnrolmentKey)) =>
         block(IdentifierRequest(request, Organisation))
       case _ ~ _ => Future.successful(Status(UNAUTHORIZED))
     } recover { case _: NoActiveSession =>

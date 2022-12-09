@@ -97,6 +97,18 @@ class IdentifierAuthActionSpec extends PlaySpec with GuiceOneAppPerSuite with Mo
         status(result) mustBe OK
       }
 
+      "for a Non UK Organisation must return the request" in {
+        val retrieval: RetrievalType = new ~(Enrolments(Set(Enrolment("HMRC-CBC-NONUK-ORG", Seq(EnrolmentIdentifier("cbcId", "subscriptionID")), "ACTIVE"))), Some(Organisation))
+        when(mockAuthConnector.authorise(any[Predicate](), any[Retrieval[RetrievalType]]())(any[HeaderCarrier](), any[ExecutionContext]()))
+          .thenReturn(Future.successful(retrieval))
+
+        val authAction = application.injector.instanceOf[IdentifierAuthAction]
+        val controller = new Harness(authAction)
+
+        val result = controller.onPageLoad()(FakeRequest("", ""))
+        status(result) mustBe OK
+      }
+
       "for an Agent must return the request" in {
         val retrieval: RetrievalType = new ~(Enrolments(Set(Enrolment("HMRC-AS-AGENT", Seq(EnrolmentIdentifier("AgentReferenceNumber", "arn")), "ACTIVE"))), Some(Agent))
         when(mockAuthConnector.authorise(any[Predicate](), any[Retrieval[RetrievalType]]())(any[HeaderCarrier](), any[ExecutionContext]()))
