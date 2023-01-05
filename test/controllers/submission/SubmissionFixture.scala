@@ -16,6 +16,7 @@
 
 package controllers.submission
 
+import models.agentSubscription.AgentResponseDetail
 import models.subscription.{ContactInformation, OrganisationDetails, ResponseDetail}
 
 object SubmissionFixture {
@@ -165,4 +166,28 @@ object SubmissionFixture {
       )
     )
 
+  val agentResponseDetail =
+    AgentResponseDetail(
+      subscriptionID = "subscriptionID",
+      tradingName = Some("tradingName"),
+      isGBUser = true,
+      primaryContact = ContactInformation(
+        email = "agent@test.com",
+        phone = Some("1234567"),
+        mobile = None,
+        organisationDetails = OrganisationDetails(
+          organisationName = "Example"
+        )
+      ),
+      secondaryContact = Some(
+        ContactInformation(
+          email = "agent2@tes.com",
+          phone = Some("12345678"),
+          mobile = Some("1222222"),
+          organisationDetails = OrganisationDetails(
+            organisationName = "AnotherExample"
+          )
+        )
+      )
+    )
 }

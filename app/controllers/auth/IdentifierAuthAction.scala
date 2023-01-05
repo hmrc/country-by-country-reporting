@@ -32,11 +32,11 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class IdentifierAuthActionImpl @Inject() (
-                                           override val authConnector: AuthConnector,
-                                           val parser: BodyParsers.Default,
-                                           config: AppConfig
-                                         )(implicit val executionContext: ExecutionContext)
-  extends IdentifierAuthAction
+  override val authConnector: AuthConnector,
+  val parser: BodyParsers.Default,
+  config: AppConfig
+)(implicit val executionContext: ExecutionContext)
+    extends IdentifierAuthAction
     with AuthorisedFunctions {
 
   val enrolmentKey: String        = config.enrolmentKey("cbc")
@@ -48,7 +48,12 @@ class IdentifierAuthActionImpl @Inject() (
 
     authorised(Enrolment(enrolmentKey) or Enrolment(nonUkEnrolmentKey) or Enrolment(agentEnrolmentKey)).retrieve(Retrievals.authorisedEnrolments and Retrievals.affinityGroup) {
       case Enrolments(enrolments) ~ Some(Agent) if enrolments.exists(_.key.equals(agentEnrolmentKey)) =>
-        block(IdentifierRequest(request, Agent))
+        val arn =
+          for {
+            enrolment <- enrolments.find(_.key.equals("HMRC-AS-AGENT"))
+            arn       <- enrolment.getIdentifier("AgentReferenceNumber")
+          } yield arn.value
+        block(IdentifierRequest(request, Agent, arn))
       case Enrolments(enrolments) ~ Some(Organisation) if enrolments.exists(_.key.equals(enrolmentKey)) =>
         block(IdentifierRequest(request, Organisation))
       case Enrolments(enrolments) ~ Some(Organisation) if enrolments.exists(_.key.equals(nonUkEnrolmentKey)) =>
