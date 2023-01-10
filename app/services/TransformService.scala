@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,16 @@ package services
 import models.agentSubscription.AgentResponseDetail
 import models.submission.{NamespaceForNode, SubmissionMetaData}
 import models.subscription._
+import play.api.libs.json.{Json, OFormat}
 
 import javax.inject.Inject
 import scala.xml._
 
 case class AgentDetails(agentReferenceNumber: String, subscriptionDetails: AgentResponseDetail)
+
+object AgentDetails {
+  implicit val format: OFormat[AgentDetails] = Json.format[AgentDetails]
+}
 class TransformService @Inject() () {
 
   //TODO update cadx  schemaLocation when recievd the spec DCT72a_CBCSubmissionRequest_v0.1.xsd

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,10 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
                                                                                                                                      executionContext: ExecutionContext
 ) extends Logging {
 
-  def sendAndLogEmail(subscriptionId: String, submissionTime: String, messageRefId: String, isUploadSuccessful: Boolean)(implicit
+  def sendAndLogEmail(subscriptionId: String, submissionTime: String, messageRefId: String, agentDetails: Option[AgentDetails], isUploadSuccessful: Boolean)(implicit
     hc: HeaderCarrier
   ): Future[Int] =
-    sendEmail(subscriptionId, submissionTime, messageRefId, isUploadSuccessful) map {
+    sendEmail(subscriptionId, submissionTime, messageRefId, agentDetails, isUploadSuccessful) map {
       case Some(resp) =>
         resp.status match {
           case NOT_FOUND   => logger.warn("The template cannot be found within the email service")
@@ -48,40 +48,59 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
         INTERNAL_SERVER_ERROR
     }
 
-  def sendEmail(subscriptionId: String, submissionTime: String, messageRefId: String, isUploadSuccessful: Boolean)(implicit
+  def sendEmail(subscriptionId: String, submissionTime: String, messageRefId: String, agentDetails: Option[AgentDetails], isUploadSuccessful: Boolean)(implicit
     hc: HeaderCarrier
   ): Future[Option[HttpResponse]] =
-    subscriptionService.getContactInformation(subscriptionId).flatMap { //ToDo Currently organisation only
+    subscriptionService.getContactInformation(subscriptionId).flatMap {
       case Right(responseDetail) =>
         val emailAddress          = Some(responseDetail.primaryContact.email)
         val contactName           = Some(responseDetail.primaryContact.organisationDetails.organisationName)
         val secondaryEmailAddress = responseDetail.secondaryContact.map(_.email)
         val secondaryName         = responseDetail.secondaryContact.map(contactInfo => contactInfo.organisationDetails.organisationName)
+        val agentPrimaryEmail     = agentDetails.map(_.subscriptionDetails.primaryContact.email)
+        val agentPrimaryName      = agentDetails.map(_.subscriptionDetails.primaryContact.organisationDetails.organisationName)
+        val agentSecondaryEmail   = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.email))
+        val agentSecondaryName    = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.organisationDetails.organisationName))
 
-        for {
-          primaryResponse <- emailAddress
-            .filter(EmailAddress.isValid)
-            .fold(Future.successful(Option.empty[HttpResponse])) { email =>
-              emailConnector
-                .sendEmail(
-                  EmailRequest.fileUploadSubmission(email, contactName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId)
-                )
-                .map(Some.apply)
-            }
+        (agentDetails.isDefined, isUploadSuccessful) match {
+          case (false, _) =>
+            logger.info("Organisation User: Org emails sent to email service")
+            for {
+              primaryResponse <- send(emailAddress, contactName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId)
+              _ <- send(secondaryEmailAddress, secondaryName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId)
+            } yield primaryResponse
 
-          _ <- secondaryEmailAddress
-            .filter(EmailAddress.isValid)
-            .fold(Future.successful(Option.empty[HttpResponse])) { secondaryEmailAddress =>
-              emailConnector
-                .sendEmail(
-                  EmailRequest
-                    .fileUploadSubmission(secondaryEmailAddress, secondaryName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId)
-                )
-                .map(Some.apply)
-            }
-        } yield primaryResponse
+          case (true, true) =>
+            logger.info("Agent User with successful file upload: Agent and Org emails sent to email service")
+            for {
+              agentPrimaryResponse <- send(agentPrimaryEmail, agentPrimaryName, emailTemplate.getAgentTemplate(isUploadSuccessful), submissionTime, messageRefId)
+              _ <- send(agentSecondaryEmail, agentSecondaryName, emailTemplate.getAgentTemplate(isUploadSuccessful), submissionTime, messageRefId)
+              _ <- send(emailAddress, contactName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId)
+              _ <- send(secondaryEmailAddress, secondaryName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId)
+            } yield agentPrimaryResponse
+
+          case (true, false) =>
+            logger.info("Agent User with rejected file: Agent emails sent to email service")
+            for {
+              agentPrimaryResponse <- send(agentPrimaryEmail, agentPrimaryName, emailTemplate.getAgentTemplate(isUploadSuccessful), submissionTime, messageRefId)
+              _ <- send(agentSecondaryEmail, agentSecondaryName, emailTemplate.getAgentTemplate(isUploadSuccessful), submissionTime, messageRefId)
+            } yield agentPrimaryResponse
+        }
       case Left(ReadSubscriptionError(value)) =>
         logger.warn(s"Failed to get contact information, received ReadSubscriptionError: $value")
         Future.successful(None)
     }
+
+  private def send(emailAddress: Option[String], contactName: Option[String], template: String, submissionTime: String, messageRefId: String)
+  (implicit hc: HeaderCarrier): Future[Option[HttpResponse]] = {
+    emailAddress
+      .filter(EmailAddress.isValid)
+      .fold(Future.successful(Option.empty[HttpResponse])) { email =>
+        emailConnector
+          .sendEmail(
+            EmailRequest.fileUploadSubmission(email, contactName, template, submissionTime, messageRefId)
+          )
+          .map(Some.apply)
+      }
+  }
 }

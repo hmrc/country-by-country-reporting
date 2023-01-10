@@ -19,9 +19,46 @@ lazy val microservice = Project(appName, file("."))
       "-Wconf:cat=unused&src=.*Routes\\.scala:s"
     )
   )
+  .settings(scoverageSettings)
   .settings(publishingSettings: _*)
   .configs(IntegrationTest)
   .settings(integrationTestSettings(): _*)
   .settings(resolvers += Resolver.jcenterRepo)
   .settings(CodeCoverageSettings.settings: _*)
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
+
+lazy val scoverageSettings = {
+  import scoverage.ScoverageKeys
+
+  val excludedPackages = Seq(
+    "<empty>",
+    ".*Reverse.*",
+    ".*Routes.*",
+    ".*standardError*.*",
+    ".*main_template*.*",
+    "uk.gov.hmrc.BuildInfo",
+    "app.*",
+    "prod.*",
+    "config.*",
+    "testOnlyDoNotUseInAppConf.*",
+    "views.html.*",
+    "testOnly.*",
+    ".*.metrics.*",
+    ".*.audit.*",
+    ".*javascript.*",
+    ".*GuiceInjector;",
+    ".*ControllerConfiguration",
+    ".*LanguageSwitchController",
+    ".*handlers.*",
+    ".*utils.*",
+    ".*Repository.*"
+  )
+
+  Seq(
+    ScoverageKeys.coverageExcludedFiles := excludedPackages.mkString(";"),
+    ScoverageKeys.coverageMinimum := 80,
+    ScoverageKeys.coverageFailOnMinimum := true,
+    ScoverageKeys.coverageHighlighting := true
+  )
+}
+

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package services
 import base.SpecBase
 import connectors.EmailConnector
 import generators.Generators
+import models.agentSubscription.AgentResponseDetail
 import models.email.EmailRequest
 import models.error.ReadSubscriptionError
 import models.subscription.{ContactInformation, OrganisationDetails, ResponseDetail}
@@ -70,9 +71,26 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
     None
   )
 
+  val agentPrimaryContact = ContactInformation(
+    OrganisationDetails("agentName"),
+    "agent@email.com",
+    None,
+    None
+  )
+
+  val agentSecondaryContact = ContactInformation(
+    OrganisationDetails("agentOtherName"),
+    "agentSecond@email.com",
+    None,
+    None
+  )
+
   val submissionTime = DateTimeFormatUtil.displayFormattedDate(LocalDateTime.now)
   val messageRefId   = "messageRefId"
   val subscriptionId = "subscriptionId"
+
+  val agentDetails = AgentDetails("ARN", AgentResponseDetail(subscriptionId, None, isGBUser = true, agentPrimaryContact, Some(agentSecondaryContact)))
+  val agentSingleContactDetails = AgentDetails("ARN", AgentResponseDetail(subscriptionId, None, isGBUser = true, agentPrimaryContact, None))
 
   "Email Service" - {
     "sendAndLogEmail" - {
@@ -88,7 +106,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
             Future.successful(Right(ResponseDetail(subscriptionId, None, isGBUser = true, primaryContact, None)))
           )
 
-        val result = emailService.sendAndLogEmail(subscriptionId, submissionTime, messageRefId, isUploadSuccessful = true)
+        val result = emailService.sendAndLogEmail(subscriptionId, submissionTime, messageRefId, None, isUploadSuccessful = true)
 
         whenReady(result) { result =>
           result mustBe ACCEPTED
@@ -108,7 +126,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
             Future.successful(Right(ResponseDetail(subscriptionId, None, isGBUser = true, primaryContact, None)))
           )
 
-        val result = emailService.sendAndLogEmail(subscriptionId, submissionTime, messageRefId, isUploadSuccessful = true)
+        val result = emailService.sendAndLogEmail(subscriptionId, submissionTime, messageRefId, None, isUploadSuccessful = true)
 
         whenReady(result) { result =>
           result mustBe NOT_FOUND
@@ -128,7 +146,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
             Future.successful(Right(ResponseDetail(subscriptionId, None, isGBUser = true, primaryContact, None)))
           )
 
-        val result = emailService.sendAndLogEmail(subscriptionId, submissionTime, messageRefId, isUploadSuccessful = true)
+        val result = emailService.sendAndLogEmail(subscriptionId, submissionTime, messageRefId, None, isUploadSuccessful = true)
 
         whenReady(result) { result =>
           result mustBe BAD_REQUEST
@@ -151,7 +169,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
             Future.successful(Right(ResponseDetail(subscriptionId, None, isGBUser = true, primaryContact, None)))
           )
 
-        val result = emailService.sendEmail(subscriptionId, submissionTime, messageRefId, isUploadSuccessful = true)
+        val result = emailService.sendEmail(subscriptionId, submissionTime, messageRefId, None, isUploadSuccessful = true)
 
         whenReady(result) { result =>
           result.map(_.status) mustBe Some(OK)
@@ -172,12 +190,96 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
             Future.successful(Right(ResponseDetail(subscriptionId, None, isGBUser = true, primaryContact, Some(secondaryContact))))
           )
 
-        val result = emailService.sendEmail(subscriptionId, submissionTime, messageRefId, isUploadSuccessful = true)
+        val result = emailService.sendEmail(subscriptionId, submissionTime, messageRefId, None, isUploadSuccessful = true)
 
         whenReady(result) { result =>
           result.map(_.status) mustBe Some(OK)
 
           verify(mockEmailConnector, times(2)).sendEmail(any[EmailRequest])(any[HeaderCarrier])
+        }
+      }
+
+      "must submit to the email connector four times when Agent and client both have 2 sets of valid details provided for successful file upload" in {
+
+        when(mockEmailConnector.sendEmail(any[EmailRequest])(any[HeaderCarrier]))
+          .thenReturn(
+            Future.successful(HttpResponse(OK, ""))
+          )
+
+        when(mockSubscriptionService.getContactInformation(any[String])(any[HeaderCarrier], any[ExecutionContext]))
+          .thenReturn(
+            Future.successful(Right(ResponseDetail(subscriptionId, None, isGBUser = true, primaryContact, Some(secondaryContact))))
+          )
+
+        val result = emailService.sendEmail(subscriptionId, submissionTime, messageRefId, Some(agentDetails), isUploadSuccessful = true)
+
+        whenReady(result) { result =>
+          result.map(_.status) mustBe Some(OK)
+
+          verify(mockEmailConnector, times(4)).sendEmail(any[EmailRequest])(any[HeaderCarrier])
+        }
+      }
+
+      "must submit to the email connector 2 times when Agent and client both have 2 sets of valid details provided for failed file upload" in {
+
+        when(mockEmailConnector.sendEmail(any[EmailRequest])(any[HeaderCarrier]))
+          .thenReturn(
+            Future.successful(HttpResponse(OK, ""))
+          )
+
+        when(mockSubscriptionService.getContactInformation(any[String])(any[HeaderCarrier], any[ExecutionContext]))
+          .thenReturn(
+            Future.successful(Right(ResponseDetail(subscriptionId, None, isGBUser = true, primaryContact, Some(secondaryContact))))
+          )
+
+        val result = emailService.sendEmail(subscriptionId, submissionTime, messageRefId, Some(agentDetails), isUploadSuccessful = false)
+
+        whenReady(result) { result =>
+          result.map(_.status) mustBe Some(OK)
+
+          verify(mockEmailConnector, times(2)).sendEmail(any[EmailRequest])(any[HeaderCarrier])
+        }
+      }
+
+      "must submit to the email connector 3 times when Agent has 2 sets and client has 1 set of valid details provided for successful file upload" in {
+
+        when(mockEmailConnector.sendEmail(any[EmailRequest])(any[HeaderCarrier]))
+          .thenReturn(
+            Future.successful(HttpResponse(OK, ""))
+          )
+
+        when(mockSubscriptionService.getContactInformation(any[String])(any[HeaderCarrier], any[ExecutionContext]))
+          .thenReturn(
+            Future.successful(Right(ResponseDetail(subscriptionId, None, isGBUser = true, primaryContact, None)))
+          )
+
+        val result = emailService.sendEmail(subscriptionId, submissionTime, messageRefId, Some(agentDetails), isUploadSuccessful = true)
+
+        whenReady(result) { result =>
+          result.map(_.status) mustBe Some(OK)
+
+          verify(mockEmailConnector, times(3)).sendEmail(any[EmailRequest])(any[HeaderCarrier])
+        }
+      }
+
+      "must submit to the email connector 3 times when Agent has 1 set and client has 2 sets of valid details provided for successful file upload" in {
+
+        when(mockEmailConnector.sendEmail(any[EmailRequest])(any[HeaderCarrier]))
+          .thenReturn(
+            Future.successful(HttpResponse(OK, ""))
+          )
+
+        when(mockSubscriptionService.getContactInformation(any[String])(any[HeaderCarrier], any[ExecutionContext]))
+          .thenReturn(
+            Future.successful(Right(ResponseDetail(subscriptionId, None, isGBUser = true, primaryContact, Some(secondaryContact))))
+          )
+
+        val result = emailService.sendEmail(subscriptionId, submissionTime, messageRefId, Some(agentSingleContactDetails), isUploadSuccessful = true)
+
+        whenReady(result) { result =>
+          result.map(_.status) mustBe Some(OK)
+
+          verify(mockEmailConnector, times(3)).sendEmail(any[EmailRequest])(any[HeaderCarrier])
         }
       }
 
@@ -194,7 +296,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
           )
 
         val result =
-          emailService.sendEmail(subscriptionId, submissionTime, messageRefId, isUploadSuccessful = true)
+          emailService.sendEmail(subscriptionId, submissionTime, messageRefId, None, isUploadSuccessful = true)
 
         whenReady(result) { result =>
           result.map(_.status) mustBe None
@@ -214,7 +316,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
           )
 
         val result =
-          emailService.sendEmail(subscriptionId, submissionTime, messageRefId, isUploadSuccessful = true)
+          emailService.sendEmail(subscriptionId, submissionTime, messageRefId, None, isUploadSuccessful = true)
 
         whenReady(result) { result =>
           result.map(_.status) mustBe None

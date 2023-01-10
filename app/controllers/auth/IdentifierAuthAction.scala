@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import config.AppConfig
 import play.api.http.Status.UNAUTHORIZED
 import play.api.mvc.Results.Status
 import play.api.mvc._
-import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Individual, Organisation}
+import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.~
@@ -52,7 +52,10 @@ class IdentifierAuthActionImpl @Inject() (
           for {
             enrolment <- enrolments.find(_.key.equals("HMRC-AS-AGENT"))
             arn       <- enrolment.getIdentifier("AgentReferenceNumber")
-          } yield arn.value
+          } yield {
+            arn.value
+          }
+
         block(IdentifierRequest(request, Agent, arn))
       case Enrolments(enrolments) ~ Some(Organisation) if enrolments.exists(_.key.equals(enrolmentKey)) =>
         block(IdentifierRequest(request, Organisation))

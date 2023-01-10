@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,18 @@ object AgentResponseDetail {
     }
   }
 
-  implicit val writes: OWrites[AgentResponseDetail] = Json.writes[AgentResponseDetail]
+  implicit lazy val writes: Writes[AgentResponseDetail] = {
+    import play.api.libs.functional.syntax._
+
+    (
+      (__ \ "subscriptionID").write[String] and
+        (__ \ "tradingName").writeNullable[String] and
+        (__ \ "isGBUser").write[Boolean] and
+        (__ \ "primaryContact").write[Seq[ContactInformation]] and
+        (__ \ "secondaryContact").writeNullable[Seq[ContactInformation]]
+      )(r => (r.subscriptionID, r.tradingName, r.isGBUser, Seq(r.primaryContact), r.secondaryContact.map(Seq(_))))
+
+  }
 }
 
 case class AgentReturnParameters(paramName: String, paramValue: String)
