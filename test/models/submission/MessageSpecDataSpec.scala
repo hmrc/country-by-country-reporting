@@ -17,21 +17,37 @@
 package models.submission
 
 import base.SpecBase
-import play.api.libs.json.Json
+import play.api.libs.json.{JsResultException, Json}
 
 class MessageSpecDataSpec extends SpecBase {
 
   "MessageSpecDataSpec" - {
-    "must serialize MessageSpec" in {
+    "must serialize MessageSpec for MessageTypeIndic CBC401" in {
       val msd          = MessageSpecData("XDSG111111", CBC401, "Reporting Entity")
       val expectedJson = Json.parse("""{"messageRefId":"XDSG111111","messageTypeIndic":"CBC401","reportingEntityName":"Reporting Entity"}""")
       Json.toJson(msd) mustBe expectedJson
     }
-    "must deserialize MessageSpec" in {
-      val json     = Json.parse("""{"messageRefId":"XDSG333333","messageTypeIndic":"CBC402","reportingEntityName":"Reporting Entity"}""")
+    "must deserialize MessageSpec for MessageTypeIndic CBC401" in {
+      val json     = Json.parse("""{"messageRefId":"XDSG333333","messageTypeIndic":"CBC401","reportingEntityName":"Reporting Entity"}""")
+      val expected = MessageSpecData("XDSG333333", CBC401, "Reporting Entity")
+
+      json.as[MessageSpecData] mustEqual expected
+    }
+    "must serialize MessageSpec for MessageTypeIndic CBC402" in {
+      val msd = MessageSpecData("XDSG111111", CBC402, "Reporting Entity")
+      val expectedJson = Json.parse("""{"messageRefId":"XDSG111111","messageTypeIndic":"CBC402","reportingEntityName":"Reporting Entity"}""")
+      Json.toJson(msd) mustBe expectedJson
+    }
+    "must deserialize MessageSpec for MessageTypeIndic CBC402" in {
+      val json = Json.parse("""{"messageRefId":"XDSG333333","messageTypeIndic":"CBC402","reportingEntityName":"Reporting Entity"}""")
       val expected = MessageSpecData("XDSG333333", CBC402, "Reporting Entity")
 
       json.as[MessageSpecData] mustEqual expected
+    }
+    "must fail to deserialize for any other MessageTypeIndic value" in {
+      val json = Json.parse("""{"messageRefId":"XDSG333333","messageTypeIndic":"CBC123","reportingEntityName":"Reporting Entity"}""")
+
+      a [JsResultException] must be thrownBy(json.as[MessageSpecData])
     }
   }
 }
