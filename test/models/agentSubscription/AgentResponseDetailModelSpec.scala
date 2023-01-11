@@ -50,9 +50,9 @@ class AgentResponseDetailModelSpec extends SpecBase {
           |}""".stripMargin
 
       val expectedJson =
-        """{"subscriptionID":"111111111","tradingName":"","isGBUser":true,"primaryContact":[{"organisation":
-          |{"organisationName":"orgName"},"email":"","phone":"","mobile":""}],"secondaryContact"
-          |:[{"organisation":{"organisationName":""},"email":""}]}""".stripMargin
+        """{"subscriptionID":"111111111","tradingName":"","isGBUser":true,"primaryContact":{"organisation":
+          |{"organisationName":"orgName"},"email":"","phone":"","mobile":""},"secondaryContact"
+          |:{"organisation":{"organisationName":""},"email":""}}""".stripMargin
       val json: JsValue =
         Json.parse(agentResponseDetailJson)
       val responseDetail = json.as[AgentResponseDetail]

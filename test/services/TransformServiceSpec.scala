@@ -17,7 +17,7 @@
 package services
 
 import base.SpecBase
-import models.agentSubscription.AgentResponseDetail
+import models.agentSubscription.{AgentContactDetails, AgentResponseDetail}
 import models.subscription.{ContactInformation, OrganisationDetails, ResponseDetail}
 import org.scalatest.StreamlinedXmlEquality._
 
@@ -164,7 +164,7 @@ class TransformServiceSpec extends SpecBase {
         )
       )
 
-    val agentDetails = AgentDetails("agent007", contactInformationForAgent)
+    val agentDetails = AgentContactDetails("agent007", contactInformationForAgent)
     val expected =
       <subscriptionDetails>
         <subscriptionID>subscriptionID</subscriptionID>

@@ -52,9 +52,7 @@ class IdentifierAuthActionImpl @Inject() (
           for {
             enrolment <- enrolments.find(_.key.equals("HMRC-AS-AGENT"))
             arn       <- enrolment.getIdentifier("AgentReferenceNumber")
-          } yield {
-            arn.value
-          }
+          } yield arn.value
 
         block(IdentifierRequest(request, Agent, arn))
       case Enrolments(enrolments) ~ Some(Organisation) if enrolments.exists(_.key.equals(enrolmentKey)) =>

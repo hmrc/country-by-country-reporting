@@ -16,19 +16,16 @@
 
 package services
 
-import models.agentSubscription.AgentResponseDetail
+import models.agentSubscription.{AgentContactDetails, AgentResponseDetail}
 import models.submission.{NamespaceForNode, SubmissionMetaData}
 import models.subscription._
-import play.api.libs.json.{Json, OFormat}
 
 import javax.inject.Inject
 import scala.xml._
 
-case class AgentDetails(agentReferenceNumber: String, subscriptionDetails: AgentResponseDetail)
 
-object AgentDetails {
-  implicit val format: OFormat[AgentDetails] = Json.format[AgentDetails]
-}
+
+
 class TransformService @Inject() () {
 
   //TODO update cadx  schemaLocation when recievd the spec DCT72a_CBCSubmissionRequest_v0.1.xsd
@@ -36,7 +33,7 @@ class TransformService @Inject() () {
     uploadedFile: NodeSeq,
     subscriptionDetails: ResponseDetail,
     metaData: SubmissionMetaData,
-    agentDetails: Option[AgentDetails] = None
+    agentDetails: Option[AgentContactDetails] = None
   ): NodeSeq =
     <cadx:CBCSubmissionRequest xmlns:cbc="urn:oecd:ties:cbc:v1"
                           xmlns:cadx="http://www.hmrc.gsi.gov.uk/cbc/cadx"
@@ -74,7 +71,7 @@ class TransformService @Inject() () {
   def transformSubscriptionDetails(
     subscriptionDetails: ResponseDetail,
     fileName: Option[String],
-    agentDetails: Option[AgentDetails] = None
+    agentDetails: Option[AgentContactDetails] = None
   ): NodeSeq =
     Seq(
       fileName.map(name => <fileName>

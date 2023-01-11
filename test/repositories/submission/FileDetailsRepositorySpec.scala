@@ -18,12 +18,11 @@ package repositories.submission
 
 import base.SpecBase
 import metrics.MetricsService
-import models.agentSubscription.AgentResponseDetail
+import models.agentSubscription.{AgentContactDetails, AgentResponseDetail}
 import models.submission._
 import models.subscription.{ContactInformation, OrganisationDetails}
 import models.xml.{FileErrorCode, FileErrors, ValidationErrors}
 import play.api.Configuration
-import services.AgentDetails
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import java.time.LocalDateTime
@@ -61,7 +60,7 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
     None,
     None
   )
-  val agentDetails: AgentDetails = AgentDetails("ARN", AgentResponseDetail("subscriptionId2", None, isGBUser = true, agentPrimaryContact, Some(agentSecondaryContact)))
+  val agentDetails: AgentContactDetails = AgentContactDetails("ARN", AgentResponseDetail("subscriptionId2", None, isGBUser = true, agentPrimaryContact, Some(agentSecondaryContact)))
 
   val agentFileDetails: FileDetails = FileDetails(
     ConversationId("conversationId1234567"),

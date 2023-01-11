@@ -19,7 +19,7 @@ package services
 import base.SpecBase
 import connectors.EmailConnector
 import generators.Generators
-import models.agentSubscription.AgentResponseDetail
+import models.agentSubscription.{AgentContactDetails, AgentResponseDetail}
 import models.email.EmailRequest
 import models.error.ReadSubscriptionError
 import models.subscription.{ContactInformation, OrganisationDetails, ResponseDetail}
@@ -89,8 +89,8 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
   val messageRefId   = "messageRefId"
   val subscriptionId = "subscriptionId"
 
-  val agentDetails = AgentDetails("ARN", AgentResponseDetail(subscriptionId, None, isGBUser = true, agentPrimaryContact, Some(agentSecondaryContact)))
-  val agentSingleContactDetails = AgentDetails("ARN", AgentResponseDetail(subscriptionId, None, isGBUser = true, agentPrimaryContact, None))
+  val agentDetails = AgentContactDetails("ARN", AgentResponseDetail(subscriptionId, None, isGBUser = true, agentPrimaryContact, Some(agentSecondaryContact)))
+  val agentSingleContactDetails = AgentContactDetails("ARN", AgentResponseDetail(subscriptionId, None, isGBUser = true, agentPrimaryContact, None))
 
   "Email Service" - {
     "sendAndLogEmail" - {

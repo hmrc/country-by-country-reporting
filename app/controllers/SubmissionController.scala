@@ -19,6 +19,7 @@ package controllers
 import config.AppConfig
 import connectors.SubmissionConnector
 import controllers.auth.{IdentifierAuthAction, IdentifierRequest}
+import models.agentSubscription.AgentContactDetails
 import models.error.ReadSubscriptionError
 import models.submission.{ConversationId, FileDetails, Pending, SubmissionMetaData}
 import models.subscription.ResponseDetail
@@ -27,7 +28,7 @@ import play.api.mvc.{Action, ControllerComponents, Request}
 import play.api.{Logger, Logging}
 import repositories.submission.FileDetailsRepository
 import services.validation.XMLValidationService
-import services.{AgentDetails, AgentSubscriptionService, SubscriptionService, TransformService}
+import services.{AgentSubscriptionService, SubscriptionService, TransformService}
 import uk.gov.hmrc.http.HttpReads.is2xx
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -82,7 +83,7 @@ class SubmissionController @Inject() (
                                      submissionMetaData: SubmissionMetaData,
                                      value: ResponseDetail,
                                      submissionDetails: FileDetails,
-                                     agentDetails: Option[AgentDetails]
+                                     agentDetails: Option[AgentContactDetails]
   )(implicit request: Request[NodeSeq]) = {
     val submissionXml: NodeSeq = transformService.addSubscriptionDetailsToSubmission(uploadedXmlNode, value, submissionMetaData, agentDetails)
     val sanitisedXml           = scala.xml.Utility.trim(scala.xml.XML.loadString(submissionXml.mkString)) //trim only behaves correctly with xml.Elem
@@ -102,11 +103,11 @@ class SubmissionController @Inject() (
     }
   }
 
-  private def getAgentDetails(implicit request: IdentifierRequest[NodeSeq]): Future[Either[ReadSubscriptionError, Option[AgentDetails]]] =
+  private def getAgentDetails(implicit request: IdentifierRequest[NodeSeq]): Future[Either[ReadSubscriptionError, Option[AgentContactDetails]]] =
     request.arn
       .map(agentRefNo =>
         agentReadSubscriptionService.getContactInformation(agentRefNo).map {
-          case Right(value) => Right(Some(AgentDetails(agentRefNo, value)))
+          case Right(value) => Right(Some(AgentContactDetails(agentRefNo, value)))
 
           case Left(ReadSubscriptionError(value)) =>
             logger.warn(s"ReadSubscriptionError $value")

@@ -44,18 +44,8 @@ object AgentResponseDetail {
     }
   }
 
-  implicit lazy val writes: Writes[AgentResponseDetail] = {
-    import play.api.libs.functional.syntax._
+  implicit val writes: OWrites[AgentResponseDetail] = Json.writes[AgentResponseDetail]
 
-    (
-      (__ \ "subscriptionID").write[String] and
-        (__ \ "tradingName").writeNullable[String] and
-        (__ \ "isGBUser").write[Boolean] and
-        (__ \ "primaryContact").write[Seq[ContactInformation]] and
-        (__ \ "secondaryContact").writeNullable[Seq[ContactInformation]]
-      )(r => (r.subscriptionID, r.tradingName, r.isGBUser, Seq(r.primaryContact), r.secondaryContact.map(Seq(_))))
-
-  }
 }
 
 case class AgentReturnParameters(paramName: String, paramValue: String)

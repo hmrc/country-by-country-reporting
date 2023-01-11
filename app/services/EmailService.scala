@@ -17,6 +17,7 @@
 package services
 
 import connectors.EmailConnector
+import models.agentSubscription.AgentContactDetails
 import models.email.{EmailAddress, EmailRequest, EmailTemplate}
 import models.error.ReadSubscriptionError
 import play.api.Logging
@@ -31,8 +32,8 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
                                                                                                                                      executionContext: ExecutionContext
 ) extends Logging {
 
-  def sendAndLogEmail(subscriptionId: String, submissionTime: String, messageRefId: String, agentDetails: Option[AgentDetails], isUploadSuccessful: Boolean)(implicit
-    hc: HeaderCarrier
+  def sendAndLogEmail(subscriptionId: String, submissionTime: String, messageRefId: String, agentDetails: Option[AgentContactDetails], isUploadSuccessful: Boolean)(implicit
+                                                                                                                                                                    hc: HeaderCarrier
   ): Future[Int] =
     sendEmail(subscriptionId, submissionTime, messageRefId, agentDetails, isUploadSuccessful) map {
       case Some(resp) =>
@@ -48,8 +49,8 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
         INTERNAL_SERVER_ERROR
     }
 
-  def sendEmail(subscriptionId: String, submissionTime: String, messageRefId: String, agentDetails: Option[AgentDetails], isUploadSuccessful: Boolean)(implicit
-    hc: HeaderCarrier
+  def sendEmail(subscriptionId: String, submissionTime: String, messageRefId: String, agentDetails: Option[AgentContactDetails], isUploadSuccessful: Boolean)(implicit
+                                                                                                                                                              hc: HeaderCarrier
   ): Future[Option[HttpResponse]] =
     subscriptionService.getContactInformation(subscriptionId).flatMap {
       case Right(responseDetail) =>
