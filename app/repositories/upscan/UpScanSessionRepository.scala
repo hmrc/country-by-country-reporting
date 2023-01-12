@@ -27,7 +27,7 @@ import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
+import javax.inject.{Singleton, Inject}
 import scala.concurrent.{ExecutionContext, Future}
 
 object UpScanSessionRepository {
@@ -45,6 +45,7 @@ object UpScanSessionRepository {
   )
 }
 
+@Singleton
 class UpScanSessionRepository @Inject() (
                                           val mongo: MongoComponent,
                                           config: Configuration

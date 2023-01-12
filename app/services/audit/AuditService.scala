@@ -26,8 +26,7 @@ import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class AuditService @Inject()(
   appConfig: AppConfig,
@@ -38,7 +37,8 @@ class AuditService @Inject()(
     eventName: String,
     detail: JsValue
   )(implicit
-    hc: HeaderCarrier
+    hc: HeaderCarrier,
+    ex: ExecutionContext
   ): Future[AuditResult] =
     auditConnector.sendExtendedEvent(
       ExtendedDataEvent(
