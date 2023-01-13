@@ -15,6 +15,8 @@
  */
 
 package models.submission
+
+import models.agentSubscription.AgentContactDetails
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
@@ -27,7 +29,8 @@ case class FileDetails(_id: ConversationId,
                        status: FileStatus,
                        name: String,
                        submitted: LocalDateTime,
-                       lastUpdated: LocalDateTime
+                       lastUpdated: LocalDateTime,
+                       agentDetails: Option[AgentContactDetails] = None
                       )
 object FileDetails {
   implicit val mongoDateTime: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat

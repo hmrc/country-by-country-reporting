@@ -70,6 +70,7 @@ class EISResponseController @Inject() (cc: ControllerComponents,
               updatedFileDetails.subscriptionId,
               DateTimeFormatUtil.displayFormattedDate(updatedFileDetails.submitted),
               updatedFileDetails.messageRefId,
+              updatedFileDetails.agentDetails,
               updatedFileDetails.status == FileStatusAccepted
             )
           case _ =>

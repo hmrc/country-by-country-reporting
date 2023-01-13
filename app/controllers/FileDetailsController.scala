@@ -45,7 +45,7 @@ class FileDetailsController @Inject() (
     }
   }
 
-  def getAllFileDetails(subscriptionId: String): Action[AnyContent] = authenticate.async { implicit request =>
+  def getAllFileDetails(subscriptionId: String): Action[AnyContent] = authenticate.async { _ =>
     fileDetailsRepository.findBySubscriptionId(subscriptionId).map {
       case Nil =>
         logger.warn(s"No matching records for subscription id")

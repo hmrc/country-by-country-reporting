@@ -29,10 +29,11 @@ import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
 import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
+import javax.inject.{Singleton, Inject}
 import scala.concurrent.duration.Duration
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class FileDetailsRepository @Inject() (
   val mongo: MongoComponent,
   config: Configuration,

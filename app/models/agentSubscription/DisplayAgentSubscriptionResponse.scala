@@ -45,6 +45,7 @@ object AgentResponseDetail {
   }
 
   implicit val writes: OWrites[AgentResponseDetail] = Json.writes[AgentResponseDetail]
+
 }
 
 case class AgentReturnParameters(paramName: String, paramValue: String)
