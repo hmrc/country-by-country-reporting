@@ -6,10 +6,10 @@ import sbt._
 object AppDependencies {
 
   val compile = Seq(
-    "uk.gov.hmrc"             %% "bootstrap-backend-play-28"  % "7.12.0",
-    "org.julienrf"            %% "play-json-derived-codecs"   % "7.0.0",
-    "com.lucidchart"          %% "xtract"                     % "2.3.0-alpha3",
-    "uk.gov.hmrc.mongo"       %% "hmrc-mongo-play-28"         % "0.74.0"
+    "uk.gov.hmrc"            %% "bootstrap-backend-play-28" % "7.12.0",
+    "org.julienrf"           %% "play-json-derived-codecs"  % "10.1.0",
+    "com.lucidchart"         %% "xtract"                    % "2.3.0-alpha3",
+    "uk.gov.hmrc.mongo"      %% "hmrc-mongo-play-28"        % "0.74.0"
   )
 
   val test = Seq(
