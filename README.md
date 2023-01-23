@@ -11,9 +11,11 @@ The frontend to this service can be found [here]("https://github.com/hmrc/countr
 
 ### Running the service
 
-Service manager: CBCR_NEW_ALL
-Individually via service manager: COUNTRY_BY_COUNTRY_REPORTING
-Port: 10024
+**Service manager:** CBCR_NEW_ALL
+
+**Individually via service manager:** COUNTRY_BY_COUNTRY_REPORTING
+
+**Port:** 10024
 
 ---
 
