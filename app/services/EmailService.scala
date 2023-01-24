@@ -39,7 +39,7 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
       case Some(resp) =>
         resp.status match {
           case NOT_FOUND   => logger.warn("The template cannot be found within the email service")
-          case BAD_REQUEST => logger.warn("Missing email or name parameter")
+          case BAD_REQUEST => logger.warn(s"Missing parameters from email template: ${resp.body}")
           case ACCEPTED    => logger.info("Email queued")
           case _           => logger.warn(s"Unhandled status received from email service ${resp.status}")
         }
@@ -57,34 +57,35 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
         val emailAddress          = Some(responseDetail.primaryContact.email)
         val contactName           = Some(responseDetail.primaryContact.organisationDetails.organisationName)
         val secondaryEmailAddress = responseDetail.secondaryContact.map(_.email)
-        val secondaryName         = responseDetail.secondaryContact.map(contactInfo => contactInfo.organisationDetails.organisationName)
+        val secondaryName         = responseDetail.secondaryContact.map(_.organisationDetails.organisationName)
         val agentPrimaryEmail     = agentDetails.map(_.subscriptionDetails.primaryContact.email)
         val agentPrimaryName      = agentDetails.map(_.subscriptionDetails.primaryContact.organisationDetails.organisationName)
         val agentSecondaryEmail   = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.email))
         val agentSecondaryName    = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.organisationDetails.organisationName))
+        val cbcId                 = responseDetail.subscriptionID
 
         (agentDetails.isDefined, isUploadSuccessful) match {
           case (false, _) =>
             logger.info("Organisation User: Org emails sent to email service")
             for {
-              primaryResponse <- send(emailAddress, contactName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId)
-              _ <- send(secondaryEmailAddress, secondaryName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId)
+              primaryResponse <- send(emailAddress, contactName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId, None)
+              _ <- send(secondaryEmailAddress, secondaryName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId, None)
             } yield primaryResponse
 
           case (true, true) =>
             logger.info("Agent User with successful file upload: Agent and Org emails sent to email service")
             for {
-              agentPrimaryResponse <- send(agentPrimaryEmail, agentPrimaryName, emailTemplate.getAgentTemplate(isUploadSuccessful), submissionTime, messageRefId)
-              _ <- send(agentSecondaryEmail, agentSecondaryName, emailTemplate.getAgentTemplate(isUploadSuccessful), submissionTime, messageRefId)
-              _ <- send(emailAddress, contactName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId)
-              _ <- send(secondaryEmailAddress, secondaryName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId)
+              agentPrimaryResponse <- send(agentPrimaryEmail, agentPrimaryName, emailTemplate.getAgentTemplate(isUploadSuccessful), submissionTime, messageRefId, Some(cbcId))
+              _ <- send(agentSecondaryEmail, agentSecondaryName, emailTemplate.getAgentTemplate(isUploadSuccessful), submissionTime, messageRefId, Some(cbcId))
+              _ <- send(emailAddress, contactName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId, None)
+              _ <- send(secondaryEmailAddress, secondaryName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId, None)
             } yield agentPrimaryResponse
 
           case (true, false) =>
             logger.info("Agent User with rejected file: Agent emails sent to email service")
             for {
-              agentPrimaryResponse <- send(agentPrimaryEmail, agentPrimaryName, emailTemplate.getAgentTemplate(isUploadSuccessful), submissionTime, messageRefId)
-              _ <- send(agentSecondaryEmail, agentSecondaryName, emailTemplate.getAgentTemplate(isUploadSuccessful), submissionTime, messageRefId)
+              agentPrimaryResponse <- send(agentPrimaryEmail, agentPrimaryName, emailTemplate.getAgentTemplate(isUploadSuccessful), submissionTime, messageRefId, Some(cbcId))
+              _ <- send(agentSecondaryEmail, agentSecondaryName, emailTemplate.getAgentTemplate(isUploadSuccessful), submissionTime, messageRefId, Some(cbcId))
             } yield agentPrimaryResponse
         }
       case Left(ReadSubscriptionError(value)) =>
@@ -92,14 +93,14 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
         Future.successful(None)
     }
 
-  private def send(emailAddress: Option[String], contactName: Option[String], template: String, submissionTime: String, messageRefId: String)
+  private def send(emailAddress: Option[String], contactName: Option[String], template: String, submissionTime: String, messageRefId: String, cbcId: Option[String])
   (implicit hc: HeaderCarrier): Future[Option[HttpResponse]] = {
     emailAddress
       .filter(EmailAddress.isValid)
       .fold(Future.successful(Option.empty[HttpResponse])) { email =>
         emailConnector
           .sendEmail(
-            EmailRequest.fileUploadSubmission(email, contactName, template, submissionTime, messageRefId)
+            EmailRequest.fileUploadSubmission(email, contactName, template, submissionTime, messageRefId, cbcId)
           )
           .map(Some.apply)
       }
