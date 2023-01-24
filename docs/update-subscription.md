@@ -52,3 +52,13 @@ Update subscription
 * **Success Response:**
 
     * **Code:** 200 <br />
+
+* **Example Success Response**
+
+```json
+
+{ "updateSubscriptionForCbCResponse": { "responseCommon": { "status":
+"OK", "processingDate": "2020-09-09T11:23:12Z" }, "responseDetail": {
+"subscriptionID": "YUDD7483202" } } }
+```
+
