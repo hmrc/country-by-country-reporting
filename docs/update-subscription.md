@@ -4,6 +4,10 @@ Update subscription
 
   `/subscription/update-subscription`
 
+* **Method**
+
+  `POST`
+
 * **Example Payload**
 
 ```json
