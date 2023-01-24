@@ -1,5 +1,8 @@
 Update subscription
 -------------------
+* **URL**
+
+  `/subscription/update-subscription`
 
 * **Example Payload**
 
