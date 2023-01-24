@@ -48,3 +48,7 @@ Update subscription
   }
 }
 ```
+
+* **Success Response:**
+
+    * **Code:** 200 <br />
