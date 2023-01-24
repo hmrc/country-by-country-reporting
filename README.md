@@ -5,7 +5,7 @@ Backend service to support file uploads from registered users (agent, client or 
 
 This service integrates with HOD, i.e. DES/ETMP.
 
-The frontend to this service can be found [here]("https://github.com/hmrc/country-by-country-reporting-frontend/")
+The frontend to this service can be found [here](https://github.com/hmrc/country-by-country-reporting-frontend/)
 
 ---
 
