@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ class SubscriptionConnectorSpec extends SpecBase with WireMockServerHandler with
     "read subscription" - {
       "must return status as OK for read Subscription" in {
         stubResponse(
-          "/cbc/dct70d/v1",
+          "/dac6/dct50d/v1",
           OK
         )
 
@@ -65,7 +65,7 @@ class SubscriptionConnectorSpec extends SpecBase with WireMockServerHandler with
 
         forAll(arbitrary[DisplaySubscriptionForCBCRequest], errorCodes) { (sub, errorCode) =>
           stubResponse(
-            "/cbc/dct70d/v1",
+            "/dac6/dct50d/v1",
             errorCode
           )
 
@@ -78,7 +78,7 @@ class SubscriptionConnectorSpec extends SpecBase with WireMockServerHandler with
     "update subscription" - {
       "must return status as OK for update Subscription" in {
         stubResponse(
-          "/cbc/dct05/v1",
+          "/dac6/dct50e/v1",
           OK
         )
 
@@ -92,7 +92,7 @@ class SubscriptionConnectorSpec extends SpecBase with WireMockServerHandler with
 
         forAll(arbitrary[UpdateSubscriptionForCBCRequest], errorCodes) { (sub, errorCode) =>
           stubResponse(
-            "/cbc/dct05/v1",
+            "/dac6/dct50e/v1",
             errorCode
           )
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,6 +123,8 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
         formattedError(errorMessage2) match {
           case missingOrInvalidErrorFormat("", element) =>
             Some(missingInfoMessage(element))
+          case invalidTypeErrorFormat(_, _, element, _) =>
+            Some(missingInfoMessage(element))
           case _ => None
         }
       case _ => None
@@ -239,6 +241,9 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
       case emptySubTagErrorFormat(parent, element) =>
         val formattedElement = element.replaceAll("(.*?):", "")
         Some(Message("xml.empty.tag", Seq(parent, formattedElement)))
+      case emptySubTagDocSpecErrorFormat(parent, element) =>
+        val formattedElement = element.replaceAll("(.*?):", "")
+        Some(Message("xml.empty.tag", Seq(parent, formattedElement)))
       case _ => None
     }
   }
@@ -275,8 +280,8 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
 
   private def getErrorMessageForMissingTags(element: String): Option[Message] =
     element match {
-      case "ConstEntity" | "ReportingEntity" | "DocSpec" | "Address" | "MessageSpec" | "CbcBody" => Some(missingInfoMessage(element))
-      case "Entity" => Some(Message("xml.add.element", Seq(element)))
+      case "ConstEntity" | "ReportingEntity" | "DocSpec" | "Address" | "MessageSpec" => Some(missingInfoMessage(element))
+      case "Entity" | "CbcBody" => Some(Message("xml.add.element", Seq(element)))
       case "ReceivingCountry" => Some(Message("xml.add.receivingCountry"))
       case "MessageType" => Some(Message("xml.add.line.messageType", Seq(element)))
       case "ReportingPeriod" => Some(Message("xml.add.line.reportingPeriod", Seq(element)))

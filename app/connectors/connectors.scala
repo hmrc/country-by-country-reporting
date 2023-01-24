@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ package object connectors {
     def withXForwardedHost(value: Option[String] = None): Seq[(String, String)] =
       seq :+ ("x-forwarded-host" -> s"${value.getOrElse("mdtp")}")
 
-    def withXCorrelationId(value: Option[String] = None)(implicit headerCarrier: HeaderCarrier): Seq[(String, String)] = {
+    def withXCorrelationId(value: Option[String] = None): Seq[(String, String)] = {
       val xCorrelationId = value.getOrElse(UUID.randomUUID().toString)
       seq :+ ("x-correlation-id" -> s"$xCorrelationId")
     }

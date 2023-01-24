@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,55 +57,56 @@ class SubscriptionControllerSpec extends SpecBase with Generators with ScalaChec
     val responseDetailString: String =
       """
         |{
-        |"subscriptionID": "111111111",
-        |"tradingName": "",
-        |"isGBUser": true,
-        |"primaryContact": [
-        |{
-        |"email": "",
-        |"phone": "",
-        |"mobile": "",
-        |"organisation": {
-        |"organisationName": "orgName"
-        |}
-        |}
-        |],
-        |"secondaryContact": [
-        |{
-        |"email": "",
-        |"organisation": {
-        |"organisationName": ""
-        |}
-        |}
-        |]
+        | "subscriptionID": "111111111",
+        | "tradingName": "",
+        | "isGBUser": true,
+        | "primaryContact": [
+        |  {
+        |   "email": "",
+        |   "phone": "",
+        |   "mobile": "",
+        |   "organisation": {
+        |    "organisationName": "orgName"
+        |   }
+        |  }
+        | ],
+        | "secondaryContact": [
+        |  {
+        |   "email": "",
+        |   "organisation": {
+        |   "organisationName": ""
+        |   }
+        |  }
+        | ]
         |}""".stripMargin
 
     val responseDetail = Json.parse(responseDetailString)
 
-    val requestDetailJson = Json.parse("""
-                                             |{
-                                             |      "IDType": "SAFE",
-                                             |      "IDNumber": "IDNumber",
-                                             |      "tradingName": "Trading Name",
-                                             |      "isGBUser": true,
-                                             |      "primaryContact":
-                                             |        {
-                                             |          "organisation": {
-                                             |            "organisationName": "orgName1"
-                                             |          },
-                                             |          "email": "test@email.com",
-                                             |          "phone": "+4411223344"
-                                             |        },
-                                             |      "secondaryContact":
-                                             |        {
-                                             |          "organisation": {
-                                             |            "organisationName": "orgName2"
-                                             |          },
-                                             |          "email": "test@email.com",
-                                             |          "phone": "+4411223344"
-                                             |        }
-                                             |}
-                                             |""".stripMargin)
+    val requestDetailJson = Json.parse(
+      """
+        |{
+        | "IDType": "SAFE",
+        | "IDNumber": "IDNumber",
+        | "tradingName": "Trading Name",
+        | "isGBUser": true,
+        | "primaryContact":
+        |   {
+        |     "organisation": {
+        |       "organisationName": "orgName1"
+        |     },
+        |     "email": "test@email.com",
+        |     "phone": "+4411223344"
+        |   },
+        | "secondaryContact":
+        |   {
+        |     "organisation": {
+        |       "organisationName": "orgName2"
+        |     },
+        |     "email": "test@email.com",
+        |     "phone": "+4411223344"
+        |   }
+        |}""".stripMargin
+    )
 
     "should return OK when ReadSubscription is valid" in {
       when(
@@ -123,7 +124,7 @@ class SubscriptionControllerSpec extends SpecBase with Generators with ScalaChec
       val request =
         FakeRequest(
           POST,
-          routes.SubscriptionController.readSubscription.url
+          routes.SubscriptionController.readSubscription("XACBC0009234568").url
         )
 
       val result = route(application, request).value
@@ -147,7 +148,7 @@ class SubscriptionControllerSpec extends SpecBase with Generators with ScalaChec
       val request =
         FakeRequest(
           POST,
-          routes.SubscriptionController.readSubscription.url
+          routes.SubscriptionController.readSubscription("XACBC0009234568").url
         )
 
       val result = route(application, request).value
@@ -200,22 +201,6 @@ class SubscriptionControllerSpec extends SpecBase with Generators with ScalaChec
 
       val result = route(application, request).value
       status(result) mustEqual INTERNAL_SERVER_ERROR
-
-    }
-
-    "should return BAD_REQUEST when Json is Invalid" in {
-
-      when(
-        mockSubscriptionService
-          .updateSubscription(any[RequestDetailForUpdate]())(
-            any[HeaderCarrier](),
-            any[ExecutionContext]()
-          )
-      ).thenReturn(
-        Future.successful(
-          Left(UpdateSubscriptionError(500))
-        )
-      )
 
     }
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
       "when element contains 'cbc:' prefix" - {
 
         "must return correct error for missing element declaration'" in {
-          val missingDeclaration = SaxParseError(lineNumber, "cvc-elt.1: Cannot find the declaration of element 'cbc:CBC_OECD'.")
+          val missingDeclaration = SaxParseError(lineNumber, "cvc-elt.1.a: Cannot find the declaration of element 'cbc:CBC_OECD'.")
           val result             = helper.generateErrorMessages(ListBuffer(missingDeclaration))
           result mustBe List(GenericError(lineNumber, Message("xml.must.have.element.declaration", List("CBC_OECD", "urn:oecd:ties:cbc:v2"))))
         }
@@ -383,8 +383,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
 
         "must return 'Add an' message for relevant missing tag values" in {
           val elements = List(
-            "Address",
-            "CbcBody"
+            "Address"
           )
 
           elements.map { element =>
@@ -431,7 +430,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
       "when element does not contain 'cbc:' prefix" - {
 
         "must return correct error for missing element declaration'" in {
-          val missingDeclaration = SaxParseError(lineNumber, "cvc-elt.1: Cannot find the declaration of element 'CBC_OECD'.")
+          val missingDeclaration = SaxParseError(lineNumber, "cvc-elt.1.a: Cannot find the declaration of element 'CBC_OECD'.")
           val result             = helper.generateErrorMessages(ListBuffer(missingDeclaration))
           result mustBe List(GenericError(lineNumber, Message("xml.must.have.element.declaration", List("CBC_OECD", "urn:oecd:ties:cbc:v2"))))
         }
@@ -783,8 +782,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
 
         "must return 'Add an' message for relevant missing tag values" in {
           val elements = List(
-            "Address",
-            "CbcBody"
+            "Address"
           )
 
           elements.map { element =>

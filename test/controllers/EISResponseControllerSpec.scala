@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package controllers
 
 import base.SpecBase
 import models.submission._
-import models.xml.ValidationErrors
 import org.mockito.ArgumentMatchers.any
 import org.scalatest.BeforeAndAfterEach
 import play.api.Application
@@ -34,7 +33,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 
 import java.time.LocalDateTime
 import java.util.UUID
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.xml.NodeSeq
 
 class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
@@ -89,13 +88,13 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
   "EISResponseController" - {
     "must return NoContent when input xml is valid" in {
       val fileDetails =
-        FileDetails(ConversationId("conversationId123456"), "subscriptionId", "messageRefId", Accepted, "file1.xml", LocalDateTime.now(), LocalDateTime.now())
+        FileDetails(ConversationId("conversationId123456"), "subscriptionId", "messageRefId", "Reporting Entity", Accepted, "file1.xml", LocalDateTime.now(), LocalDateTime.now())
 
       when(mockFileDetailsRepository.updateStatus(any[String], any[FileStatus])).thenReturn(Future.successful(Some(fileDetails)))
       //TODO: Uncomment all code relating to emailService and add additional email tests when implemented
 //      when(mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Boolean])(any[HeaderCarrier]))
 //        .thenReturn(Future.successful(ACCEPTED))
-      when(mockAuditService.sendAuditEvent(any(), any())(any())).thenReturn(Future.successful(Success))
+      when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(Success))
 
       val request = FakeRequest(POST, routes.EISResponseController.processEISResponse.url)
         .withHeaders("x-conversation-id" -> randomUUID.toString, HeaderNames.authorisation -> s"Bearer token")
@@ -105,7 +104,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
 
       status(result) mustEqual NO_CONTENT
       verify(mockFileDetailsRepository, times(1)).updateStatus(any[String](), any[FileStatus]())
-      verify(mockAuditService, times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier])
+      verify(mockAuditService, times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
     }
 
     "must return FORBIDDEN when auth token fails the validation" in {
@@ -136,7 +135,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
     }
 
     "must return InternalServerError on failing to update the status" in {
-      when(mockAuditService.sendAuditEvent(any(), any())(any())).thenReturn(Future.successful(Success))
+      when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(Success))
       when(mockFileDetailsRepository.updateStatus(any[String](), any[FileStatus]())).thenReturn(Future.successful(None))
 
       running(application) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ class SubscriptionController @Inject()(
     extends BackendController(cc)
     with Logging {
 
-  def readSubscription(): Action[AnyContent] = authenticate.async { implicit request =>
-    subscriptionService.getContactInformation(request.subscriptionId).map {
+  def readSubscription(subscriptionId: String): Action[AnyContent] = authenticate.async { implicit request =>
+    subscriptionService.getContactInformation(subscriptionId).map {
       case Right(value) => Ok(Json.toJson(value))
       case Left(ReadSubscriptionError(value)) =>
         logger.warn(s"ReadSubscriptionError $value")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,10 @@ import config.AppConfig
 import play.api.http.Status.UNAUTHORIZED
 import play.api.mvc.Results.Status
 import play.api.mvc._
+import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
+import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
@@ -30,31 +32,34 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class IdentifierAuthActionImpl @Inject() (
-                                           override val authConnector: AuthConnector,
-                                           val parser: BodyParsers.Default,
-                                           config: AppConfig
-                                         )(implicit val executionContext: ExecutionContext)
-  extends IdentifierAuthAction
+  override val authConnector: AuthConnector,
+  val parser: BodyParsers.Default,
+  config: AppConfig
+)(implicit val executionContext: ExecutionContext)
+    extends IdentifierAuthAction
     with AuthorisedFunctions {
 
-  private val serviceName: String = "cbc"
-  val enrolmentKey: String        = config.enrolmentKey(serviceName)
-  val enrolmentIdentifier: String = config.enrolmentId(serviceName)
+  val enrolmentKey: String        = config.enrolmentKey("cbc")
+  val nonUkEnrolmentKey: String   = config.enrolmentKey("cbcNonUK")
+  val agentEnrolmentKey: String   = config.enrolmentKey("agent")
 
-  override def invokeBlock[A](request: Request[A], block: UserRequest[A] => Future[Result]): Future[Result] = {
+  override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
-    authorised(Enrolment(enrolmentKey)).retrieve(Retrievals.authorisedEnrolments) {
-      case Enrolments(enrolments) =>
-        val subscriptionId =
-          (for {
-            enrolment           <- enrolments.find(_.key.equals(enrolmentKey))
-            enrolmentIdentifier <- enrolment.getIdentifier(enrolmentIdentifier)
-          } yield enrolmentIdentifier.value)
-            .getOrElse(throw new IllegalAccessException("SubscriptionId Required"))
+    authorised(Enrolment(enrolmentKey) or Enrolment(nonUkEnrolmentKey) or Enrolment(agentEnrolmentKey)).retrieve(Retrievals.authorisedEnrolments and Retrievals.affinityGroup) {
+      case Enrolments(enrolments) ~ Some(Agent) if enrolments.exists(_.key.equals(agentEnrolmentKey)) =>
+        val arn =
+          for {
+            enrolment <- enrolments.find(_.key.equals("HMRC-AS-AGENT"))
+            arn       <- enrolment.getIdentifier("AgentReferenceNumber")
+          } yield arn.value
 
-        block(UserRequest(subscriptionId, request))
-      case _ => Future.successful(Status(UNAUTHORIZED))
+        block(IdentifierRequest(request, Agent, arn))
+      case Enrolments(enrolments) ~ Some(Organisation) if enrolments.exists(_.key.equals(enrolmentKey)) =>
+        block(IdentifierRequest(request, Organisation))
+      case Enrolments(enrolments) ~ Some(Organisation) if enrolments.exists(_.key.equals(nonUkEnrolmentKey)) =>
+        block(IdentifierRequest(request, Organisation))
+      case _ ~ _ => Future.successful(Status(UNAUTHORIZED))
     } recover { case _: NoActiveSession =>
       Status(UNAUTHORIZED)
     }
@@ -62,4 +67,4 @@ class IdentifierAuthActionImpl @Inject() (
 }
 
 @ImplementedBy(classOf[IdentifierAuthActionImpl])
-trait IdentifierAuthAction extends ActionBuilder[UserRequest, AnyContent] with ActionFunction[Request, UserRequest]
+trait IdentifierAuthAction extends ActionBuilder[IdentifierRequest, AnyContent] with ActionFunction[Request, IdentifierRequest]

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ class DataExtraction()() {
     for {
       messageID <- (xml \\ "MessageRefId").headOption
       typeIndic <- (xml \\ "MessageTypeIndic").headOption.map(node => MessageTypeIndic.fromString(node.text))
-    } yield MessageSpecData(messageID.text, typeIndic)
+      reportingEntityName <- (xml \\ "ReportingEntity" \\ "Entity" \\ "Name").headOption
+    } yield MessageSpecData(messageID.text, typeIndic, reportingEntityName.text)
 
 }

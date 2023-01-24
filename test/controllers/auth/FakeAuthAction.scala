@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package controllers.auth
 
 import play.api.mvc.{BodyParsers, Request, Result}
+import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -35,6 +36,15 @@ class FakeIdentifierAuthAction @Inject() (
                                          )(implicit val executionContext: ExecutionContext)
   extends IdentifierAuthAction {
 
-  override def invokeBlock[A](request: Request[A], block: UserRequest[A] => Future[Result]): Future[Result] =
-    block(UserRequest("XACBC0009234568", request))
+  override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] =
+    block(IdentifierRequest(request, Organisation))
+}
+
+class FakeAgentOnlyAuthAction @Inject() (
+                                           val parser: BodyParsers.Default
+                                         )(implicit val executionContext: ExecutionContext)
+  extends AgentOnlyAuthAction {
+
+  override def invokeBlock[A](request: Request[A], block: AgentOnlyRequest[A] => Future[Result]): Future[Result] =
+    block(AgentOnlyRequest("ARN12345", request))
 }

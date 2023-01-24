@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package helpers
 
 trait SaxParseErrorRegExConstants {
   final val missingDeclarationErrorFormat =
-    """cvc-elt.1: Cannot find the declaration of element '(?:.*:)?(.*?)'.""".stripMargin.r
+    """cvc-elt.1.a: Cannot find the declaration of element '(?:.*:)?(.*?)'.""".stripMargin.r
 
   final val missingAttributeErrorFormat = """cvc-complex-type.4: Attribute '(.*?)' must appear on element '(?:.*:)?(.*?)'.""".stripMargin.r
 
@@ -29,6 +29,9 @@ trait SaxParseErrorRegExConstants {
 
   final val emptySubTagErrorFormat =
     """cvc-complex-type.2.4.b: The content of element '(?:.*:)?(.*?)' is not complete. One of '"urn:oecd:ties:cbc:v2":(?:.*:)?(.*?)' is expected.""".stripMargin.r
+
+  final val emptySubTagDocSpecErrorFormat =
+    """cvc-complex-type.2.4.b: The content of element '(?:.*:)?(.*?)' is not complete. One of '"urn:oecd:ties:cbcstf:v5":(?:.*:)?(.*?)' is expected.""".stripMargin.r
 
   final val missingTagErrorFormat =
     """cvc-complex-type.2.4.a: Invalid content was found starting with element '(?:.*:)?(.*?)'. One of '"urn:oecd:ties:cbc:v2":(?:.*:)?(.*?)' is expected.""".stripMargin.r

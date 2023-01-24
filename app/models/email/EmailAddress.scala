@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-package controllers.auth
+package models.email
 
-import play.api.mvc.{Request, WrappedRequest}
+object EmailAddress {
+  val validEmail = """^([a-zA-Z0-9.!#$%&’'*+/=?^_`{|}~-]+)@([a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*)$""".r
 
-case class UserRequest[+A](subscriptionId: String, request: Request[A]) extends WrappedRequest[A](request)
+  def isValid(email: String) = email match {
+    case validEmail(_, _) => true
+    case _                => false
+  }
+
+}

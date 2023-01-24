@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,4 +41,12 @@ class AppConfig @Inject()(config: Configuration,
   val fileUploadXSDFilePath: String  = config.get[String]("xsd-files.fileUpload_CBC_XSDFile")
   val submissionXSDFilePath: String  = config.get[String]("xsd-files.submission_DCT72a_XSDFile")
   val eisResponseXSDFilePath: String = config.get[String]("xsd-files.eisResponse_DCT72B_XSDFile")
+
+  lazy val sendEmailUrl: String = servicesConfig.baseUrl("email")
+
+
+  lazy val emailOrganisationSuccessfulTemplate: String = config.get[String]("emailTemplates.fileOrganisationUploadSuccessful")
+  lazy val emailOrganisationUnsuccessfulTemplate: String = config.get[String]("emailTemplates.fileOrganisationUploadUnsuccessful")
+  lazy val emailAgentSuccessfulTemplate: String = config.get[String]("emailTemplates.fileAgentUploadSuccessful")
+  lazy val emailAgentUnsuccessfulTemplate: String = config.get[String]("emailTemplates.fileAgentUploadUnsuccessful")
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,6 +137,12 @@ trait Generators extends ModelGenerators {
 
   val apiOrgName                = "^([a-zA-Z0-9_.]{1,105})\\$"
   def validOrgName: Gen[String] = RegexpGen.from(apiOrgName)
+
+  def validEmailAddress: Gen[String] = {
+    val emailRegexWithQuantifier = """^([a-zA-Z0-9.!#$%&’'*+/=?^_`{|}~-]+)@([a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*)$"""
+
+    RegexpGen.from(emailRegexWithQuantifier)
+  }
 
   def listWithMaxLength[T](maxSize: Int, gen: Gen[T]): Gen[Seq[T]] =
     for {
