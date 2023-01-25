@@ -220,7 +220,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
         }
       }
 
-      "must submit to the email connector 2 times when Agent and client both have 2 sets of valid details provided for failed file upload" in {
+      "must submit to the email connector once for Agent only when Agent and client both have 1 set of valid details provided for failed file upload" in {
 
         when(mockEmailConnector.sendEmail(any[EmailRequest])(any[HeaderCarrier]))
           .thenReturn(
@@ -229,15 +229,15 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
 
         when(mockSubscriptionService.getContactInformation(any[String])(any[HeaderCarrier], any[ExecutionContext]))
           .thenReturn(
-            Future.successful(Right(ResponseDetail(subscriptionId, None, isGBUser = true, primaryContact, Some(secondaryContact))))
+            Future.successful(Right(ResponseDetail(subscriptionId, None, isGBUser = true, primaryContact, None)))
           )
 
-        val result = emailService.sendEmail(subscriptionId, submissionTime, messageRefId, Some(agentDetails), isUploadSuccessful = false)
+        val result = emailService.sendEmail(subscriptionId, submissionTime, messageRefId, Some(agentSingleContactDetails), isUploadSuccessful = false)
 
         whenReady(result) { result =>
-          result.map(_.result.map(_.status)) mustBe Seq(Some(ACCEPTED), Some(ACCEPTED))
+          result.map(_.result.map(_.status)) mustBe Seq(Some(ACCEPTED), None)
 
-          verify(mockEmailConnector, times(2)).sendEmail(any[EmailRequest])(any[HeaderCarrier])
+          verify(mockEmailConnector, times(1)).sendEmail(any[EmailRequest])(any[HeaderCarrier])
         }
       }
 
