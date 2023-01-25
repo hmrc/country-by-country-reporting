@@ -27,7 +27,7 @@ import org.mockito.ArgumentMatchers.any
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
-import play.api.http.Status.{ACCEPTED, BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND}
+import play.api.http.Status.{ACCEPTED, BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, NO_CONTENT}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers.OK
@@ -94,7 +94,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
 
   "Email Service" - {
     "sendAndLogEmail" - {
-      "must submit to the email connector with valid details and return 202" in {
+      "must submit to the email connector with valid details and return ACCEPTED and NO_CONTENT for a Primary contact only" in {
 
         when(mockEmailConnector.sendEmail(any[EmailRequest])(any[HeaderCarrier]))
           .thenReturn(
@@ -109,12 +109,12 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
         val result = emailService.sendAndLogEmail(subscriptionId, submissionTime, messageRefId, None, isUploadSuccessful = true)
 
         whenReady(result) { result =>
-          result mustBe ACCEPTED
+          result mustBe Seq(ACCEPTED, NO_CONTENT)
 
           verify(mockEmailConnector, times(1)).sendEmail(any[EmailRequest])(any[HeaderCarrier])
         }
       }
-      "must submit to the email connector and return NOT_FOUND when the template is missing" in {
+      "must submit to the email connector and return NOT_FOUND and NO_CONTENT for a Primary contact only when the template is missing" in {
 
         when(mockEmailConnector.sendEmail(any[EmailRequest])(any[HeaderCarrier]))
           .thenReturn(
@@ -129,12 +129,12 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
         val result = emailService.sendAndLogEmail(subscriptionId, submissionTime, messageRefId, None, isUploadSuccessful = true)
 
         whenReady(result) { result =>
-          result mustBe NOT_FOUND
+          result mustBe Seq(NOT_FOUND, NO_CONTENT)
 
           verify(mockEmailConnector, times(1)).sendEmail(any[EmailRequest])(any[HeaderCarrier])
         }
       }
-      "must submit to the email connector and return BAD_REQUEST email service rejects request" in {
+      "must submit to the email connector and return BAD_REQUEST and NO_CONTENT for a Primary contact only when email service rejects request" in {
 
         when(mockEmailConnector.sendEmail(any[EmailRequest])(any[HeaderCarrier]))
           .thenReturn(
@@ -149,7 +149,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
         val result = emailService.sendAndLogEmail(subscriptionId, submissionTime, messageRefId, None, isUploadSuccessful = true)
 
         whenReady(result) { result =>
-          result mustBe BAD_REQUEST
+          result mustBe Seq(BAD_REQUEST, NO_CONTENT)
 
           verify(mockEmailConnector, times(1)).sendEmail(any[EmailRequest])(any[HeaderCarrier])
         }
@@ -161,7 +161,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
 
         when(mockEmailConnector.sendEmail(any[EmailRequest])(any[HeaderCarrier]))
           .thenReturn(
-            Future.successful(HttpResponse(OK, ""))
+            Future.successful(HttpResponse(ACCEPTED, ""))
           )
 
         when(mockSubscriptionService.getContactInformation(any[String])(any[HeaderCarrier], any[ExecutionContext]))
@@ -172,7 +172,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
         val result = emailService.sendEmail(subscriptionId, submissionTime, messageRefId, None, isUploadSuccessful = true)
 
         whenReady(result) { result =>
-          result.map(_.status) mustBe Some(OK)
+          result.map(_.result.map(_.status)) mustBe Seq(Some(ACCEPTED), None)
 
           verify(mockEmailConnector, times(1)).sendEmail(any[EmailRequest])(any[HeaderCarrier])
         }
@@ -182,7 +182,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
 
         when(mockEmailConnector.sendEmail(any[EmailRequest])(any[HeaderCarrier]))
           .thenReturn(
-            Future.successful(HttpResponse(OK, ""))
+            Future.successful(HttpResponse(ACCEPTED, ""))
           )
 
         when(mockSubscriptionService.getContactInformation(any[String])(any[HeaderCarrier], any[ExecutionContext]))
@@ -193,7 +193,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
         val result = emailService.sendEmail(subscriptionId, submissionTime, messageRefId, None, isUploadSuccessful = true)
 
         whenReady(result) { result =>
-          result.map(_.status) mustBe Some(OK)
+          result.map(_.result.map(_.status)) mustBe Seq(Some(ACCEPTED), Some(ACCEPTED))
 
           verify(mockEmailConnector, times(2)).sendEmail(any[EmailRequest])(any[HeaderCarrier])
         }
@@ -203,7 +203,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
 
         when(mockEmailConnector.sendEmail(any[EmailRequest])(any[HeaderCarrier]))
           .thenReturn(
-            Future.successful(HttpResponse(OK, ""))
+            Future.successful(HttpResponse(ACCEPTED, ""))
           )
 
         when(mockSubscriptionService.getContactInformation(any[String])(any[HeaderCarrier], any[ExecutionContext]))
@@ -214,7 +214,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
         val result = emailService.sendEmail(subscriptionId, submissionTime, messageRefId, Some(agentDetails), isUploadSuccessful = true)
 
         whenReady(result) { result =>
-          result.map(_.status) mustBe Some(OK)
+          result.map(_.result.map(_.status)) mustBe Seq(Some(ACCEPTED), Some(ACCEPTED), Some(ACCEPTED), Some(ACCEPTED))
 
           verify(mockEmailConnector, times(4)).sendEmail(any[EmailRequest])(any[HeaderCarrier])
         }
@@ -224,7 +224,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
 
         when(mockEmailConnector.sendEmail(any[EmailRequest])(any[HeaderCarrier]))
           .thenReturn(
-            Future.successful(HttpResponse(OK, ""))
+            Future.successful(HttpResponse(ACCEPTED, ""))
           )
 
         when(mockSubscriptionService.getContactInformation(any[String])(any[HeaderCarrier], any[ExecutionContext]))
@@ -235,7 +235,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
         val result = emailService.sendEmail(subscriptionId, submissionTime, messageRefId, Some(agentDetails), isUploadSuccessful = false)
 
         whenReady(result) { result =>
-          result.map(_.status) mustBe Some(OK)
+          result.map(_.result.map(_.status)) mustBe Seq(Some(ACCEPTED), Some(ACCEPTED))
 
           verify(mockEmailConnector, times(2)).sendEmail(any[EmailRequest])(any[HeaderCarrier])
         }
@@ -245,7 +245,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
 
         when(mockEmailConnector.sendEmail(any[EmailRequest])(any[HeaderCarrier]))
           .thenReturn(
-            Future.successful(HttpResponse(OK, ""))
+            Future.successful(HttpResponse(ACCEPTED, ""))
           )
 
         when(mockSubscriptionService.getContactInformation(any[String])(any[HeaderCarrier], any[ExecutionContext]))
@@ -256,7 +256,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
         val result = emailService.sendEmail(subscriptionId, submissionTime, messageRefId, Some(agentDetails), isUploadSuccessful = true)
 
         whenReady(result) { result =>
-          result.map(_.status) mustBe Some(OK)
+          result.map(_.result.map(_.status)) mustBe Seq(Some(ACCEPTED), Some(ACCEPTED), Some(ACCEPTED), None)
 
           verify(mockEmailConnector, times(3)).sendEmail(any[EmailRequest])(any[HeaderCarrier])
         }
@@ -266,7 +266,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
 
         when(mockEmailConnector.sendEmail(any[EmailRequest])(any[HeaderCarrier]))
           .thenReturn(
-            Future.successful(HttpResponse(OK, ""))
+            Future.successful(HttpResponse(ACCEPTED, ""))
           )
 
         when(mockSubscriptionService.getContactInformation(any[String])(any[HeaderCarrier], any[ExecutionContext]))
@@ -277,7 +277,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
         val result = emailService.sendEmail(subscriptionId, submissionTime, messageRefId, Some(agentSingleContactDetails), isUploadSuccessful = true)
 
         whenReady(result) { result =>
-          result.map(_.status) mustBe Some(OK)
+          result.map(_.result.map(_.status)) mustBe Seq(Some(ACCEPTED), None, Some(ACCEPTED), Some(ACCEPTED))
 
           verify(mockEmailConnector, times(3)).sendEmail(any[EmailRequest])(any[HeaderCarrier])
         }
@@ -287,7 +287,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
 
         when(mockEmailConnector.sendEmail(any[EmailRequest])(any[HeaderCarrier]))
           .thenReturn(
-            Future.successful(HttpResponse(OK, ""))
+            Future.successful(HttpResponse(ACCEPTED, ""))
           )
 
         when(mockSubscriptionService.getContactInformation(any[String])(any[HeaderCarrier], any[ExecutionContext]))
@@ -299,7 +299,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
           emailService.sendEmail(subscriptionId, submissionTime, messageRefId, None, isUploadSuccessful = true)
 
         whenReady(result) { result =>
-          result.map(_.status) mustBe None
+          result.map(_.result.map(_.status)) mustBe Seq(None, Some(ACCEPTED))
         }
       }
 
@@ -307,7 +307,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
 
         when(mockEmailConnector.sendEmail(any[EmailRequest])(any[HeaderCarrier]))
           .thenReturn(
-            Future.successful(HttpResponse(OK, ""))
+            Future.successful(HttpResponse(ACCEPTED, ""))
           )
 
         when(mockSubscriptionService.getContactInformation(any[String])(any[HeaderCarrier], any[ExecutionContext]))
@@ -319,7 +319,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
           emailService.sendEmail(subscriptionId, submissionTime, messageRefId, None, isUploadSuccessful = true)
 
         whenReady(result) { result =>
-          result.map(_.status) mustBe None
+          result.map(_.result.map(_.status)) mustBe Seq(None)
         }
       }
     }
