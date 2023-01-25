@@ -56,9 +56,7 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
       }
     }
 
-  def sendEmail(subscriptionId: String, submissionTime: String, messageRefId: String, agentDetails: Option[AgentContactDetails], isUploadSuccessful: Boolean)(implicit
-                                                                                                                                                              hc: HeaderCarrier
-  ): Future[Seq[EmailResult]] =
+  def sendEmail(subscriptionId: String, submissionTime: String, messageRefId: String, agentDetails: Option[AgentContactDetails], isUploadSuccessful: Boolean)(implicit hc: HeaderCarrier): Future[Seq[EmailResult]] = {
     subscriptionService.getContactInformation(subscriptionId).flatMap {
       case Right(responseDetail) =>
         val emailAddress          = Some(responseDetail.primaryContact.email)
@@ -71,45 +69,44 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
         val agentSecondaryName    = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.organisationDetails.organisationName))
         val cbcId                 = responseDetail.subscriptionID
 
+        lazy val orgEmails: Seq[Future[EmailResult]] = Seq(
+          send(emailAddress, contactName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId, None).map(res => EmailResult("Primary Org", res)),
+          send(secondaryEmailAddress, secondaryName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId, None).map(res => EmailResult("Secondary Org", res))
+        )
+
+        lazy val agentEmails: Seq[Future[EmailResult]] = Seq(
+          send(agentPrimaryEmail, agentPrimaryName, emailTemplate.getAgentTemplate(isUploadSuccessful), submissionTime, messageRefId, Some(cbcId)).map(res => EmailResult("Primary Agent", res)),
+          send(agentSecondaryEmail, agentSecondaryName, emailTemplate.getAgentTemplate(isUploadSuccessful), submissionTime, messageRefId, Some(cbcId)).map(res => EmailResult("Secondary Agent", res))
+        )
+
         (agentDetails.isDefined, isUploadSuccessful) match {
           case (false, _) =>
             logger.info("Organisation User: Org emails sent to email service")
-            for {
-              primaryResponse <- send(emailAddress, contactName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId, None)
-              secondaryResponse <- send(secondaryEmailAddress, secondaryName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId, None)
-            } yield Seq(EmailResult("Primary Org", primaryResponse), EmailResult("Secondary Org", secondaryResponse))
-
+            Future.sequence(orgEmails)
           case (true, true) =>
             logger.info("Agent User with successful file upload: Agent and Org emails sent to email service")
-            for {
-              agentPrimaryResponse <- send(agentPrimaryEmail, agentPrimaryName, emailTemplate.getAgentTemplate(isUploadSuccessful), submissionTime, messageRefId, Some(cbcId))
-              agentSecondaryResponse <- send(agentSecondaryEmail, agentSecondaryName, emailTemplate.getAgentTemplate(isUploadSuccessful), submissionTime, messageRefId, Some(cbcId))
-              primaryResponse <- send(emailAddress, contactName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId, None)
-              secondaryResponse <- send(secondaryEmailAddress, secondaryName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId, None)
-            } yield Seq(EmailResult("Primary Agent", agentPrimaryResponse), EmailResult("Secondary Agent", agentSecondaryResponse), EmailResult("Primary Org", primaryResponse), EmailResult("Secondary Org", secondaryResponse))
-
+            Future.sequence(agentEmails ++ orgEmails)
           case (true, false) =>
             logger.info("Agent User with rejected file: Agent emails sent to email service")
-            for {
-              agentPrimaryResponse <- send(agentPrimaryEmail, agentPrimaryName, emailTemplate.getAgentTemplate(isUploadSuccessful), submissionTime, messageRefId, Some(cbcId))
-              agentSecondaryResponse <- send(agentSecondaryEmail, agentSecondaryName, emailTemplate.getAgentTemplate(isUploadSuccessful), submissionTime, messageRefId, Some(cbcId))
-            } yield Seq(EmailResult("Primary Agent", agentPrimaryResponse), EmailResult("Secondary Agent", agentSecondaryResponse))
+            Future.sequence(agentEmails)
         }
       case Left(ReadSubscriptionError(value)) =>
         logger.warn(s"Failed to get contact information, received ReadSubscriptionError: $value")
         Future.successful(Seq(EmailResult("Failed to get contact information", None)))
     }
+  }
 
   private def send(emailAddress: Option[String], contactName: Option[String], template: String, submissionTime: String, messageRefId: String, cbcId: Option[String])
   (implicit hc: HeaderCarrier): Future[Option[HttpResponse]] = {
     emailAddress
       .filter(EmailAddress.isValid)
-      .fold(Future.successful(Option.empty[HttpResponse])) { email =>
+      .map { email =>
         emailConnector
           .sendEmail(
             EmailRequest.fileUploadSubmission(email, contactName, template, submissionTime, messageRefId, cbcId)
           )
           .map(Some.apply)
       }
+      .getOrElse(Future.successful(None))
   }
 }
