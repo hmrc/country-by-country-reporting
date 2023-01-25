@@ -7,7 +7,7 @@ lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .settings(
     majorVersion                     := 0,
-    scalaVersion                     := "2.13.8",
+    scalaVersion                     := "2.13.10",
     PlayKeys.playDefaultPort         := 10022,
     libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test,
     scalacOptions ++= Seq(
@@ -25,6 +25,9 @@ lazy val microservice = Project(appName, file("."))
   .settings(integrationTestSettings(): _*)
   .settings(resolvers += Resolver.jcenterRepo)
   .settings(CodeCoverageSettings.settings: _*)
+  .settings(ThisBuild / libraryDependencySchemes ++= Seq(
+    "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
+  ))
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
 
 lazy val scoverageSettings = {
@@ -56,7 +59,7 @@ lazy val scoverageSettings = {
 
   Seq(
     ScoverageKeys.coverageExcludedFiles := excludedPackages.mkString(";"),
-    ScoverageKeys.coverageMinimum := 80,
+    ScoverageKeys.coverageMinimumStmtTotal := 80,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true
   )
