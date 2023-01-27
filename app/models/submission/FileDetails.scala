@@ -19,9 +19,11 @@ package models.submission
 import models.agentSubscription.AgentContactDetails
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
+import javax.inject.Singleton
 
 import java.time.LocalDateTime
 
+@Singleton
 case class FileDetails(_id: ConversationId,
                        subscriptionId: String,
                        messageRefId: String,
