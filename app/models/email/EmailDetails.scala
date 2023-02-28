@@ -18,6 +18,6 @@ package models.email
 
 sealed trait EmailDetails
 
-case class AgentEmailDetails() extends EmailDetails
-case class OrganisationEmailDetails() extends EmailDetails
+
+
 
