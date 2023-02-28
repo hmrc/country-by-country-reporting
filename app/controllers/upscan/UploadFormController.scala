@@ -33,6 +33,7 @@ class UploadFormController @Inject() (
 )(implicit ec: ExecutionContext)
     extends BackendController(cc) {
 
+  //noinspection ScalaUnusedSymbol
   def requestUpload: Action[JsValue] = Action.async(parse.json) { implicit request =>
     val upscanIdentifiers = request.body.validate[UpscanIdentifiers]
     upscanIdentifiers.fold(
@@ -44,6 +45,7 @@ class UploadFormController @Inject() (
     )
   }
 
+  //noinspection ScalaUnusedSymbol
   def getDetails(uploadId: String): Action[AnyContent] = Action.async {
     repository.findByUploadId(UploadId(uploadId)).map {
       case Some(value) => Ok(Json.toJson(value))
