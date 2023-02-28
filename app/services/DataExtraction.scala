@@ -24,6 +24,7 @@ import scala.xml.Elem
 @Inject
 class DataExtraction()() {
 
+  //noinspection ScalaUnusedSymbol
   def messageSpecData(xml: Elem): Option[MessageSpecData] =
     for {
       messageID <- (xml \\ "MessageRefId").headOption

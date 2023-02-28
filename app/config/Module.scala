@@ -19,6 +19,7 @@ package config
 import com.google.inject.AbstractModule
 import services.upscan.{MongoBackedUploadProgressTracker, UploadProgressTracker}
 
+//noinspection ScalaUnusedSymbol
 class Module() extends AbstractModule {
 
   override def configure(): Unit = {

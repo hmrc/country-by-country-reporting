@@ -25,6 +25,7 @@ sealed trait FileStatus
 case object Pending extends FileStatus
 //noinspection ScalaUnusedSymbol
 case object Accepted extends FileStatus
+//noinspection ScalaUnusedSymbol
 case class Rejected(error: ValidationErrors) extends FileStatus {
   override def toString: String = "Rejected"
 }
