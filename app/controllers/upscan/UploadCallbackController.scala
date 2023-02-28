@@ -26,6 +26,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.play.bootstrap.controller.WithJsonBody
 
+//noinspection ScalaUnusedSymbol
 @Singleton
 class UploadCallbackController @Inject() (
   val controllerComponents: MessagesControllerComponents,

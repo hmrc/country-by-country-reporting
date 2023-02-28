@@ -22,6 +22,7 @@ sealed trait MessageTypeIndic
 case object CBC401 extends MessageTypeIndic
 case object CBC402 extends MessageTypeIndic
 
+//noinspection ScalaUnusedSymbol
 object MessageTypeIndic {
 
   def fromString(typeIndic: String): MessageTypeIndic = typeIndic.toUpperCase match {

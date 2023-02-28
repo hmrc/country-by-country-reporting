@@ -23,6 +23,7 @@ import play.api.libs.json.OFormat
 sealed trait FileStatus
 
 case object Pending extends FileStatus
+//noinspection ScalaUnusedSymbol
 case object Accepted extends FileStatus
 case class Rejected(error: ValidationErrors) extends FileStatus {
   override def toString: String = "Rejected"

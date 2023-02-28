@@ -51,6 +51,7 @@ class UploadFormController @Inject() (
     }
   }
 
+  //noinspection ScalaUnusedSymbol
   def getStatus(uploadId: String): Action[AnyContent] = Action.async {
     uploadProgressTracker.getUploadResult(UploadId(uploadId)).map {
       case Some(value) => Ok(Json.toJson(value))
