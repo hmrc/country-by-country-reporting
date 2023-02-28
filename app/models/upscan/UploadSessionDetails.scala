@@ -28,7 +28,6 @@ case class UploadSessionDetails(
 )
 
 object UploadSessionDetails {
-  val status = "status"
 
   implicit val objectIdFormats: Format[ObjectId] = MongoFormats.objectIdFormat
 
