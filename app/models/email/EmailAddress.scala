@@ -17,8 +17,10 @@
 package models.email
 
 object EmailAddress {
+  //noinspection ScalaUnusedSymbol
   val validEmail = """^([a-zA-Z0-9.!#$%&’'*+/=?^_`{|}~-]+)@([a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*)$""".r
 
+  //noinspection ScalaUnusedSymbol
   def isValid(email: String) = email match {
     case validEmail(_, _) => true
     case _                => false
