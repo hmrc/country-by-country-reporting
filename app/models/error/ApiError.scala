@@ -19,6 +19,7 @@ package models.error
 sealed trait ApiError
 
 
+//noinspection ScalaUnusedSymbol
 case class UpdateSubscriptionError(status: Int) extends ApiError
 
 //noinspection ScalaUnusedSymbol
