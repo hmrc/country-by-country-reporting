@@ -26,7 +26,8 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class UploadFormController @Inject() (
+//noinspection ScalaUnusedSymbol
+class UploadFormController @Inject()(
   uploadProgressTracker: UploadProgressTracker,
   repository: UpScanSessionRepository,
   cc: ControllerComponents

@@ -27,7 +27,8 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class FileDetailsController @Inject() (
+//noinspection ScalaUnusedSymbol
+class FileDetailsController @Inject()(
                                         authenticate: IdentifierAuthAction,
                                         cc: ControllerComponents,
                                         fileDetailsRepository: FileDetailsRepository
