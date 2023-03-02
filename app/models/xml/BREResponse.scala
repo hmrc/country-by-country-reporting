@@ -22,7 +22,7 @@ import play.api.libs.json.{Json, OWrites}
 
 case class BREResponse(regime: String, conversationID: String, genericStatusMessage: GenericStatusMessage)
 
-//noinspection ScalaUnusedSymbol
+
 object BREResponse {
 
   implicit val xmlReader: XmlReader[BREResponse] = (

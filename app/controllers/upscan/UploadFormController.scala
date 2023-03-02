@@ -26,7 +26,7 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
-//noinspection ScalaUnusedSymbol
+
 class UploadFormController @Inject()(
   uploadProgressTracker: UploadProgressTracker,
   repository: UpScanSessionRepository,
@@ -34,7 +34,7 @@ class UploadFormController @Inject()(
 )(implicit ec: ExecutionContext)
     extends BackendController(cc) {
 
-  //noinspection ScalaUnusedSymbol
+
   def requestUpload: Action[JsValue] = Action.async(parse.json) { implicit request =>
     val upscanIdentifiers = request.body.validate[UpscanIdentifiers]
     upscanIdentifiers.fold(
@@ -46,7 +46,7 @@ class UploadFormController @Inject()(
     )
   }
 
-  //noinspection ScalaUnusedSymbol
+
   def getDetails(uploadId: String): Action[AnyContent] = Action.async {
     repository.findByUploadId(UploadId(uploadId)).map {
       case Some(value) => Ok(Json.toJson(value))
@@ -54,7 +54,7 @@ class UploadFormController @Inject()(
     }
   }
 
-  //noinspection ScalaUnusedSymbol
+
   def getStatus(uploadId: String): Action[AnyContent] = Action.async {
     uploadProgressTracker.getUploadResult(UploadId(uploadId)).map {
       case Some(value) => Ok(Json.toJson(value))

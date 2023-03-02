@@ -68,7 +68,7 @@ package object controllers {
   val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
   val timeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("h:mma")
 
-  //noinspection ScalaUnusedSymbol
+
   def dateTimeNow(): LocalDateTime = ZonedDateTime.now(euLondonZoneId).toLocalDateTime
 
   def displayFormattedDate(dateTime: LocalDateTime): String =

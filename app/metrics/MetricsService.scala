@@ -23,7 +23,7 @@ import models.submission.{Accepted, FileStatus, Rejected}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-//noinspection ScalaUnusedSymbol
+
 @Singleton
 class MetricsService @Inject() (metrics: Metrics) {
 

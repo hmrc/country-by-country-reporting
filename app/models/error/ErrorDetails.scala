@@ -39,7 +39,7 @@ object ErrorDetail {
 
 case class ErrorDetails(errorDetail: ErrorDetail)
 
-//noinspection ScalaUnusedSymbol
+
 object ErrorDetails {
   implicit val format = Json.format[ErrorDetails]
 }

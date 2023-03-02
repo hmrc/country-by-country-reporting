@@ -23,7 +23,7 @@ import play.api.libs.json.{Json, OWrites}
 
 case class GenericStatusMessage(validationErrors: ValidationErrors, status: ValidationStatus.Value)
 
-//noinspection ScalaUnusedSymbol
+
 object GenericStatusMessage {
   implicit val xmlReader: XmlReader[GenericStatusMessage] = (
     (__ \ "ValidationErrors").read[ValidationErrors],

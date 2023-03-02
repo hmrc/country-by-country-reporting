@@ -28,7 +28,7 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-//noinspection ScalaUnusedSymbol
+
 class SubmissionValidationController @Inject()(
   authenticate: IdentifierAuthAction,
   cc: ControllerComponents,

@@ -48,21 +48,20 @@ object ResponseDetail {
 
 case class ReturnParameters(paramName: String, paramValue: String)
 
-//noinspection ScalaUnusedSymbol
+
 object ReturnParameters {
   implicit val format: Format[ReturnParameters] = Json.format[ReturnParameters]
 }
 
 case class ResponseCommon(status: String, statusText: Option[String], processingDate: String, returnParameters: Option[Seq[ReturnParameters]])
 
-//noinspection ScalaUnusedSymbol
+
 object ResponseCommon {
   implicit val format: Format[ResponseCommon] = Json.format[ResponseCommon]
 }
 
 case class DisplaySubscriptionResponse(responseCommon: ResponseCommon, responseDetail: ResponseDetail)
 
-//noinspection ScalaUnusedSymbol
 object DisplaySubscriptionResponse {
   implicit val format: OFormat[DisplaySubscriptionResponse] = Json.format[DisplaySubscriptionResponse]
 }
