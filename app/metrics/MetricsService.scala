@@ -23,6 +23,7 @@ import models.submission.{Accepted, FileStatus, Rejected}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+
 @Singleton
 class MetricsService @Inject() (metrics: Metrics) {
 

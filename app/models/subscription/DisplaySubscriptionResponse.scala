@@ -48,11 +48,13 @@ object ResponseDetail {
 
 case class ReturnParameters(paramName: String, paramValue: String)
 
+
 object ReturnParameters {
   implicit val format: Format[ReturnParameters] = Json.format[ReturnParameters]
 }
 
 case class ResponseCommon(status: String, statusText: Option[String], processingDate: String, returnParameters: Option[Seq[ReturnParameters]])
+
 
 object ResponseCommon {
   implicit val format: Format[ResponseCommon] = Json.format[ResponseCommon]

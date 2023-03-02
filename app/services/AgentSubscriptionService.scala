@@ -30,6 +30,7 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try}
 
+
 class AgentSubscriptionService @Inject()(agentSubscriptionConnector: AgentSubscriptionConnector) extends Logging {
 
   def createContactInformation(subscriptionRequest: CreateAgentSubscriptionRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Result] = {

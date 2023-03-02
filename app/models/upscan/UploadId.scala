@@ -19,12 +19,9 @@ package models.upscan
 import play.api.libs.json._
 import play.api.mvc.QueryStringBindable
 
-import java.util.UUID
-
 case class UploadId(value: String) extends AnyVal
 
 object UploadId {
-  def generate = UploadId(UUID.randomUUID().toString)
 
   implicit def queryBinder(implicit
     stringBinder: QueryStringBindable[String]

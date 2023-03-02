@@ -55,6 +55,7 @@ class EISResponseController @Inject() (cc: ControllerComponents,
         Rejected(breResponse.genericStatusMessage.validationErrors)
     }
 
+
   def processEISResponse(): Action[NodeSeq] = (Action(parse.xml) andThen validateAuth andThen actionRefiner).async { implicit request =>
     auditService.sendAuditEvent(AuditType.eisResponse, Json.toJson(request.BREResponse))
     val conversationId = request.BREResponse.conversationID

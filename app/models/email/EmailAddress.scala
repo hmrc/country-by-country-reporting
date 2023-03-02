@@ -16,8 +16,11 @@
 
 package models.email
 
+
 object EmailAddress {
+
   val validEmail = """^([a-zA-Z0-9.!#$%&’'*+/=?^_`{|}~-]+)@([a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*)$""".r
+
 
   def isValid(email: String) = email match {
     case validEmail(_, _) => true

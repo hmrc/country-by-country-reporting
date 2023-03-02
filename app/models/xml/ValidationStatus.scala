@@ -20,7 +20,9 @@ import play.api.libs.json.{JsString, Writes}
 
 object ValidationStatus extends Enumeration {
   type ValidationStatus = Value
+
   val accepted: Value = Value("Accepted")
+
   val rejected: Value = Value("Rejected")
 
   implicit val writes: Writes[ValidationStatus] = Writes[ValidationStatus] { v =>

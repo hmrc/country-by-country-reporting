@@ -39,6 +39,7 @@ object ErrorDetail {
 
 case class ErrorDetails(errorDetail: ErrorDetail)
 
+
 object ErrorDetails {
   implicit val format = Json.format[ErrorDetails]
 }

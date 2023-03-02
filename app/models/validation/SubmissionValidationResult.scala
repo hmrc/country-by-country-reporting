@@ -41,6 +41,7 @@ object SubmissionValidationResult {
 
 case class ValidationErrors(errors: Seq[GenericError])
 
+
 object ValidationErrors {
   implicit val format = Json.format[ValidationErrors]
 }

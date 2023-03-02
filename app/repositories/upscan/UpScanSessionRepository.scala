@@ -80,6 +80,7 @@ class UpScanSessionRepository @Inject() (
       .map(_ => true)
   }
 
+
   def insert(uploadDetails: UploadSessionDetails): Future[Boolean] =
     collection
       .insertOne(uploadDetails)

@@ -24,6 +24,7 @@ import scala.xml.Elem
 @Inject
 class DataExtraction()() {
 
+
   def messageSpecData(xml: Elem): Option[MessageSpecData] =
     for {
       messageID <- (xml \\ "MessageRefId").headOption

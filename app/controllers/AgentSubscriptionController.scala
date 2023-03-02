@@ -28,6 +28,7 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
+
 class AgentSubscriptionController @Inject()(
   authenticate: AgentOnlyAuthAction,
   cc: ControllerComponents,

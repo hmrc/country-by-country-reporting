@@ -50,17 +50,20 @@ object AgentResponseDetail {
 
 case class AgentReturnParameters(paramName: String, paramValue: String)
 
+
 object AgentReturnParameters {
   implicit val format: Format[AgentReturnParameters] = Json.format[AgentReturnParameters]
 }
 
 case class AgentResponseCommon(status: String, statusText: Option[String], processingDate: String, returnParameters: Option[Seq[AgentReturnParameters]])
 
+
 object AgentResponseCommon {
   implicit val format: Format[AgentResponseCommon] = Json.format[AgentResponseCommon]
 }
 
 case class DisplayAgentSubscriptionResponse(responseCommon: AgentResponseCommon, responseDetail: AgentResponseDetail)
+
 
 object DisplayAgentSubscriptionResponse {
   implicit val format: OFormat[DisplayAgentSubscriptionResponse] = Json.format[DisplayAgentSubscriptionResponse]
