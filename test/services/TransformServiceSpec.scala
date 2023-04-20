@@ -18,6 +18,7 @@ package services
 
 import base.SpecBase
 import models.agentSubscription.{AgentContactDetails, AgentResponseDetail}
+import models.submission.{ConversationId, SubmissionMetaData}
 import models.subscription.{ContactInformation, OrganisationDetails, ResponseDetail}
 import org.scalatest.StreamlinedXmlEquality._
 
@@ -228,6 +229,95 @@ class TransformServiceSpec extends SpecBase {
     val result = service.addNameSpaceDefinitions(file)
 
     result.toString mustBe expected.toString
+  }
+
+  "must add subscription details to submission without adding any extra spaces or carriage returns" in {
+    val service = app.injector.instanceOf[TransformService]
+
+    val contactInformation =
+      ResponseDetail(
+        subscriptionID = "subscriptionID",
+        tradingName = Some("tradingName"),
+        isGBUser = true,
+        primaryContact = ContactInformation(
+          email = "aaa",
+          phone = Some("bbb"),
+          mobile = None,
+          organisationDetails = OrganisationDetails(
+            organisationName = "Example"
+          )
+        ),
+        secondaryContact = Some(
+          ContactInformation(
+            email = "ddd",
+            phone = Some("eee"),
+            mobile = Some("fff"),
+            organisationDetails = OrganisationDetails(
+              organisationName = "AnotherExample"
+            )
+          )
+        )
+      )
+
+    val metaData = SubmissionMetaData("time", ConversationId("conversationId"), Some("Filename.xml"))
+
+    val uploadedFile = <CBC_OECD version="1.0.0"><submission>Submitted Data</submission></CBC_OECD>
+
+    val expected =
+      <cadx:CBCSubmissionRequest xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:cadx="http://www.hmrc.gsi.gov.uk/cbc/cadx" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.hmrc.gsi.gov.uk/cbc/cadx DCT52c_CustomerFileSubmissionMDTPToCADX_v0.1.xsd">
+        <requestCommon>
+          <receiptDate>time</receiptDate>
+          <regime>CBC</regime>
+          <conversationID>conversationId</conversationID>
+          <schemaVersion>1.0.0</schemaVersion>
+        </requestCommon>
+        <requestDetail><cbc:CBC_OECD version="1.0.0" xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><cbc:submission>Submitted Data</cbc:submission></cbc:CBC_OECD></requestDetail>
+        <requestAdditionalDetail><fileName>Filename.xml</fileName><subscriptionID>subscriptionID</subscriptionID><tradingName>tradingName</tradingName><isGBUser>true</isGBUser><primaryContact><phoneNumber>bbb</phoneNumber><emailAddress>aaa</emailAddress><organisationDetails><organisationName>Example</organisationName></organisationDetails></primaryContact><secondaryContact><phoneNumber>eee</phoneNumber><mobileNumber>fff</mobileNumber><emailAddress>ddd</emailAddress><organisationDetails><organisationName>AnotherExample</organisationName></organisationDetails></secondaryContact></requestAdditionalDetail>
+      </cadx:CBCSubmissionRequest>
+
+    val incorrectlyFormatted =
+      <cadx:CBCSubmissionRequest xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:cadx="http://www.hmrc.gsi.gov.uk/cbc/cadx" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.hmrc.gsi.gov.uk/cbc/cadx DCT52c_CustomerFileSubmissionMDTPToCADX_v0.1.xsd">
+        <requestCommon>
+          <receiptDate>time</receiptDate>
+          <regime>CBC</regime>
+          <conversationID>conversationId</conversationID>
+          <schemaVersion>1.0.0</schemaVersion>
+        </requestCommon>
+        <requestDetail>
+          <cbc:CBC_OECD version="1.0.0" xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <cbc:submission>Submitted Data</cbc:submission>
+          </cbc:CBC_OECD>
+        </requestDetail>
+        <requestAdditionalDetail>
+          <fileName>
+            Filename.xml
+          </fileName>
+          <subscriptionID>subscriptionID</subscriptionID>
+          <tradingName>tradingName</tradingName>
+          <isGBUser>true</isGBUser>
+          <primaryContact>
+            <phoneNumber>bbb</phoneNumber>
+            <emailAddress>aaa</emailAddress>
+            <organisationDetails>
+              <organisationName>Example</organisationName>
+            </organisationDetails>
+          </primaryContact>
+          <secondaryContact>
+            <phoneNumber>eee</phoneNumber>
+            <mobileNumber>fff</mobileNumber>
+            <emailAddress>ddd</emailAddress>
+            <organisationDetails>
+              <organisationName>AnotherExample</organisationName>
+            </organisationDetails>
+          </secondaryContact>
+        </requestAdditionalDetail>
+      </cadx:CBCSubmissionRequest>
+
+    val result =
+      service.addSubscriptionDetailsToSubmission(uploadedFile, contactInformation, metaData)
+
+    assert(expected.toString == result.toString)
+    assert(incorrectlyFormatted.toString != result.toString)
   }
 
 }

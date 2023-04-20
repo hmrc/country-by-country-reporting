@@ -23,38 +23,24 @@ import models.subscription._
 import javax.inject.Inject
 import scala.xml._
 
-
-
-
 class TransformService @Inject() () {
 
-  //TODO update cadx  schemaLocation when recievd the spec DCT72a_CBCSubmissionRequest_v0.1.xsd
   def addSubscriptionDetailsToSubmission(
     uploadedFile: NodeSeq,
     subscriptionDetails: ResponseDetail,
     metaData: SubmissionMetaData,
     agentDetails: Option[AgentContactDetails] = None
   ): NodeSeq =
-    <cadx:CBCSubmissionRequest xmlns:cbc="urn:oecd:ties:cbc:v1"
-                          xmlns:cadx="http://www.hmrc.gsi.gov.uk/cbc/cadx"
-                          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                          xsi:schemaLocation="http://www.hmrc.gsi.gov.uk/cbc/cadx DCT72a_CBCSubmissionRequest_v0.1.xsd">
-
-      <requestCommon>
-        <receiptDate>
-          {metaData.submissionTime}
-        </receiptDate>
-        <regime>CBC</regime>
-        <conversationID>{metaData.conversationId.value}</conversationID>
-        <schemaVersion>1.0.0</schemaVersion>
-      </requestCommon>
-      <requestDetail>
-        {addNameSpaces(addNameSpaceDefinitions(uploadedFile), Seq(NamespaceForNode("CBC_OECD", "cbc"), NamespaceForNode("DocSpec", "stf")))}
-      </requestDetail>
-      <requestAdditionalDetail>
-        {transformSubscriptionDetails(subscriptionDetails, metaData.fileName, agentDetails)}
-      </requestAdditionalDetail>
-    </cadx:CBCSubmissionRequest>
+    <cadx:CBCSubmissionRequest xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:cadx="http://www.hmrc.gsi.gov.uk/cbc/cadx" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.hmrc.gsi.gov.uk/cbc/cadx DCT52c_CustomerFileSubmissionMDTPToCADX_v0.1.xsd">
+        <requestCommon>
+          <receiptDate>{metaData.submissionTime}</receiptDate>
+          <regime>CBC</regime>
+          <conversationID>{metaData.conversationId.value}</conversationID>
+          <schemaVersion>1.0.0</schemaVersion>
+        </requestCommon>
+        <requestDetail>{addNameSpaces(addNameSpaceDefinitions(uploadedFile), Seq(NamespaceForNode("CBC_OECD", "cbc"), NamespaceForNode("DocSpec", "stf")))}</requestDetail>
+        <requestAdditionalDetail>{transformSubscriptionDetails(subscriptionDetails, metaData.fileName, agentDetails)}</requestAdditionalDetail>
+      </cadx:CBCSubmissionRequest>
 
   def addNameSpaceDefinitions(submissionFile: NodeSeq): NodeSeq =
     for (node <- submissionFile) yield node match {
@@ -74,29 +60,13 @@ class TransformService @Inject() () {
     agentDetails: Option[AgentContactDetails] = None
   ): NodeSeq =
     Seq(
-      fileName.map(name => <fileName>
-        {name}
-      </fileName>),
-      Some(<subscriptionID>
-        {subscriptionDetails.subscriptionID}
-      </subscriptionID>),
-      subscriptionDetails.tradingName
-        .filter(_.trim.nonEmpty)
-        .map(tradingName => <tradingName>
-        {tradingName}
-      </tradingName>),
-      Some(<isGBUser>
-        {subscriptionDetails.isGBUser}
-      </isGBUser>),
-      Some(<primaryContact>
-        {transformContactInformation(subscriptionDetails.primaryContact)}
-      </primaryContact>),
-      subscriptionDetails.secondaryContact.map(sc => <secondaryContact>
-        {transformContactInformation(sc)}
-      </secondaryContact>),
-      agentDetails.map { agentDetail =>
-        <agentDetails>{transformAgentSubscriptionDetails(agentDetail.agentReferenceNumber, agentDetail.subscriptionDetails)}</agentDetails>
-      }
+      fileName.map(name => <fileName>{name}</fileName>),
+      Some(<subscriptionID>{subscriptionDetails.subscriptionID}</subscriptionID>),
+      subscriptionDetails.tradingName.filter(_.trim.nonEmpty).map(tradingName => <tradingName>{tradingName}</tradingName>),
+      Some(<isGBUser>{subscriptionDetails.isGBUser}</isGBUser>),
+      Some(<primaryContact>{transformContactInformation(subscriptionDetails.primaryContact)}</primaryContact>),
+      subscriptionDetails.secondaryContact.map(sc => <secondaryContact>{transformContactInformation(sc)}</secondaryContact>),
+      agentDetails.map { agentDetail => <agentDetails>{transformAgentSubscriptionDetails(agentDetail.agentReferenceNumber, agentDetail.subscriptionDetails)}</agentDetails>}
     ).filter(_.isDefined).map(_.get)
   def transformAgentSubscriptionDetails(
     agentReferenceNumber: String,
@@ -113,9 +83,7 @@ class TransformService @Inject() () {
   ): NodeSeq = {
 
     val organisationDetails =
-      Some(<organisationDetails>
-        <organisationName>{contactInformation.organisationDetails.organisationName}</organisationName>
-      </organisationDetails>)
+      Some(<organisationDetails><organisationName>{contactInformation.organisationDetails.organisationName}</organisationName></organisationDetails>)
 
     val nodes =
       Seq(
