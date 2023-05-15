@@ -17,16 +17,32 @@
 package repositories.upscan
 
 import base.SpecBase
-import models.upscan.{Failed, Quarantined, Reference, UploadId, UploadSessionDetails}
+import config.AppConfig
+import models.upscan._
 import org.bson.types.ObjectId
+import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
+import java.time.{Clock, Instant, ZoneId}
 import java.util.UUID
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class UpScanSessionRepositorySpec extends SpecBase {
-  lazy val uploadRep = app.injector.instanceOf[UpScanSessionRepository]
-  val uploadId       = UploadId(UUID.randomUUID().toString)
+class UpScanSessionRepositorySpec extends SpecBase with DefaultPlayMongoRepositorySupport[UploadSessionDetails] {
+
+
+  private val uploadId = UploadId(UUID.randomUUID().toString)
+  private val instant = Instant.now.truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
+  private val stubClock: Clock = Clock.fixed(instant, ZoneId.systemDefault)
+
+  private val mockAppConfig = mock[AppConfig]
+  when(mockAppConfig.cacheTtl) thenReturn 1
+
+  override protected val repository = new UpScanSessionRepository(
+    mongoComponent = mongoComponent,
+    appConfig = mockAppConfig,
+    clock = stubClock
+  )
 
   val uploadDetails = UploadSessionDetails(
     ObjectId.get(),
@@ -34,6 +50,7 @@ class UpScanSessionRepositorySpec extends SpecBase {
     Reference("xxxx"),
     Quarantined
   )
+
   "Insert" - {
     "must insert UploadStatus" in {
       val uploadDetails = UploadSessionDetails(
@@ -42,13 +59,13 @@ class UpScanSessionRepositorySpec extends SpecBase {
         Reference("xxxx"),
         Quarantined
       )
-      val res = uploadRep.insert(uploadDetails)
+      val res = repository.insert(uploadDetails)
       whenReady(res) { result =>
         result mustBe true
       }
     }
     "must read UploadStatus" in {
-      val res = uploadRep.findByUploadId(uploadId)
+      val res = repository.findByUploadId(uploadId)
       whenReady(res) {
         case Some(result) =>
           result.uploadId mustBe (uploadDetails.uploadId)
@@ -60,7 +77,7 @@ class UpScanSessionRepositorySpec extends SpecBase {
   }
   "Update" - {
     "must update a status" in {
-      val result1: Boolean = Await.result(uploadRep.updateStatus(Reference("xxxx"), Failed), 5.seconds)
+      val result1: Boolean = Await.result(repository.updateStatus(Reference("xxxx"), Failed), 5.seconds)
       result1 mustBe true
     }
   }

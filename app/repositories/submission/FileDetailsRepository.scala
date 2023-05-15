@@ -32,18 +32,31 @@ import java.util.concurrent.TimeUnit
 import javax.inject.{Singleton, Inject}
 import scala.concurrent.duration.Duration
 import scala.concurrent.{ExecutionContext, Future}
+import config.AppConfig
 
 @Singleton
 class FileDetailsRepository @Inject() (
   val mongo: MongoComponent,
-  config: Configuration,
+  appConfig: AppConfig,
   metricsService: MetricsService
 )(implicit ec: ExecutionContext)
     extends PlayMongoRepository[FileDetails](
       mongoComponent = mongo,
       collectionName = "file-details",
       domainFormat = FileDetails.format,
-      indexes = FileDetailsRepository.indexes(config),
+      indexes = Seq(
+        IndexModel(
+          ascending("lastUpdated"),
+          IndexOptions()
+            .name("submission-last-updated-index")
+            .expireAfter(appConfig.submissionTtl, TimeUnit.DAYS)
+        ),
+        IndexModel(ascending("subscriptionId"),
+          IndexOptions()
+            .name("subscriptionId-index")
+            .unique(false)
+        )
+      ),
       replaceIndexes = true
     ) {
 
@@ -100,24 +113,4 @@ class FileDetailsRepository @Inject() (
         true
       }
 
-}
-
-object FileDetailsRepository {
-
-  def cacheTtl(config: Configuration): Long =
-    Duration(config.get[Int]("mongodb.submission.timeToLiveInDays"), "days").toSeconds
-
-  def indexes(config: Configuration) = Seq(
-    IndexModel(
-      ascending("lastUpdated"),
-      IndexOptions()
-        .name("submission-last-updated-index")
-        .expireAfter(cacheTtl(config), TimeUnit.SECONDS)
-    ),
-    IndexModel(ascending("subscriptionId"),
-               IndexOptions()
-                 .name("subscriptionId-index")
-                 .unique(false)
-    )
-  )
 }
