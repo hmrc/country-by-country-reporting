@@ -45,6 +45,8 @@ class AppConfig @Inject()(config: Configuration,
 
   lazy val sendEmailUrl: String = servicesConfig.baseUrl("email")
 
+  lazy val cacheTtl: Int = config.get[Int]("mongodb.timeToLiveInSeconds")
+  lazy val submissionTtl: Int = config.get[Int]("mongodb.submission.timeToLiveInDays")
 
   lazy val emailOrganisationSuccessfulTemplate: String = config.get[String]("emailTemplates.fileOrganisationUploadSuccessful")
   lazy val emailOrganisationUnsuccessfulTemplate: String = config.get[String]("emailTemplates.fileOrganisationUploadUnsuccessful")

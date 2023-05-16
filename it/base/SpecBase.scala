@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-package config
+package base
 
-import com.google.inject.AbstractModule
-import services.upscan.{MongoBackedUploadProgressTracker, UploadProgressTracker}
+import org.mockito.MockitoSugar
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.{OptionValues, TryValues}
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
-import java.time.{Clock, ZoneOffset}
-
-
-class Module() extends AbstractModule {
-
-  override def configure(): Unit = {
-    bind(classOf[UploadProgressTracker]).to(classOf[MongoBackedUploadProgressTracker])
-    bind(classOf[Clock]).toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC))
-    ()
-  }
-}
+trait SpecBase
+  extends AnyFreeSpec
+    with Matchers
+    with GuiceOneAppPerSuite
+    with OptionValues
+    with TryValues
+    with ScalaFutures
+    with IntegrationPatience
+    with MockitoSugar
