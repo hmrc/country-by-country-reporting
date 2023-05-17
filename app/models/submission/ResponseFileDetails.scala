@@ -16,8 +16,7 @@
 
 package models.submission
 
-import play.api.libs.json.{__, Json, OWrites, Reads}
-import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
+import play.api.libs.json.{Json, OWrites, Reads, __}
 
 import java.time.LocalDateTime
 
