@@ -27,7 +27,7 @@ case class UploadSessionDetails(
   uploadId: UploadId,
   reference: Reference,
   status: UploadStatus,
-  lastUpdated: Instant = Instant.now()
+  lastUpdated: Instant = Instant.now
 )
 
 object UploadSessionDetails {

@@ -16,6 +16,7 @@
 
 package repositories.submission
 
+import config.AppConfig
 import metrics.MetricsService
 import models.submission.{ConversationId, FileDetails, FileStatus}
 import org.mongodb.scala.bson.conversions.Bson
@@ -23,16 +24,13 @@ import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.Updates.set
 import org.mongodb.scala.model._
-import play.api.Configuration
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
 import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
-import javax.inject.{Singleton, Inject}
-import scala.concurrent.duration.Duration
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import config.AppConfig
 
 @Singleton
 class FileDetailsRepository @Inject() (
