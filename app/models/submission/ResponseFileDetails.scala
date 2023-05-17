@@ -41,8 +41,8 @@ object ResponseFileDetails {
       (__ \ "reportingEntityName").read[String] and
       (__ \ "status").read[FileStatus] and
       (__ \ "name").read[String] and
-      (__ \ "created").read[LocalDateTime](MongoJavatimeFormats.localDateTimeReads) and
-      (__ \ "updated").read[LocalDateTime](MongoJavatimeFormats.localDateTimeReads)
+      (__ \ "created").read[LocalDateTime](FileDetails.localDateTimeReads) and
+      (__ \ "updated").read[LocalDateTime](FileDetails.localDateTimeReads)
     )(ResponseFileDetails.apply _)
 
   implicit val writes: OWrites[ResponseFileDetails] = Json.writes[ResponseFileDetails]

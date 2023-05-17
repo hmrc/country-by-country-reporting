@@ -23,7 +23,6 @@ import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.Updates.set
 import org.mongodb.scala.model.{FindOneAndUpdateOptions, IndexModel, IndexOptions, Updates}
-import play.api.Configuration
 import play.api.libs.json.Format
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
@@ -34,10 +33,9 @@ import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-
 @Singleton
 class UpScanSessionRepository @Inject() (
-                                          val mongoComponent: MongoComponent,
+                                          mongoComponent: MongoComponent,
                                           clock: Clock,
                                           appConfig: AppConfig
                                         )(implicit ec: ExecutionContext)
@@ -92,7 +90,6 @@ class UpScanSessionRepository @Inject() (
       .toFuture
       .map(_ => true)
   }
-
 
   def insert(uploadDetails: UploadSessionDetails): Future[Boolean] =
     collection
