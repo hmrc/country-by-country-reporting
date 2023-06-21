@@ -17,20 +17,20 @@
 package services
 
 import base.SpecBase
+import config.AppConfig
 import connectors.EmailConnector
 import generators.Generators
 import models.agentSubscription.{AgentContactDetails, AgentResponseDetail}
 import models.email.EmailRequest
 import models.error.ReadSubscriptionError
 import models.subscription.{ContactInformation, OrganisationDetails, ResponseDetail}
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, eq => mockitoEq}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
 import play.api.http.Status.{ACCEPTED, BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, NO_CONTENT}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.test.Helpers.OK
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import utils.DateTimeFormatUtil
 
@@ -54,6 +54,8 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
       bind[SubscriptionService].toInstance(mockSubscriptionService)
     )
     .build()
+
+  val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
 
   val emailService: EmailService = app.injector.instanceOf[EmailService]
 
@@ -88,9 +90,10 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
   val submissionTime = DateTimeFormatUtil.displayFormattedDate(LocalDateTime.now)
   val messageRefId   = "messageRefId"
   val subscriptionId = "subscriptionId"
+  val tradingName    = "tradingName"
 
-  val agentDetails = AgentContactDetails("ARN", AgentResponseDetail(subscriptionId, None, isGBUser = true, agentPrimaryContact, Some(agentSecondaryContact)))
-  val agentSingleContactDetails = AgentContactDetails("ARN", AgentResponseDetail(subscriptionId, None, isGBUser = true, agentPrimaryContact, None))
+  val agentDetails = AgentContactDetails("ARN", AgentResponseDetail(subscriptionId, Option(tradingName), isGBUser = true, agentPrimaryContact, Some(agentSecondaryContact)))
+  val agentSingleContactDetails = AgentContactDetails("ARN", AgentResponseDetail(subscriptionId, Option(tradingName), isGBUser = true, agentPrimaryContact, None))
 
   "Email Service" - {
     "sendAndLogEmail" - {
@@ -222,6 +225,18 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
 
       "must submit to the email connector once for Agent only when Agent and client both have 1 set of valid details provided for failed file upload" in {
 
+        val emailRequest = EmailRequest(
+          List(agentPrimaryContact.email),
+          appConfig.emailAgentUnsuccessfulTemplate,
+          Map(
+            "dateSubmitted"     -> submissionTime,
+            "messageRefId"      -> messageRefId,
+            "contactName"       -> agentPrimaryContact.organisationDetails.organisationName,
+            "cbcId"             -> subscriptionId,
+            "clientTradingName" -> tradingName
+          )
+        )
+
         when(mockEmailConnector.sendEmail(any[EmailRequest])(any[HeaderCarrier]))
           .thenReturn(
             Future.successful(HttpResponse(ACCEPTED, ""))
@@ -229,7 +244,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
 
         when(mockSubscriptionService.getContactInformation(any[String])(any[HeaderCarrier], any[ExecutionContext]))
           .thenReturn(
-            Future.successful(Right(ResponseDetail(subscriptionId, None, isGBUser = true, primaryContact, None)))
+            Future.successful(Right(ResponseDetail(subscriptionId, Option(tradingName), isGBUser = true, primaryContact, None)))
           )
 
         val result = emailService.sendEmail(subscriptionId, submissionTime, messageRefId, Some(agentSingleContactDetails), isUploadSuccessful = false)
@@ -237,7 +252,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
         whenReady(result) { result =>
           result.map(_.result.map(_.status)) mustBe Seq(Some(ACCEPTED), None)
 
-          verify(mockEmailConnector, times(1)).sendEmail(any[EmailRequest])(any[HeaderCarrier])
+          verify(mockEmailConnector, times(1)).sendEmail(mockitoEq(emailRequest))(any[HeaderCarrier])
         }
       }
 

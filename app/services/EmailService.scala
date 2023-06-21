@@ -68,7 +68,7 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
         val agentSecondaryEmail   = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.email))
         val agentSecondaryName    = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.organisationDetails.organisationName))
         val cbcId                 = responseDetail.subscriptionID
-        val clientTradingName     = responseDetail.tradingName
+        val tradingName           = responseDetail.tradingName
 
         lazy val orgEmails: Seq[Future[EmailResult]] = Seq(
           send(emailAddress, contactName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId, None, None)
@@ -84,7 +84,7 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
                submissionTime,
                messageRefId,
                Some(cbcId),
-               clientTradingName
+              tradingName
           ).map(res => EmailResult("Primary Agent", res)),
           send(agentSecondaryEmail,
                agentSecondaryName,
@@ -92,7 +92,7 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
                submissionTime,
                messageRefId,
                Some(cbcId),
-               clientTradingName
+               tradingName
           ).map(res => EmailResult("Secondary Agent", res))
         )
 
@@ -119,14 +119,14 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
                    submissionTime: String,
                    messageRefId: String,
                    cbcId: Option[String],
-                   clientTradingName: Option[String]
+                   tradingName: Option[String]
   )(implicit hc: HeaderCarrier): Future[Option[HttpResponse]] = {
     emailAddress
       .filter(EmailAddress.isValid)
       .map { email =>
         emailConnector
           .sendEmail(
-            EmailRequest.fileUploadSubmission(email, contactName, template, submissionTime, messageRefId, cbcId, clientTradingName)
+            EmailRequest.fileUploadSubmission(email, contactName, template, submissionTime, messageRefId, cbcId, tradingName)
           )
           .map(Some.apply)
       }
