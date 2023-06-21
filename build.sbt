@@ -1,5 +1,4 @@
 import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 
 val appName = "country-by-country-reporting"
 
@@ -20,7 +19,6 @@ lazy val microservice = Project(appName, file("."))
     )
   )
   .settings(scoverageSettings)
-  .settings(publishingSettings: _*)
   .configs(IntegrationTest)
   .settings(integrationTestSettings(): _*)
   .settings(resolvers += Resolver.jcenterRepo)
