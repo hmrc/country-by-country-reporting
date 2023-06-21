@@ -68,15 +68,32 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
         val agentSecondaryEmail   = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.email))
         val agentSecondaryName    = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.organisationDetails.organisationName))
         val cbcId                 = responseDetail.subscriptionID
+        val clientTradingName     = responseDetail.tradingName
 
         lazy val orgEmails: Seq[Future[EmailResult]] = Seq(
-          send(emailAddress, contactName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId, None).map(res => EmailResult("Primary Org", res)),
-          send(secondaryEmailAddress, secondaryName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId, None).map(res => EmailResult("Secondary Org", res))
+          send(emailAddress, contactName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId, None, None)
+            .map(res => EmailResult("Primary Org", res)),
+          send(secondaryEmailAddress, secondaryName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId, None, None)
+            .map(res => EmailResult("Secondary Org", res))
         )
 
         lazy val agentEmails: Seq[Future[EmailResult]] = Seq(
-          send(agentPrimaryEmail, agentPrimaryName, emailTemplate.getAgentTemplate(isUploadSuccessful), submissionTime, messageRefId, Some(cbcId)).map(res => EmailResult("Primary Agent", res)),
-          send(agentSecondaryEmail, agentSecondaryName, emailTemplate.getAgentTemplate(isUploadSuccessful), submissionTime, messageRefId, Some(cbcId)).map(res => EmailResult("Secondary Agent", res))
+          send(agentPrimaryEmail,
+               agentPrimaryName,
+               emailTemplate.getAgentTemplate(isUploadSuccessful),
+               submissionTime,
+               messageRefId,
+               Some(cbcId),
+               clientTradingName
+          ).map(res => EmailResult("Primary Agent", res)),
+          send(agentSecondaryEmail,
+               agentSecondaryName,
+               emailTemplate.getAgentTemplate(isUploadSuccessful),
+               submissionTime,
+               messageRefId,
+               Some(cbcId),
+               clientTradingName
+          ).map(res => EmailResult("Secondary Agent", res))
         )
 
         (agentDetails.isDefined, isUploadSuccessful) match {
@@ -96,14 +113,20 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
     }
   }
 
-  private def send(emailAddress: Option[String], contactName: Option[String], template: String, submissionTime: String, messageRefId: String, cbcId: Option[String])
-  (implicit hc: HeaderCarrier): Future[Option[HttpResponse]] = {
+  private def send(emailAddress: Option[String],
+                   contactName: Option[String],
+                   template: String,
+                   submissionTime: String,
+                   messageRefId: String,
+                   cbcId: Option[String],
+                   clientTradingName: Option[String]
+  )(implicit hc: HeaderCarrier): Future[Option[HttpResponse]] = {
     emailAddress
       .filter(EmailAddress.isValid)
       .map { email =>
         emailConnector
           .sendEmail(
-            EmailRequest.fileUploadSubmission(email, contactName, template, submissionTime, messageRefId, cbcId)
+            EmailRequest.fileUploadSubmission(email, contactName, template, submissionTime, messageRefId, cbcId, clientTradingName)
           )
           .map(Some.apply)
       }
