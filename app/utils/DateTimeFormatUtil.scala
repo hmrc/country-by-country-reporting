@@ -26,7 +26,8 @@ object DateTimeFormatUtil {
   val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
   val timeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("h:mma")
 
-  def displayFormattedDate(dateTime: LocalDateTime): String =
-    s"${dateTime.atZone(euLondonZoneId).format(dateFormatter).capitalize} at ${dateTime.atZone(euLondonZoneId).format(timeFormatter)}"
+  def displayFormattedDate(dateTime: LocalDateTime): String = {
+    s"${dateTime.atZone(euLondonZoneId).format(timeFormatter)} on ${dateTime.atZone(euLondonZoneId).format(dateFormatter).capitalize}"
+  }
 
 }
