@@ -41,7 +41,7 @@ object EmailRequest {
         "dateSubmitted" -> submissionTime,
         "messageRefId"  -> messageRefId,
         "contactName"   -> contactName
-      ) ++ cbcId.map("cbcId" -> _) ++ tradingName.map("clientTradingName" -> _)
+      ) ++ cbcId.map("cbcId" -> _) ++ tradingName.filter(_.nonEmpty).map("clientTradingName" -> _)
     )
   }
 }
