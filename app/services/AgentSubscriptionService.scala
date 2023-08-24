@@ -18,12 +18,12 @@ package services
 
 import connectors.AgentSubscriptionConnector
 import models.agentSubscription._
-import models.error.{ErrorDetails, ReadSubscriptionError, UpdateSubscriptionError}
+import models.error._
 import play.api.Logging
 import play.api.http.Status._
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{JsSuccess, Json, Reads}
 import play.api.mvc.Result
-import play.api.mvc.Results.{BadRequest, Conflict, Forbidden, InternalServerError, NotFound, Ok, ServiceUnavailable}
+import play.api.mvc.Results._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import javax.inject.Inject
@@ -33,33 +33,44 @@ import scala.util.{Success, Try}
 
 class AgentSubscriptionService @Inject()(agentSubscriptionConnector: AgentSubscriptionConnector) extends Logging {
 
-  def createContactInformation(subscriptionRequest: CreateAgentSubscriptionRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Result] = {
+  def createContactInformation(subscriptionRequest: CreateAgentSubscriptionEtmpRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Result] = {
 
     agentSubscriptionConnector.createSubscription(subscriptionRequest).map { response =>
+
+      val responseBody = response.body
       response.status match {
-      case OK => Ok(response.body)
-      case NOT_FOUND => NotFound(response.body)
-      case BAD_REQUEST =>
-      logDownStreamError (response.body)
-      BadRequest(response.body)
+        case CREATED => Ok(responseBody)
+        case NOT_FOUND => NotFound(responseBody)
+        case UNPROCESSABLE_ENTITY =>
+          logDownStreamError[BusinessValidationError](responseBody)
+          UnprocessableEntity(responseBody)
 
-      case FORBIDDEN =>
-      logDownStreamError (response.body)
-      Forbidden(response.body)
+        case INTERNAL_SERVER_ERROR =>
+          logDownStreamError[BackendSAPSystemError](responseBody)
+          InternalServerError(responseBody)
 
-      case SERVICE_UNAVAILABLE =>
-      logDownStreamError (response.body)
-      ServiceUnavailable(response.body)
+        case BAD_REQUEST =>
+          logDownStreamError[ErrorDetails](responseBody)
+          BadRequest(responseBody)
 
-      case CONFLICT =>
-      logDownStreamError (response.body)
-      Conflict(response.body)
+        case FORBIDDEN =>
+          logDownStreamError[ErrorDetails](responseBody)
+          Forbidden(responseBody)
 
-      case _ =>
-      logDownStreamError (response.body)
-      InternalServerError(response.body)
+        case SERVICE_UNAVAILABLE =>
+          logDownStreamError[ErrorDetails](responseBody)
+          ServiceUnavailable(responseBody)
+
+        case CONFLICT =>
+          logDownStreamError[ErrorDetails](responseBody)
+          Conflict(responseBody)
+
+        case _ =>
+          logDownStreamError[ErrorDetails](responseBody)
+          InternalServerError(responseBody)
       }
     }
+
   }
 
   def getContactInformation(agentRefNo: String)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Either[ReadSubscriptionError, AgentResponseDetail]] = {
@@ -95,13 +106,11 @@ class AgentSubscriptionService @Inject()(agentSubscriptionConnector: AgentSubscr
       }
     }
 
-  private def logDownStreamError(body: String): Unit = {
-    val error = Try(Json.parse(body).validate[ErrorDetails])
+  private def logDownStreamError[T <: DownStreamError](body: String)(implicit reads: Reads[T]): Unit = {
+    val error = Try(Json.parse(body).validate[T])
     error match {
       case Success(JsSuccess(value, _)) =>
-        logger.warn(
-          s"Error with submission: ${value.errorDetail.sourceFaultDetail.map(_.detail.mkString)}"
-        )
+        logger.warn(s"Error with submission: ${value.detail}")
       case _ =>
         logger.warn("Error with submission but return is not a valid json")
     }

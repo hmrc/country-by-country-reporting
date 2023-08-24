@@ -31,11 +31,12 @@ import play.api.inject.bind
 import play.api.libs.json.Json
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import CreateAgentSubscriptionEtmpRequest._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class AgentSubscriptionServiceSpec extends SpecBase with BeforeAndAfterEach with Generators with ScalaCheckPropertyChecks {
+class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEach with Generators with ScalaCheckPropertyChecks {
 
   override def beforeEach(): Unit = reset(mockAgentSubscriptionConnector)
 
@@ -78,18 +79,46 @@ class AgentSubscriptionServiceSpec extends SpecBase with BeforeAndAfterEach with
         |""".stripMargin)
     val requestDetailForUpdate = requestDetailJson.as[AgentRequestDetailForUpdate]
 
-    val createAgentSubscriptionRequest = CreateAgentSubscriptionRequest(
-      AgentCreateSubscriptionRequest(
-        AgentRequestCommonForSubscription("CBC", "2020-10-01", "acknowledgement", "MDTP", None),
-        requestDetailJson.as[AgentRequestDetail])
-      )
       
     "createSubscription" - {
+      val createAgentSubscriptionJson = Json.parse(
+      """
+        |{
+        |  "idType" : "ARN",
+        |  "idNumber" : "JARN0000158",
+        |  "tradingName" : "tshfhygzjqdlvuk",
+        |  "gbUser" : false,
+        |  "primaryContact" : {
+        |    "individual" : {
+        |      "firstName" : "pamio",
+        |      "middleName" : "lxtt",
+        |      "lastName" : "hcuamjmixp"
+        |    },
+        |    "email" : "mj@gmailqqq.com",
+        |    "phone" : "(+351) 282 43 50 50",
+        |    "mobile" : "555-8909"
+        |  },
+        |  "secondaryContact" : {
+        |    "individual" : {
+        |      "firstName" : "pwpesonhpntyq",
+        |      "middleName" : "bp",
+        |      "lastName" : "hieieiy"
+        |    },
+        |    "email" : "djwkxescl@gmail.com",
+        |    "phone" : "1-234 567.89/01 ext.1234",
+        |    "mobile" : "(0055)(123)8575973"
+        |  }
+        |}
+        |""".stripMargin
+      )
+
+      val createAgentSubscriptionRequest = createAgentSubscriptionJson.as[CreateAgentSubscriptionEtmpRequest]
+
       "should return BAD_REQUEST when subscriptionForCBCRequest ia invalid" in {
         when(
           mockAgentSubscriptionConnector
             .createSubscription(
-              any[CreateAgentSubscriptionRequest]()
+              any[CreateAgentSubscriptionEtmpRequest]()
             )(
               any[HeaderCarrier](),
               any[ExecutionContext]()
@@ -109,7 +138,7 @@ class AgentSubscriptionServiceSpec extends SpecBase with BeforeAndAfterEach with
         when(
           mockAgentSubscriptionConnector
             .createSubscription(
-              any[CreateAgentSubscriptionRequest]()
+              any[CreateAgentSubscriptionEtmpRequest]()
             )(
               any[HeaderCarrier](),
               any[ExecutionContext]()
@@ -121,7 +150,7 @@ class AgentSubscriptionServiceSpec extends SpecBase with BeforeAndAfterEach with
             )
           )
 
-        forAll(arbitrary[CreateAgentSubscriptionRequest]) {
+        forAll(arbitrary[CreateAgentSubscriptionEtmpRequest]) {
           subscriptionForCBCRequest =>
             val result = service.createContactInformation(subscriptionForCBCRequest)
             status(result) mustEqual BAD_REQUEST
@@ -132,7 +161,7 @@ class AgentSubscriptionServiceSpec extends SpecBase with BeforeAndAfterEach with
         when(
           mockAgentSubscriptionConnector
             .createSubscription(
-              any[CreateAgentSubscriptionRequest]()
+              any[CreateAgentSubscriptionEtmpRequest]()
             )(
               any[HeaderCarrier](),
               any[ExecutionContext]()
@@ -144,7 +173,7 @@ class AgentSubscriptionServiceSpec extends SpecBase with BeforeAndAfterEach with
             )
           )
 
-        forAll(arbitrary[CreateAgentSubscriptionRequest]) {
+        forAll(arbitrary[CreateAgentSubscriptionEtmpRequest]) {
           subscriptionForCBCRequest =>
             val result = service.createContactInformation(subscriptionForCBCRequest)
             status(result) mustEqual FORBIDDEN
@@ -155,7 +184,7 @@ class AgentSubscriptionServiceSpec extends SpecBase with BeforeAndAfterEach with
         when(
           mockAgentSubscriptionConnector
             .createSubscription(
-              any[CreateAgentSubscriptionRequest]()
+              any[CreateAgentSubscriptionEtmpRequest]()
             )(
               any[HeaderCarrier](),
               any[ExecutionContext]()
@@ -167,7 +196,7 @@ class AgentSubscriptionServiceSpec extends SpecBase with BeforeAndAfterEach with
             )
           )
 
-        forAll(arbitrary[CreateAgentSubscriptionRequest]) {
+        forAll(arbitrary[CreateAgentSubscriptionEtmpRequest]) {
           subscriptionForCBCRequest =>
             val result = service.createContactInformation(subscriptionForCBCRequest)
             status(result) mustEqual SERVICE_UNAVAILABLE
@@ -178,7 +207,7 @@ class AgentSubscriptionServiceSpec extends SpecBase with BeforeAndAfterEach with
         when(
           mockAgentSubscriptionConnector
             .createSubscription(
-              any[CreateAgentSubscriptionRequest]()
+              any[CreateAgentSubscriptionEtmpRequest]()
             )(
               any[HeaderCarrier](),
               any[ExecutionContext]()
@@ -194,7 +223,7 @@ class AgentSubscriptionServiceSpec extends SpecBase with BeforeAndAfterEach with
             )
           )
 
-        forAll(arbitrary[CreateAgentSubscriptionRequest]) {
+        forAll(arbitrary[CreateAgentSubscriptionEtmpRequest]) {
           subscriptionForCBCRequest =>
             val result = service.createContactInformation(subscriptionForCBCRequest)
             status(result) mustEqual INTERNAL_SERVER_ERROR
@@ -215,7 +244,7 @@ class AgentSubscriptionServiceSpec extends SpecBase with BeforeAndAfterEach with
         when(
           mockAgentSubscriptionConnector
             .createSubscription(
-              any[CreateAgentSubscriptionRequest]()
+              any[CreateAgentSubscriptionEtmpRequest]()
             )(
               any[HeaderCarrier](),
               any[ExecutionContext]()
@@ -231,7 +260,7 @@ class AgentSubscriptionServiceSpec extends SpecBase with BeforeAndAfterEach with
             )
           )
 
-        forAll(arbitrary[CreateAgentSubscriptionRequest]) {
+        forAll(arbitrary[CreateAgentSubscriptionEtmpRequest]) {
           subscriptionForCBCRequest =>
             val result = service.createContactInformation(subscriptionForCBCRequest)
             status(result) mustEqual CONFLICT
@@ -242,7 +271,7 @@ class AgentSubscriptionServiceSpec extends SpecBase with BeforeAndAfterEach with
         when(
           mockAgentSubscriptionConnector
             .createSubscription(
-              any[CreateAgentSubscriptionRequest]()
+              any[CreateAgentSubscriptionEtmpRequest]()
             )(
               any[HeaderCarrier](),
               any[ExecutionContext]()
@@ -254,7 +283,7 @@ class AgentSubscriptionServiceSpec extends SpecBase with BeforeAndAfterEach with
             )
           )
 
-        forAll(arbitrary[CreateAgentSubscriptionRequest]) {
+        forAll(arbitrary[CreateAgentSubscriptionEtmpRequest]) {
           subscriptionForCBCRequest =>
             val result = service.createContactInformation(subscriptionForCBCRequest)
             status(result) mustEqual NOT_FOUND
@@ -265,7 +294,7 @@ class AgentSubscriptionServiceSpec extends SpecBase with BeforeAndAfterEach with
         when(
           mockAgentSubscriptionConnector
             .createSubscription(
-              any[CreateAgentSubscriptionRequest]()
+              any[CreateAgentSubscriptionEtmpRequest]()
             )(
               any[HeaderCarrier](),
               any[ExecutionContext]()
@@ -277,7 +306,7 @@ class AgentSubscriptionServiceSpec extends SpecBase with BeforeAndAfterEach with
             )
           )
 
-        forAll(arbitrary[CreateAgentSubscriptionRequest]) {
+        forAll(arbitrary[CreateAgentSubscriptionEtmpRequest]) {
           subscriptionForCBCRequest =>
             val result = service.createContactInformation(subscriptionForCBCRequest)
             status(result) mustEqual SERVICE_UNAVAILABLE

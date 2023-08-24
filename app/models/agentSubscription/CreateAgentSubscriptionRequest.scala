@@ -19,10 +19,39 @@ package models.agentSubscription
 import play.api.libs.json.{Json, OFormat}
 
 case class CreateAgentSubscriptionRequest(
-     createAgentSubscriptionForCBCRequest: AgentCreateSubscriptionRequest
+  createAgentSubscriptionForCBCRequest: AgentCreateSubscriptionRequest
 )
 
 object CreateAgentSubscriptionRequest {
-  implicit val format: OFormat[CreateAgentSubscriptionRequest] =
-    Json.format[CreateAgentSubscriptionRequest]
+
+  implicit val format: OFormat[CreateAgentSubscriptionRequest] = Json.format[CreateAgentSubscriptionRequest]
+
+  implicit class CreateAgentSubscriptionRequestExtension(val req: CreateAgentSubscriptionRequest) extends AnyVal {
+
+    def toEtmpRequest: CreateAgentSubscriptionEtmpRequest = {
+      val cbcRequestDetail = req.createAgentSubscriptionForCBCRequest.requestDetail
+
+      CreateAgentSubscriptionEtmpRequest(
+        idType = cbcRequestDetail.IDType,
+        idNumber = cbcRequestDetail.IDNumber,
+        gbUser = cbcRequestDetail.isGBUser,
+        primaryContact = Contact(
+          email = cbcRequestDetail.primaryContact.email,
+          organisation = Option(Organisation(cbcRequestDetail.primaryContact.organisationDetails.organisationName)),
+          phone = cbcRequestDetail.primaryContact.phone,
+          mobile = cbcRequestDetail.primaryContact.mobile
+        ),
+        tradingName = cbcRequestDetail.tradingName,
+        secondaryContact = cbcRequestDetail.secondaryContact.map { contact =>
+          Contact(
+            email = contact.email,
+            organisation = Option(Organisation(contact.organisationDetails.organisationName)),
+            phone = contact.phone,
+            mobile = contact.mobile
+          )
+        }
+      )
+    }
+  }
+
 }

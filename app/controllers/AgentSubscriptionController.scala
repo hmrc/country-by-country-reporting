@@ -47,8 +47,7 @@ class AgentSubscriptionController @Inject()(
         Future.successful(
           BadRequest("CreateAgentSubscriptionRequest is invalid")
         ),
-      arn =>
-        agentSubscriptionService.createContactInformation(arn)
+      arn => agentSubscriptionService.createContactInformation(arn.toEtmpRequest)
     )
   }
 
