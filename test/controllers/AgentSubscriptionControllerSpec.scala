@@ -20,7 +20,7 @@ import akka.http.javadsl.model.DateTime
 import base.SpecBase
 import controllers.auth.{AgentOnlyAuthAction, FakeAgentOnlyAuthAction}
 import generators.Generators
-import models.agentSubscription.{AgentRequestDetailForUpdate, AgentResponseDetail, CreateAgentSubscriptionEtmpRequest, CreateAgentSubscriptionRequest}
+import models.agentSubscription.{AgentResponseDetail, AgentSubscriptionEtmpRequest, CreateAgentSubscriptionRequest}
 import models.error._
 import org.mockito.ArgumentMatchers.any
 import org.scalacheck.Arbitrary.arbitrary
@@ -108,7 +108,7 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
         when(
           mockAgentSubscriptionService
             .createContactInformation(
-              any[CreateAgentSubscriptionEtmpRequest]()
+              any[AgentSubscriptionEtmpRequest]()
             )(
               any[HeaderCarrier](),
               any[ExecutionContext]()
@@ -135,7 +135,7 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
         when(
           mockAgentSubscriptionService
             .createContactInformation(
-              any[CreateAgentSubscriptionEtmpRequest]()
+              any[AgentSubscriptionEtmpRequest]()
             )(
               any[HeaderCarrier](),
               any[ExecutionContext]()
@@ -165,7 +165,7 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
         when(
           mockAgentSubscriptionService
             .createContactInformation(
-              any[CreateAgentSubscriptionEtmpRequest]()
+              any[AgentSubscriptionEtmpRequest]()
             )(
               any[HeaderCarrier](),
               any[ExecutionContext]()
@@ -195,7 +195,7 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
         when(
           mockAgentSubscriptionService
             .createContactInformation(
-              any[CreateAgentSubscriptionEtmpRequest]()
+              any[AgentSubscriptionEtmpRequest]()
             )(
               any[HeaderCarrier](),
               any[ExecutionContext]()
@@ -225,7 +225,7 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
         when(
           mockAgentSubscriptionService
             .createContactInformation(
-              any[CreateAgentSubscriptionEtmpRequest]()
+              any[AgentSubscriptionEtmpRequest]()
             )(
               any[HeaderCarrier](),
               any[ExecutionContext]()
@@ -265,7 +265,7 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
         when(
           mockAgentSubscriptionService
             .createContactInformation(
-              any[CreateAgentSubscriptionEtmpRequest]()
+              any[AgentSubscriptionEtmpRequest]()
             )(
               any[HeaderCarrier](),
               any[ExecutionContext]()
@@ -295,7 +295,7 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
         when(
           mockAgentSubscriptionService
             .createContactInformation(
-              any[CreateAgentSubscriptionEtmpRequest]()
+              any[AgentSubscriptionEtmpRequest]()
             )(
               any[HeaderCarrier](),
               any[ExecutionContext]()
@@ -325,7 +325,7 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
         when(
           mockAgentSubscriptionService
             .createContactInformation(
-              any[CreateAgentSubscriptionEtmpRequest]()
+              any[AgentSubscriptionEtmpRequest]()
             )(
               any[HeaderCarrier](),
               any[ExecutionContext]()
@@ -385,7 +385,7 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
 
       "should return OK when updateContactInformation was successful" in {
         when(mockAgentSubscriptionService.updateContactInformation(
-          any[AgentRequestDetailForUpdate])(any[HeaderCarrier], any[ExecutionContext])
+          any[AgentSubscriptionEtmpRequest])(any[HeaderCarrier], any[ExecutionContext])
         ).thenReturn(Future.successful(Right(())))
 
         val request =
@@ -401,7 +401,7 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
 
       "should return InternalServerError when updateContactInformation fails" in {
         when(mockAgentSubscriptionService.updateContactInformation(
-          any[AgentRequestDetailForUpdate])(any[HeaderCarrier], any[ExecutionContext])
+          any[AgentSubscriptionEtmpRequest])(any[HeaderCarrier], any[ExecutionContext])
         ).thenReturn(Future.successful(Left(UpdateSubscriptionError(500))))
 
         val request =

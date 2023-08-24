@@ -47,7 +47,6 @@ object AgentRequestCommonForUpdate {
       requestParameters = None
     )
   }
-
 }
 
 case class AgentRequestDetailForUpdate(IDType: String,
@@ -67,7 +66,7 @@ object AgentRequestDetailForUpdate {
       (__ \ "isGBUser").read[Boolean] and
       (__ \ "primaryContact").read[AgentContactInformation] and
       (__ \ "secondaryContact").readNullable[AgentContactInformation]
-  )((idt, idr, tn, gb, pc, sc) => AgentRequestDetailForUpdate(idt, idr, tn, gb, pc, sc))
+    ) ((idt, idr, tn, gb, pc, sc) => AgentRequestDetailForUpdate(idt, idr, tn, gb, pc, sc))
 
   implicit lazy val writes: Writes[AgentRequestDetailForUpdate] = (
     (__ \ "IDType").write[String] and
@@ -76,8 +75,34 @@ object AgentRequestDetailForUpdate {
       (__ \ "isGBUser").write[Boolean] and
       (__ \ "primaryContact").write[Seq[AgentContactInformation]] and
       (__ \ "secondaryContact").writeNullable[Seq[AgentContactInformation]]
-  )(r => (r.IDType, r.IDNumber, r.tradingName, r.isGBUser, Seq(r.primaryContact), r.secondaryContact.map(Seq(_))))
+    ) (r => (r.IDType, r.IDNumber, r.tradingName, r.isGBUser, Seq(r.primaryContact), r.secondaryContact.map(Seq(_))))
 
+  implicit class UpdateAgentSubscriptionRequestExtension(val req: AgentRequestDetailForUpdate) extends AnyVal {
+
+    def toUpdateEtmpRequest: AgentSubscriptionEtmpRequest = {
+
+      AgentSubscriptionEtmpRequest(
+        idType = req.IDType,
+        idNumber = req.IDNumber,
+        gbUser = req.isGBUser,
+        primaryContact = Contact(
+          email = req.primaryContact.email,
+          organisation = Option(Organisation(req.primaryContact.organisationDetails.organisationName)),
+          phone = req.primaryContact.phone,
+          mobile = req.primaryContact.mobile
+        ),
+        tradingName = req.tradingName,
+        secondaryContact = req.secondaryContact.map { contact =>
+          Contact(
+            email = contact.email,
+            organisation = Option(Organisation(contact.organisationDetails.organisationName)),
+            phone = contact.phone,
+            mobile = contact.mobile
+          )
+        }
+      )
+    }
+  }
 }
 
 case class UpdateAgentSubscriptionDetails(requestCommon: AgentRequestCommonForUpdate, requestDetail: AgentRequestDetailForUpdate)

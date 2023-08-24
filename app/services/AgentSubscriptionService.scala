@@ -24,7 +24,7 @@ import play.api.http.Status._
 import play.api.libs.json.{JsSuccess, Json, Reads}
 import play.api.mvc.Result
 import play.api.mvc.Results._
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -33,41 +33,14 @@ import scala.util.{Success, Try}
 
 class AgentSubscriptionService @Inject()(agentSubscriptionConnector: AgentSubscriptionConnector) extends Logging {
 
-  def createContactInformation(subscriptionRequest: CreateAgentSubscriptionEtmpRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Result] = {
+  def createContactInformation(subscriptionRequest: AgentSubscriptionEtmpRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Result] = {
 
     agentSubscriptionConnector.createSubscription(subscriptionRequest).map { response =>
 
       val responseBody = response.body
       response.status match {
         case CREATED => Ok(responseBody)
-        case NOT_FOUND => NotFound(responseBody)
-        case UNPROCESSABLE_ENTITY =>
-          logDownStreamError[BusinessValidationError](responseBody)
-          UnprocessableEntity(responseBody)
-
-        case INTERNAL_SERVER_ERROR =>
-          logDownStreamError[BackendSAPSystemError](responseBody)
-          InternalServerError(responseBody)
-
-        case BAD_REQUEST =>
-          logDownStreamError[ErrorDetails](responseBody)
-          BadRequest(responseBody)
-
-        case FORBIDDEN =>
-          logDownStreamError[ErrorDetails](responseBody)
-          Forbidden(responseBody)
-
-        case SERVICE_UNAVAILABLE =>
-          logDownStreamError[ErrorDetails](responseBody)
-          ServiceUnavailable(responseBody)
-
-        case CONFLICT =>
-          logDownStreamError[ErrorDetails](responseBody)
-          Conflict(responseBody)
-
-        case _ =>
-          logDownStreamError[ErrorDetails](responseBody)
-          InternalServerError(responseBody)
+        case _       => handleError(response, Create)
       }
     }
 
@@ -95,24 +68,64 @@ class AgentSubscriptionService @Inject()(agentSubscriptionConnector: AgentSubscr
     }
   }
 
-  def updateContactInformation(agentRequestDetailForUpdate: AgentRequestDetailForUpdate)
+  def updateContactInformation(agentRequestDetailForUpdate: AgentSubscriptionEtmpRequest)
                         (implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Either[UpdateSubscriptionError, Unit]] =
-    agentSubscriptionConnector.updateSubscription(UpdateAgentSubscriptionForCBCRequest(agentRequestDetailForUpdate)).map { res =>
-      res.status match {
-        case OK => Right(())
+    agentSubscriptionConnector.updateSubscription(agentRequestDetailForUpdate).map { response =>
+      response.status match {
+        case OK     => Right(())
         case status =>
-          logger.warn(s"Update Agent Subscription Got Status $status")
+          handleError(response, Update)
           Left(UpdateSubscriptionError(status))
       }
     }
 
-  private def logDownStreamError[T <: DownStreamError](body: String)(implicit reads: Reads[T]): Unit = {
-    val error = Try(Json.parse(body).validate[T])
+  private def handleError(errorResponse: HttpResponse, action: AgentSubscriptionAction): Result = {
+    val errorResponseBody = errorResponse.body
+    val errorStatus = errorResponse.status
+
+    require(
+      isServerError(errorStatus) || isClientError(errorStatus),
+      s"Status code [$errorStatus] must be an error code"
+    )
+
+    errorStatus match {
+      case NOT_FOUND =>
+        logger.warn(s"[$action] submission returned not found: $errorResponseBody")
+        NotFound(errorResponseBody)
+      case UNPROCESSABLE_ENTITY =>
+        logDownStreamError[BusinessValidationError](errorResponse, action)
+        UnprocessableEntity(errorResponseBody)
+      case INTERNAL_SERVER_ERROR =>
+        logDownStreamError[BackendSAPSystemError](errorResponse, action)
+        InternalServerError(errorResponseBody)
+      case BAD_REQUEST =>
+        logDownStreamError[ErrorDetails](errorResponse, action)
+        BadRequest(errorResponseBody)
+      case FORBIDDEN =>
+        logDownStreamError[ErrorDetails](errorResponse, action)
+        Forbidden(errorResponseBody)
+      case SERVICE_UNAVAILABLE =>
+        logDownStreamError[ErrorDetails](errorResponse, action)
+        ServiceUnavailable(errorResponseBody)
+      case CONFLICT =>
+        logDownStreamError[ErrorDetails](errorResponse, action)
+        Conflict(errorResponseBody)
+      case _ =>
+        logDownStreamError[ErrorDetails](errorResponse, action)
+        InternalServerError(errorResponseBody)
+    }
+  }
+
+  private def logDownStreamError[T <: DownStreamError](
+    response: HttpResponse,
+    action: AgentSubscriptionAction
+  )(implicit reads: Reads[T]): Unit = {
+    val error = Try(Json.parse(response.body).validate[T])
     error match {
       case Success(JsSuccess(value, _)) =>
-        logger.warn(s"Error with submission: ${value.detail}")
+        logger.warn(s"Error with [$action] submission: ${value.detail}")
       case _ =>
-        logger.warn("Error with submission but return is not a valid json")
+        logger.warn(s"Failed to parse [$action] submission json")
     }
   }
 }

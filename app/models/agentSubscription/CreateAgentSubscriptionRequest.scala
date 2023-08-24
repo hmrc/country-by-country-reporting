@@ -28,10 +28,10 @@ object CreateAgentSubscriptionRequest {
 
   implicit class CreateAgentSubscriptionRequestExtension(val req: CreateAgentSubscriptionRequest) extends AnyVal {
 
-    def toEtmpRequest: CreateAgentSubscriptionEtmpRequest = {
+    def toEtmpRequest: AgentSubscriptionEtmpRequest = {
       val cbcRequestDetail = req.createAgentSubscriptionForCBCRequest.requestDetail
 
-      CreateAgentSubscriptionEtmpRequest(
+      AgentSubscriptionEtmpRequest(
         idType = cbcRequestDetail.IDType,
         idNumber = cbcRequestDetail.IDNumber,
         gbUser = cbcRequestDetail.isGBUser,

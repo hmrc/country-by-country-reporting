@@ -48,7 +48,7 @@ object Contact {
   implicit val format: OFormat[Contact] = Json.format[Contact]
 }
 
-final case class CreateAgentSubscriptionEtmpRequest(
+final case class AgentSubscriptionEtmpRequest(
   idType: String,
   idNumber: String,
   gbUser: Boolean,
@@ -57,6 +57,6 @@ final case class CreateAgentSubscriptionEtmpRequest(
   secondaryContact: Option[Contact] = None
 )
 
-object CreateAgentSubscriptionEtmpRequest {
-  implicit val format: OFormat[CreateAgentSubscriptionEtmpRequest] = Json.format[CreateAgentSubscriptionEtmpRequest]
+object AgentSubscriptionEtmpRequest {
+  implicit val format: OFormat[AgentSubscriptionEtmpRequest] = Json.format[AgentSubscriptionEtmpRequest]
 }
