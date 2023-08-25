@@ -244,4 +244,40 @@ trait ModelGenerators {
 
     } yield EmailRequest(to, id, params)
   }
+
+  implicit val arbitraryIndividualContact: Arbitrary[Individual] = {
+    Arbitrary {
+      for {
+        firstName <- arbitrary[String]
+        lastName <- arbitrary[String]
+        middleName <- Gen.option(arbitrary[String])
+      } yield Individual(firstName, lastName, middleName)
+    }
+  }
+
+  implicit val arbitraryOrganisationContact: Arbitrary[Organisation] =
+    Arbitrary { arbitrary[String].map(Organisation(_)) }
+
+  implicit val arbitraryContact: Arbitrary[Contact] =
+    Arbitrary {
+      for {
+        email <- arbitrary[String]
+        individualContact <- Gen.option(arbitrary[Individual])
+        organisationContact <- Gen.option(arbitrary[Organisation])
+        phone <- Gen.option(arbitrary[String])
+        mobile <- Gen.option(arbitrary[String])
+      } yield Contact(s"$email@domain.com", individualContact, organisationContact, phone, mobile)
+    }
+
+  implicit val arbitraryCreateAgentSubscriptionEtmpRequest
+  : Arbitrary[CreateAgentSubscriptionEtmpRequest] =
+    Arbitrary {
+      for {
+        idNumber <- arbitrary[String]
+        tradingName <- Gen.option(arbitrary[String])
+        isGBUser <- arbitrary[Boolean]
+        primaryContact <- arbitrary[Contact]
+        secondaryContact <- Gen.option(arbitrary[Contact])
+      } yield CreateAgentSubscriptionEtmpRequest("ARN", idNumber, isGBUser, primaryContact, tradingName, secondaryContact)
+    }
 }

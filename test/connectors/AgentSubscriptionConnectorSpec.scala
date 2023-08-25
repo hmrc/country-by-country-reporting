@@ -20,7 +20,7 @@ import base.{SpecBase, WireMockServerHandler}
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, urlEqualTo}
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import generators.Generators
-import models.agentSubscription.{CreateAgentSubscriptionRequest, DisplayAgentSubscriptionForCBCRequest, UpdateAgentSubscriptionForCBCRequest}
+import models.agentSubscription.{CreateAgentSubscriptionEtmpRequest, DisplayAgentSubscriptionForCBCRequest, UpdateAgentSubscriptionForCBCRequest}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
@@ -51,11 +51,11 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockServerHandler
     "create subscription" - {
       "must return status as OK for read Subscription" in {
         stubResponse(
-          "/dac6/DCTxxc/v1",
+          "/dac6/DCT51a/v1",
           OK
         )
 
-        forAll(arbitrary[CreateAgentSubscriptionRequest]) { sub =>
+        forAll(arbitrary[CreateAgentSubscriptionEtmpRequest]) { sub =>
           val result = connector.createSubscription(sub)
 
           result.futureValue.status mustBe OK
@@ -64,9 +64,9 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockServerHandler
 
       "must return an error status for  invalid read Subscription" in {
 
-        forAll(arbitrary[CreateAgentSubscriptionRequest], errorCodes) { (sub, errorCode) =>
+        forAll(arbitrary[CreateAgentSubscriptionEtmpRequest], errorCodes) { (sub, errorCode) =>
           stubResponse(
-            "/dac6/DCTxxc/v1",
+            "/dac6/DCT51a/v1",
             errorCode
           )
 
