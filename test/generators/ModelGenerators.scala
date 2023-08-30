@@ -270,7 +270,7 @@ trait ModelGenerators {
     }
 
   implicit val arbitraryCreateAgentSubscriptionEtmpRequest
-  : Arbitrary[CreateAgentSubscriptionEtmpRequest] =
+  : Arbitrary[AgentSubscriptionEtmpRequest] =
     Arbitrary {
       for {
         idNumber <- arbitrary[String]
@@ -278,6 +278,6 @@ trait ModelGenerators {
         isGBUser <- arbitrary[Boolean]
         primaryContact <- arbitrary[Contact]
         secondaryContact <- Gen.option(arbitrary[Contact])
-      } yield CreateAgentSubscriptionEtmpRequest("ARN", idNumber, isGBUser, primaryContact, tradingName, secondaryContact)
+      } yield AgentSubscriptionEtmpRequest("ARN", idNumber, isGBUser, primaryContact, tradingName, secondaryContact)
     }
 }

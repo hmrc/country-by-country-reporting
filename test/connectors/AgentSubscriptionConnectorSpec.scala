@@ -17,10 +17,11 @@
 package connectors
 
 import base.{SpecBase, WireMockServerHandler}
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, urlEqualTo}
+import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, request, urlEqualTo}
+import com.github.tomakehurst.wiremock.http.RequestMethod
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import generators.Generators
-import models.agentSubscription.{CreateAgentSubscriptionEtmpRequest, DisplayAgentSubscriptionForCBCRequest, UpdateAgentSubscriptionForCBCRequest}
+import models.agentSubscription.{AgentSubscriptionEtmpRequest, DisplayAgentSubscriptionForCBCRequest}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
@@ -49,24 +50,27 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockServerHandler
   "AgentSubscriptionConnector" - {
 
     "create subscription" - {
-      "must return status as OK for read Subscription" in {
+      val agentCreateSubscriptionEndpoint = "/dac6/dct51a/v1"
+
+      "must return status as OK for create Subscription" in {
         stubResponse(
-          "/dac6/DCT51a/v1",
+          RequestMethod.POST,
+          agentCreateSubscriptionEndpoint,
           OK
         )
 
-        forAll(arbitrary[CreateAgentSubscriptionEtmpRequest]) { sub =>
+        forAll(arbitrary[AgentSubscriptionEtmpRequest]) { sub =>
           val result = connector.createSubscription(sub)
 
           result.futureValue.status mustBe OK
         }
       }
 
-      "must return an error status for  invalid read Subscription" in {
-
-        forAll(arbitrary[CreateAgentSubscriptionEtmpRequest], errorCodes) { (sub, errorCode) =>
+      "must return an error status for invalid create Subscription" in {
+        forAll(arbitrary[AgentSubscriptionEtmpRequest], errorCodes) { (sub, errorCode) =>
           stubResponse(
-            "/dac6/DCT51a/v1",
+            RequestMethod.POST,
+            agentCreateSubscriptionEndpoint,
             errorCode
           )
 
@@ -77,9 +81,12 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockServerHandler
     }
 
     "read subscription" - {
+      val agentReadSubscriptionEndpoint = "/dac6/DCTxxd/v1"
+
       "must return status as OK for read Subscription" in {
         stubResponse(
-          "/dac6/DCTxxd/v1",
+          RequestMethod.POST,
+          agentReadSubscriptionEndpoint,
           OK
         )
 
@@ -94,7 +101,8 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockServerHandler
 
         forAll(arbitrary[DisplayAgentSubscriptionForCBCRequest], errorCodes) { (sub, errorCode) =>
           stubResponse(
-            "/dac6/DCTxxd/v1",
+            RequestMethod.POST,
+            agentReadSubscriptionEndpoint,
             errorCode
           )
 
@@ -105,23 +113,26 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockServerHandler
     }
 
     "update subscription" - {
+      val agentUpdateSubscriptionEndpoint = "/dac6/dct51b/v1"
+
       "must return status as OK for update Subscription" in {
         stubResponse(
-          "/dac6/DCTxxe/v1",
+          RequestMethod.PUT,
+          agentUpdateSubscriptionEndpoint,
           OK
         )
 
-        forAll(arbitrary[UpdateAgentSubscriptionForCBCRequest]) { sub =>
+        forAll(arbitrary[AgentSubscriptionEtmpRequest]) { sub =>
           val result = connector.updateSubscription(sub)
           result.futureValue.status mustBe OK
         }
       }
 
       "must return an error status for failed update Subscription" in {
-
-        forAll(arbitrary[UpdateAgentSubscriptionForCBCRequest], errorCodes) { (sub, errorCode) =>
+        forAll(arbitrary[AgentSubscriptionEtmpRequest], errorCodes) { (sub, errorCode) =>
           stubResponse(
-            "/dac6/DCTxxe/v1",
+            RequestMethod.PUT,
+            agentUpdateSubscriptionEndpoint,
             errorCode
           )
 
@@ -134,11 +145,12 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockServerHandler
   }
 
   private def stubResponse(
+    requestMethod: RequestMethod,
     expectedUrl: String,
     expectedStatus: Int
   ): StubMapping =
     server.stubFor(
-      post(urlEqualTo(expectedUrl))
+      request(requestMethod.getName, urlEqualTo(expectedUrl))
         .willReturn(
           aResponse()
             .withStatus(expectedStatus)

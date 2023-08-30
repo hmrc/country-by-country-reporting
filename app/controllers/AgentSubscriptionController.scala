@@ -74,7 +74,7 @@ class AgentSubscriptionController @Inject()(
           InternalServerError("Json Validation Failed")
         },
       validReq =>
-        agentSubscriptionService.updateContactInformation(validReq).map {
+        agentSubscriptionService.updateContactInformation(validReq.toUpdateEtmpRequest).map {
           case Right(_) => Ok
           case Left(UpdateSubscriptionError(value)) =>
             logger.warn(s"Agent updateContactInformation $value")

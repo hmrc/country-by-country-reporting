@@ -18,7 +18,7 @@ package connectors
 
 import com.google.inject.Inject
 import config.AppConfig
-import models.agentSubscription.{CreateAgentSubscriptionEtmpRequest, DisplayAgentSubscriptionForCBCRequest, UpdateAgentSubscriptionForCBCRequest}
+import models.agentSubscription.{AgentSubscriptionEtmpRequest, DisplayAgentSubscriptionForCBCRequest}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -28,16 +28,16 @@ class AgentSubscriptionConnector @Inject()(
   val http: HttpClient
 ) {
 
-  def createSubscription(agentSubscription: CreateAgentSubscriptionEtmpRequest)
+  def createSubscription(agentSubscription: AgentSubscriptionEtmpRequest)
                         (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
     val serviceName = "create-agent-subscription"
 
-    http.POST[CreateAgentSubscriptionEtmpRequest, HttpResponse](
+    http.POST[AgentSubscriptionEtmpRequest, HttpResponse](
       config.serviceUrl(serviceName),
       agentSubscription,
       headers = extraHeaders(serviceName)
     )(
-      wts = CreateAgentSubscriptionEtmpRequest.format,
+      wts = AgentSubscriptionEtmpRequest.format,
       rds = httpReads,
       hc = hc,
       ec = ec
@@ -60,22 +60,23 @@ class AgentSubscriptionConnector @Inject()(
     )
   }
 
-  def updateSubscription(updateAgentSubscription: UpdateAgentSubscriptionForCBCRequest)
+  def updateSubscription(agentSubscription: AgentSubscriptionEtmpRequest)
                         (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
 
     val serviceName = "update-agent-subscription"
 
-    http.POST[UpdateAgentSubscriptionForCBCRequest, HttpResponse](
+    http.PUT[AgentSubscriptionEtmpRequest, HttpResponse](
       config.serviceUrl(serviceName),
-      updateAgentSubscription,
+      agentSubscription,
       extraHeaders(serviceName)
     )(
-      wts = UpdateAgentSubscriptionForCBCRequest.format,
+      wts = AgentSubscriptionEtmpRequest.format,
       rds = httpReads,
       hc = hc,
       ec = ec
     )
   }
+
 
   private def extraHeaders(serviceName: String)(implicit hc: HeaderCarrier): Seq[(String, String)] = Seq()
     .withBearerToken(s"${config.bearerToken(serviceName)}")

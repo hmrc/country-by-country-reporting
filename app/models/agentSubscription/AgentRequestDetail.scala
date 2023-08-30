@@ -32,7 +32,6 @@ object AgentRequestDetail {
     Json.format[AgentRequestDetail]
 }
 
-
 case class AgentCreateSubscriptionRequest(
                                 requestCommon: AgentRequestCommonForSubscription,
                                 requestDetail: AgentRequestDetail

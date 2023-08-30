@@ -28,12 +28,12 @@ class AgentSubscriptionRequestSpec extends AnyFreeSpec with Generators with Opti
   "AgentSubscriptionRequest" - {
     "must serialise and de-serialise as expected" in {
 
-      val requestModel: CreateAgentSubscriptionEtmpRequest =
-        arbitrary[CreateAgentSubscriptionEtmpRequest].sample.value
+      val requestModel: AgentSubscriptionEtmpRequest =
+        arbitrary[AgentSubscriptionEtmpRequest].sample.value
 
       Json
         .toJson(requestModel)
-        .as[CreateAgentSubscriptionEtmpRequest] mustBe requestModel
+        .as[AgentSubscriptionEtmpRequest] mustBe requestModel
 
     }
   }
