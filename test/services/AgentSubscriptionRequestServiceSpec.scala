@@ -32,11 +32,12 @@ import play.api.libs.json.Json
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import AgentSubscriptionEtmpRequest._
+import org.scalatest.prop.TableDrivenPropertyChecks
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEach with Generators with ScalaCheckPropertyChecks {
+class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEach with Generators with ScalaCheckPropertyChecks with TableDrivenPropertyChecks {
 
   override def beforeEach(): Unit = reset(mockAgentSubscriptionConnector)
 
@@ -106,7 +107,7 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
         status(result) mustEqual BAD_REQUEST
       }
 
-      "should return BAD_REQUEST when one is encountered" in {
+      "should return NOT_FOUND when EIS request returns 404 status" in {
         when(
           mockAgentSubscriptionConnector
             .createSubscription(
@@ -118,14 +119,14 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
         )
           .thenReturn(
             Future.successful(
-              HttpResponse(400, Json.obj(), Map.empty[String, Seq[String]])
+              HttpResponse(NOT_FOUND, Json.obj(), Map.empty[String, Seq[String]])
             )
           )
 
         forAll(arbitrary[AgentSubscriptionEtmpRequest]) {
           subscriptionForCBCRequest =>
             val result = service.createContactInformation(subscriptionForCBCRequest)
-            status(result) mustEqual BAD_REQUEST
+            status(result) mustEqual NOT_FOUND
         }
       }
 
@@ -175,7 +176,7 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
         }
       }
 
-      "should return INTERNAL_SERVER_ERROR when EIS fails" in {
+      "should return BAD_GATEWAY when EIS request fails with 502 status" in {
         when(
           mockAgentSubscriptionConnector
             .createSubscription(
@@ -198,7 +199,7 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
         forAll(arbitrary[AgentSubscriptionEtmpRequest]) {
           subscriptionForCBCRequest =>
             val result = service.createContactInformation(subscriptionForCBCRequest)
-            status(result) mustEqual INTERNAL_SERVER_ERROR
+            status(result) mustEqual BAD_GATEWAY
         }
       }
 
@@ -239,7 +240,7 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
         }
       }
 
-      "should return NOT_FOUND for unspecified errors" in {
+      "should return UNAUTHORIZED when EIS fails with 401 status" in {
         when(
           mockAgentSubscriptionConnector
             .createSubscription(
@@ -251,14 +252,18 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
         )
           .thenReturn(
             Future.successful(
-              HttpResponse(404, Json.obj(), Map.empty[String, Seq[String]])
+              HttpResponse(
+                UNAUTHORIZED,
+                Json.obj(),
+                Map.empty[String, Seq[String]]
+              )
             )
           )
 
         forAll(arbitrary[AgentSubscriptionEtmpRequest]) {
           subscriptionForCBCRequest =>
             val result = service.createContactInformation(subscriptionForCBCRequest)
-            status(result) mustEqual NOT_FOUND
+            status(result) mustEqual UNAUTHORIZED
         }
       }
 
@@ -365,15 +370,30 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
         }
       }
 
-      "must have UpdateSubscriptionError when connector response with not ok status" in {
-        when(mockAgentSubscriptionConnector.updateSubscription(any[AgentSubscriptionEtmpRequest]())(any[HeaderCarrier](), any[ExecutionContext]()))
-          .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
+      val scenarios = Table(
+        ("expectedStatusCode", "description"),
+        (NOT_FOUND, "NOT_FOUND"),
+        (UNAUTHORIZED, "UNAUTHORIZED"),
+        (BAD_GATEWAY, "BAD_GATEWAY"),
+        (UNPROCESSABLE_ENTITY, "UNPROCESSABLE_ENTITY"),
+        (INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR"),
+        (BAD_REQUEST, "BAD_REQUEST"),
+        (FORBIDDEN, "FORBIDDEN"),
+        (SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE"),
+        (CONFLICT, "CONFLICT"),
+      )
 
-        val result = service.updateContactInformation(updateAgentSubscriptionRequest)
+      forAll(scenarios) { (expectedStatusCode, description) =>
+        s"must return UpdateSubscriptionError when connector responds with $description" in {
+          when(mockAgentSubscriptionConnector.updateSubscription(any[AgentSubscriptionEtmpRequest]())(any[HeaderCarrier](), any[ExecutionContext]()))
+            .thenReturn(Future.successful(HttpResponse(expectedStatusCode, "")))
 
-        whenReady(result) { sub =>
-          verify(mockAgentSubscriptionConnector, times(1)).updateSubscription(any[AgentSubscriptionEtmpRequest]())(any[HeaderCarrier](), any[ExecutionContext]())
-          sub mustBe Left(UpdateSubscriptionError(500))
+          val result = service.updateContactInformation(updateAgentSubscriptionRequest)
+
+          whenReady(result) { sub =>
+            verify(mockAgentSubscriptionConnector, times(1)).updateSubscription(any[AgentSubscriptionEtmpRequest]())(any[HeaderCarrier](), any[ExecutionContext]())
+            sub mustBe Left(UpdateSubscriptionError(expectedStatusCode))
+          }
         }
       }
     }

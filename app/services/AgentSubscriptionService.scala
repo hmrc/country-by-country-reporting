@@ -92,6 +92,12 @@ class AgentSubscriptionService @Inject()(agentSubscriptionConnector: AgentSubscr
       case NOT_FOUND =>
         logger.warn(s"[$action] submission returned not found: $errorResponseBody")
         NotFound(errorResponseBody)
+      case UNAUTHORIZED =>
+        logger.warn(s"[$action] submission returned unauthorised: $errorResponseBody")
+        Unauthorized(errorResponseBody)
+      case BAD_GATEWAY =>
+        logger.warn(s"[$action] submission returned bad gateway: $errorResponseBody")
+        BadGateway(errorResponseBody)
       case UNPROCESSABLE_ENTITY =>
         logDownStreamError[BusinessValidationError](errorResponse, action)
         UnprocessableEntity(errorResponseBody)

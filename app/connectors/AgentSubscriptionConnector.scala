@@ -86,5 +86,6 @@ class AgentSubscriptionConnector @Inject()(
     .withXConversationId()
     .withContentType(Some("application/json"))
     .withAccept(Some("application/json"))
+    .withXRegimeType("CBC")
     .withEnvironment(Some(config.environment(serviceName)))
 }
