@@ -203,33 +203,6 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
         }
       }
 
-      "should return UNAUTHORIZED when EIS fails with 401 status" in {
-        when(
-          mockAgentSubscriptionConnector
-            .createSubscription(
-              any[AgentSubscriptionEtmpRequest]()
-            )(
-              any[HeaderCarrier](),
-              any[ExecutionContext]()
-            )
-        )
-          .thenReturn(
-            Future.successful(
-              HttpResponse(
-                UNAUTHORIZED,
-                Json.obj(),
-                Map.empty[String, Seq[String]]
-              )
-            )
-          )
-
-        forAll(arbitrary[AgentSubscriptionEtmpRequest]) {
-          subscriptionForCBCRequest =>
-            val result = service.createContactInformation(subscriptionForCBCRequest)
-            status(result) mustEqual UNAUTHORIZED
-        }
-      }
-
       "should return CONFLICT when one occurs" in {
         val errorDetails = ErrorDetails(
           ErrorDetail(
@@ -264,6 +237,33 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
           subscriptionForCBCRequest =>
             val result = service.createContactInformation(subscriptionForCBCRequest)
             status(result) mustEqual CONFLICT
+        }
+      }
+
+      "should return UNAUTHORIZED when EIS fails with 401 status" in {
+        when(
+          mockAgentSubscriptionConnector
+            .createSubscription(
+              any[AgentSubscriptionEtmpRequest]()
+            )(
+              any[HeaderCarrier](),
+              any[ExecutionContext]()
+            )
+        )
+          .thenReturn(
+            Future.successful(
+              HttpResponse(
+                UNAUTHORIZED,
+                Json.obj(),
+                Map.empty[String, Seq[String]]
+              )
+            )
+          )
+
+        forAll(arbitrary[AgentSubscriptionEtmpRequest]) {
+          subscriptionForCBCRequest =>
+            val result = service.createContactInformation(subscriptionForCBCRequest)
+            status(result) mustEqual UNAUTHORIZED
         }
       }
 
