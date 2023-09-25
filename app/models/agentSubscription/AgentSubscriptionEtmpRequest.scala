@@ -18,36 +18,6 @@ package models.agentSubscription
 
 import play.api.libs.json.{Json, OFormat}
 
-sealed trait ContactType
-
-final case class Individual(
-  firstName: String,
-  lastName: String,
-  middleName: Option[String] = None
-) extends ContactType
-
-object Individual {
-  implicit val format: OFormat[Individual] = Json.format[Individual]
-}
-
-final case class Organisation(name: String) extends ContactType
-
-object Organisation {
-  implicit val format: OFormat[Organisation] = Json.format[Organisation]
-}
-
-final case class Contact(
-  email: String,
-  individual: Option[Individual] = None,
-  organisation: Option[Organisation] = None,
-  phone: Option[String] = None,
-  mobile: Option[String] = None
-)
-
-object Contact {
-  implicit val format: OFormat[Contact] = Json.format[Contact]
-}
-
 final case class AgentSubscriptionEtmpRequest(
   idType: String,
   idNumber: String,

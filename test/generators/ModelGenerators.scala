@@ -71,7 +71,7 @@ trait ModelGenerators {
 
   implicit val arbitraryAgentReadSubscriptionRequestDetail: Arbitrary[AgentReadSubscriptionRequestDetail] = Arbitrary {
     for {
-      idNumber <- arbitrary[String]
+      idNumber <- Gen.alphaNumStr
     } yield AgentReadSubscriptionRequestDetail(
       IDType = "ARN",
       IDNumber = idNumber
@@ -85,16 +85,6 @@ trait ModelGenerators {
         requestDetail <- arbitrary[ReadSubscriptionRequestDetail]
       } yield DisplaySubscriptionForCBCRequest(
         DisplaySubscriptionDetails(requestCommon, requestDetail)
-      )
-    }
-
-  implicit val arbitraryReadAgentSubscriptionForCBCRequest: Arbitrary[DisplayAgentSubscriptionForCBCRequest] =
-    Arbitrary {
-      for {
-        requestCommon <- arbitrary[AgentRequestCommonForSubscription]
-        requestDetail <- arbitrary[AgentReadSubscriptionRequestDetail]
-      } yield DisplayAgentSubscriptionForCBCRequest(
-        DisplayAgentSubscriptionDetails(requestCommon, requestDetail)
       )
     }
 

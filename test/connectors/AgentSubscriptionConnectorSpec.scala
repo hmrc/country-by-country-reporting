@@ -21,7 +21,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, request, urlE
 import com.github.tomakehurst.wiremock.http.RequestMethod
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import generators.Generators
-import models.agentSubscription.{AgentSubscriptionEtmpRequest, DisplayAgentSubscriptionForCBCRequest}
+import models.agentSubscription.AgentSubscriptionEtmpRequest
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
@@ -81,17 +81,17 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockServerHandler
     }
 
     "read subscription" - {
-      val agentReadSubscriptionEndpoint = "/dac6/DCTxxd/v1"
+      val agentReadSubscriptionEndpoint = "/dac6/dct51c/v1"
 
       "must return status as OK for read Subscription" in {
-        stubResponse(
-          RequestMethod.POST,
-          agentReadSubscriptionEndpoint,
-          OK
-        )
+        forAll(Gen.alphaNumStr) { agentRefNo =>
+          stubResponse(
+            RequestMethod.GET,
+            s"$agentReadSubscriptionEndpoint/ARN/$agentRefNo",
+            OK
+          )
 
-        forAll(arbitrary[DisplayAgentSubscriptionForCBCRequest]) { sub =>
-          val result = connector.readSubscription(sub)
+          val result = connector.readSubscription(agentRefNo)
 
           result.futureValue.status mustBe OK
         }
@@ -99,14 +99,14 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockServerHandler
 
       "must return an error status for  invalid read Subscription" in {
 
-        forAll(arbitrary[DisplayAgentSubscriptionForCBCRequest], errorCodes) { (sub, errorCode) =>
+        forAll(Gen.alphaNumStr, errorCodes) { (agentRefNo, errorCode) =>
           stubResponse(
-            RequestMethod.POST,
-            agentReadSubscriptionEndpoint,
+            RequestMethod.GET,
+            s"$agentReadSubscriptionEndpoint/ARN/$agentRefNo",
             errorCode
           )
 
-          val result = connector.readSubscription(sub)
+          val result = connector.readSubscription(agentRefNo)
           result.futureValue.status mustBe errorCode
         }
       }

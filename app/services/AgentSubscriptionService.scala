@@ -19,6 +19,7 @@ package services
 import connectors.AgentSubscriptionConnector
 import models.agentSubscription._
 import models.error._
+import models.subscription.{ContactInformation, OrganisationDetails}
 import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.{JsSuccess, Json, Reads}
@@ -29,6 +30,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try}
+import cats.syntax.all._
 
 
 class AgentSubscriptionService @Inject()(agentSubscriptionConnector: AgentSubscriptionConnector) extends Logging {
@@ -46,27 +48,23 @@ class AgentSubscriptionService @Inject()(agentSubscriptionConnector: AgentSubscr
 
   }
 
-  def getContactInformation(agentRefNo: String)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Either[ReadSubscriptionError, AgentResponseDetail]] = {
-
-    val subscriptionRequest: DisplayAgentSubscriptionForCBCRequest =
-      DisplayAgentSubscriptionForCBCRequest(
-        DisplayAgentSubscriptionDetails(
-          AgentRequestCommonForSubscription(),
-          AgentReadSubscriptionRequestDetail(agentRefNo)
-        )
-      )
-
-    agentSubscriptionConnector.readSubscription(subscriptionRequest).map { response =>
+  def getContactInformation(agentRefNo: String)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Either[ReadSubscriptionError, AgentResponseDetail]] =
+    agentSubscriptionConnector.readSubscription(agentRefNo).map { response =>
       response.status match {
         case OK =>
-          val agentResponseDetail = response.json.as[DisplayAgentSubscriptionForCBCResponse].displayAgentSubscriptionForCBCResponse.responseDetail
-          Right(agentResponseDetail)
+          val validatedResponse = Try(Json.parse(response.body).validate[DisplayAgentSubscriptionResponse])
+          validatedResponse match {
+            case Success(JsSuccess(value, _)) =>
+              convertEtmpDisplayAgentResponseToCbcResponse(value)
+            case _ =>
+              logger.warn("Failed to parse display agent subscription response json")
+              Left(ReadSubscriptionError(UNPROCESSABLE_ENTITY))
+          }
         case status =>
           logger.warn(s"Read Agent subscription Got Status $status")
           Left(ReadSubscriptionError(status))
       }
     }
-  }
 
   def updateContactInformation(agentRequestDetailForUpdate: AgentSubscriptionEtmpRequest)
                         (implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Either[UpdateSubscriptionError, Unit]] =
@@ -132,6 +130,33 @@ class AgentSubscriptionService @Inject()(agentSubscriptionConnector: AgentSubscr
         logger.warn(s"Error with [$action] submission: ${value.detail}")
       case _ =>
         logger.warn(s"Failed to parse [$action] submission json")
+    }
+  }
+
+  private def convertEtmpDisplayAgentResponseToCbcResponse(
+    agentResponse: DisplayAgentSubscriptionResponse
+  ): Either[ReadSubscriptionError, AgentResponseDetail] = {
+    val agent = agentResponse.success.agent
+    val primaryContact = resolveContacts(agent.primaryContact)
+    val secondaryContact = agent.secondaryContact.map(resolveContacts)
+
+    for {
+      mainContact <- primaryContact
+      otherContact <- secondaryContact.sequence
+    } yield AgentResponseDetail(agent.arn, agent.tradingName, agent.gbUser, mainContact, otherContact)
+
+  }
+
+  private def resolveContacts(contact: Contact): Either[ReadSubscriptionError, ContactInformation] = {
+    (contact.organisation, contact.individual) match {
+      case (Some(org), _) =>
+        Right(ContactInformation(OrganisationDetails(org.name), contact.email, contact.phone, contact.mobile))
+      case (None, Some(individual)) =>
+        val orgContactFromIndividualName = OrganisationDetails(s"${individual.firstName} ${individual.lastName}")
+        Right(ContactInformation(orgContactFromIndividualName, contact.email, contact.phone, contact.mobile))
+      case (None, None) => // This should never happen but adding it here to cover all cases
+        logger.warn(s"Neither an Organisation nor individual contact found in ETMP display agent contact response")
+        Left(ReadSubscriptionError(UNPROCESSABLE_ENTITY))
     }
   }
 }

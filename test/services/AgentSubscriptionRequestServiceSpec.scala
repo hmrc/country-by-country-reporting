@@ -20,7 +20,7 @@ import akka.http.javadsl.model.DateTime
 import base.SpecBase
 import connectors.AgentSubscriptionConnector
 import generators.Generators
-import models.agentSubscription._
+import models.agentSubscription.{AgentResponseDetail, _}
 import models.error._
 import org.mockito.ArgumentMatchers.any
 import org.scalacheck.Arbitrary.arbitrary
@@ -32,6 +32,8 @@ import play.api.libs.json.Json
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import AgentSubscriptionEtmpRequest._
+import models.subscription.{ContactInformation, OrganisationDetails}
+import org.mockito.ArgumentMatchersSugar.eqTo
 import org.scalatest.prop.TableDrivenPropertyChecks
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -290,65 +292,242 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
         }
       }
     }
+
     "readSubscription" - {
+
+      val agentRefNo = "111111111"
 
       "must correctly retrieve subscription from connector" in {
 
         val subscriptionResponseJson: String =
-          """
-            |{
-            |"displayAgentSubscriptionForCBCResponse": {
-            |"responseCommon": {
-            |"status": "OK",
-            |"processingDate": "2020-08-09T11:23:45Z"
-            |},
-            |"responseDetail": {
-            |"subscriptionID": "111111111",
-            |"tradingName": "",
-            |"isGBUser": true,
-            |"primaryContact": [
-            |{
-            |"email": "",
-            |"phone": "",
-            |"mobile": "",
-            |"organisation": {
-            |"organisationName": "orgName"
-            |}
-            |}
-            |],
-            |"secondaryContact": [
-            |{
-            |"email": "",
-            |"organisation": {
-            |"organisationName": ""
-            |}
-            |}
-            |]
-            |}
-            |}
-            |}""".stripMargin
+          s"""{
+             |  "success": {
+             |    "processingDate": "2023-05-17T09:26:17Z",
+             |    "agent": {
+             |      "arn": "$agentRefNo",
+             |      "tradingName": "Agent Ltd",
+             |      "gbUser": true,
+             |      "primaryContact": {
+             |        "organisation": {
+             |          "name": "Cbc agent"
+             |        },
+             |        "email": "AgentFirstContactEmail@cbc.com",
+             |        "phone": "0123456789",
+             |        "mobile": "07123456789"
+             |      },
+             |      "secondaryContact": {
+             |        "organisation": {
+             |          "name": "Cbc agent 2"
+             |        },
+             |        "email": "AgentSecondContactEmail@cbc.com",
+             |        "phone": "0123456000",
+             |        "mobile": "07123456000"
+             |      }
+             |    }
+             |  }
+             |}""".stripMargin
 
-        when(mockAgentSubscriptionConnector.readSubscription(any[DisplayAgentSubscriptionForCBCRequest]())(any[HeaderCarrier](), any[ExecutionContext]()))
+        when(mockAgentSubscriptionConnector.readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](), any[ExecutionContext]()))
           .thenReturn(Future.successful(HttpResponse(OK, subscriptionResponseJson)))
 
-        val result = service.getContactInformation("111111111")
+        val result = service.getContactInformation(agentRefNo)
 
-        whenReady(result) { _ =>
-          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(any[DisplayAgentSubscriptionForCBCRequest]())(any[HeaderCarrier](),
+        whenReady(result) { sub =>
+          sub mustBe Right(
+              AgentResponseDetail(
+              agentRefNo,
+              Option("Agent Ltd"),
+              isGBUser = true,
+              primaryContact = ContactInformation(
+                organisationDetails = OrganisationDetails("Cbc agent"),
+                email = "AgentFirstContactEmail@cbc.com",
+                phone = Option("0123456789"),
+                mobile = Option("07123456789")
+              ),
+              secondaryContact = Option(
+                ContactInformation(
+                  organisationDetails = OrganisationDetails("Cbc agent 2"),
+                  email = "AgentSecondContactEmail@cbc.com",
+                  phone = Option("0123456000"),
+                  mobile = Option("07123456000")
+                )
+              )
+            )
+          )
+
+          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](),
             any[ExecutionContext]()
           )
         }
       }
 
-      "must retrieve ReadSubscriptionError from connector when not ok status" in {
-        when(mockAgentSubscriptionConnector.readSubscription(any[DisplayAgentSubscriptionForCBCRequest]())(any[HeaderCarrier](), any[ExecutionContext]()))
+      "must return ReadSubscriptionError from connector when not ok status" in {
+        when(mockAgentSubscriptionConnector.readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](), any[ExecutionContext]()))
           .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
 
-        val result = service.getContactInformation("111111111")
+        val result = service.getContactInformation(agentRefNo)
 
         whenReady(result) { sub =>
           sub mustBe Left(ReadSubscriptionError(500))
-          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(any[DisplayAgentSubscriptionForCBCRequest]())(any[HeaderCarrier](),
+          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](),
+            any[ExecutionContext]()
+          )
+        }
+      }
+
+      "must convert primary Individual details to primary Organisation details when only the primary Individual detail is found" in {
+        val subscriptionResponseJson: String =
+          s"""{
+             |  "success": {
+             |    "processingDate": "2023-05-17T09:26:17Z",
+             |    "agent": {
+             |      "arn": "$agentRefNo",
+             |      "tradingName": "Agent Ltd",
+             |      "gbUser": true,
+             |      "primaryContact": {
+             |        "individual": {
+             |          "firstName": "Joe",
+             |          "lastName": "Bloggs"
+             |        },
+             |        "email": "AgentFirstContactEmail@cbc.com",
+             |        "phone": "0123456789",
+             |        "mobile": "07123456789"
+             |      },
+             |      "secondaryContact": {
+             |        "individual": {
+             |          "firstName": "Alice",
+             |          "lastName": "Wonderland"
+             |        },
+             |        "email": "AgentSecondContactEmail@cbc.com",
+             |        "phone": "0123456000",
+             |        "mobile": "07123456000"
+             |      }
+             |    }
+             |  }
+             |}""".stripMargin
+
+        when(mockAgentSubscriptionConnector.readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](), any[ExecutionContext]()))
+          .thenReturn(Future.successful(HttpResponse(OK, subscriptionResponseJson)))
+
+        val result = service.getContactInformation(agentRefNo)
+
+        whenReady(result) { sub =>
+          sub mustBe Right(
+              AgentResponseDetail(
+              agentRefNo,
+              Option("Agent Ltd"),
+              isGBUser = true,
+              primaryContact = ContactInformation(
+                organisationDetails = OrganisationDetails("Joe Bloggs"),
+                email = "AgentFirstContactEmail@cbc.com",
+                phone = Option("0123456789"),
+                mobile = Option("07123456789")
+              ),
+              secondaryContact = Option(
+                ContactInformation(
+                  organisationDetails = OrganisationDetails("Alice Wonderland"),
+                  email = "AgentSecondContactEmail@cbc.com",
+                  phone = Option("0123456000"),
+                  mobile = Option("07123456000")
+                )
+              )
+            )
+          )
+
+          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](),
+            any[ExecutionContext]()
+          )
+        }
+      }
+
+      "must convert secondary Individual details to secondary Organisation details when only the secondary Individual detail is found" in {
+        val subscriptionResponseJson: String =
+          s"""{
+             |  "success": {
+             |    "processingDate": "2023-05-17T09:26:17Z",
+             |    "agent": {
+             |      "arn": "$agentRefNo",
+             |      "tradingName": "Agent Ltd",
+             |      "gbUser": true,
+             |      "primaryContact": {
+             |        "individual": {
+             |          "firstName": "Joe",
+             |          "lastName": "Bloggs"
+             |        },
+             |        "email": "AgentFirstContactEmail@cbc.com",
+             |        "phone": "0123456789",
+             |        "mobile": "07123456789"
+             |      }
+             |    }
+             |  }
+             |}""".stripMargin
+
+        when(mockAgentSubscriptionConnector.readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](), any[ExecutionContext]()))
+          .thenReturn(Future.successful(HttpResponse(OK, subscriptionResponseJson)))
+
+        val result = service.getContactInformation(agentRefNo)
+
+        whenReady(result) { sub =>
+          sub mustBe Right(
+              AgentResponseDetail(
+              agentRefNo,
+              Option("Agent Ltd"),
+              isGBUser = true,
+              primaryContact = ContactInformation(
+                organisationDetails = OrganisationDetails("Joe Bloggs"),
+                email = "AgentFirstContactEmail@cbc.com",
+                phone = Option("0123456789"),
+                mobile = Option("07123456789")
+              ),
+              secondaryContact = None
+            )
+          )
+
+          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](),
+            any[ExecutionContext]()
+          )
+        }
+      }
+
+      "must return ReadSubscriptionError when there is no contact found in response" in {
+        val subscriptionResponseJson: String =
+          s"""{
+             |  "success": {
+             |    "processingDate": "2023-05-17T09:26:17Z",
+             |    "agent": {
+             |      "arn": "$agentRefNo",
+             |      "tradingName": "Agent Ltd",
+             |      "gbUser": true
+             |    }
+             |  }
+             |}""".stripMargin
+
+        when(mockAgentSubscriptionConnector.readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](), any[ExecutionContext]()))
+          .thenReturn(Future.successful(HttpResponse(OK, subscriptionResponseJson)))
+
+        val result = service.getContactInformation(agentRefNo)
+
+        whenReady(result) { sub =>
+          sub mustBe Left(ReadSubscriptionError(UNPROCESSABLE_ENTITY))
+
+          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](),
+            any[ExecutionContext]()
+          )
+        }
+      }
+
+      "must return ReadSubscriptionError when unable tp parse response" in {
+        val subscriptionResponseJson: String = """{ "key": "invalid response" }"""
+
+        when(mockAgentSubscriptionConnector.readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](), any[ExecutionContext]()))
+          .thenReturn(Future.successful(HttpResponse(OK, subscriptionResponseJson)))
+
+        val result = service.getContactInformation(agentRefNo)
+
+        whenReady(result) { sub =>
+          sub mustBe Left(ReadSubscriptionError(UNPROCESSABLE_ENTITY))
+
+          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](),
             any[ExecutionContext]()
           )
         }
