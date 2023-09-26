@@ -16,61 +16,18 @@
 
 package models.agentSubscription
 
-import models.subscription.ContactInformation
-import play.api.Logger
-import play.api.libs.json._
+import play.api.libs.json.{Json, OFormat}
 
-case class AgentResponseDetail(subscriptionID: String,
-                               tradingName: Option[String],
-                               isGBUser: Boolean,
-                               primaryContact: ContactInformation,
-                               secondaryContact: Option[ContactInformation]
-)
+import java.time.LocalDateTime
 
-object AgentResponseDetail {
-  val logger = Logger.apply(getClass)
-  implicit lazy val reads: Reads[AgentResponseDetail] = {
-    import play.api.libs.functional.syntax._
+final case class SuccessResponse(processingDate: LocalDateTime, agent: Agent)
 
-    (
-      (__ \ "subscriptionID").read[String] and
-        (__ \ "tradingName").readNullable[String] and
-        (__ \ "isGBUser").read[Boolean] and
-        (__ \ "primaryContact").read[Seq[ContactInformation]] and
-        (__ \ "secondaryContact").readNullable[Seq[ContactInformation]]
-    ) { (subscriptionID, tradingName, isGBUser, primaryContact, secondaryContact) =>
-      logger.warn(s"AgentResponseDetail: received ${primaryContact.size} primary contacts and ${secondaryContact.getOrElse(0)} secondaryContacts")
-      AgentResponseDetail(subscriptionID, tradingName, isGBUser, primaryContact.head, secondaryContact.map(_.head))
-    }
-  }
+final case class DisplayAgentSubscriptionResponse(success: SuccessResponse)
 
-  implicit val writes: OWrites[AgentResponseDetail] = Json.writes[AgentResponseDetail]
-
+object SuccessResponse {
+  implicit val format: OFormat[SuccessResponse] = Json.format[SuccessResponse]
 }
-
-case class AgentReturnParameters(paramName: String, paramValue: String)
-
-
-object AgentReturnParameters {
-  implicit val format: Format[AgentReturnParameters] = Json.format[AgentReturnParameters]
-}
-
-case class AgentResponseCommon(status: String, statusText: Option[String], processingDate: String, returnParameters: Option[Seq[AgentReturnParameters]])
-
-
-object AgentResponseCommon {
-  implicit val format: Format[AgentResponseCommon] = Json.format[AgentResponseCommon]
-}
-
-case class DisplayAgentSubscriptionResponse(responseCommon: AgentResponseCommon, responseDetail: AgentResponseDetail)
-
 
 object DisplayAgentSubscriptionResponse {
   implicit val format: OFormat[DisplayAgentSubscriptionResponse] = Json.format[DisplayAgentSubscriptionResponse]
-}
-
-case class DisplayAgentSubscriptionForCBCResponse(displayAgentSubscriptionForCBCResponse: DisplayAgentSubscriptionResponse)
-
-object DisplayAgentSubscriptionForCBCResponse {
-  implicit val format: OFormat[DisplayAgentSubscriptionForCBCResponse] = Json.format[DisplayAgentSubscriptionForCBCResponse]
 }

@@ -18,7 +18,7 @@ package connectors
 
 import com.google.inject.Inject
 import config.AppConfig
-import models.agentSubscription.{AgentSubscriptionEtmpRequest, DisplayAgentSubscriptionForCBCRequest}
+import models.agentSubscription.AgentSubscriptionEtmpRequest
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -44,16 +44,14 @@ class AgentSubscriptionConnector @Inject()(
     )
   }
 
-  def readSubscription(agentSubscription: DisplayAgentSubscriptionForCBCRequest)
+  def readSubscription(agentRefNo: String)
                       (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
     val serviceName = "read-agent-subscription"
 
-    http.POST[DisplayAgentSubscriptionForCBCRequest, HttpResponse](
-      config.serviceUrl(serviceName),
-      agentSubscription,
+    http.GET[HttpResponse](
+      s"${config.serviceUrl(serviceName)}/ARN/$agentRefNo",
       headers = extraHeaders(serviceName)
     )(
-      wts = DisplayAgentSubscriptionForCBCRequest.format,
       rds = httpReads,
       hc = hc,
       ec = ec

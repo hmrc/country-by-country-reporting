@@ -64,26 +64,9 @@ object AgentReadSubscriptionRequestDetail {
   implicit val format: OFormat[AgentReadSubscriptionRequestDetail] =
     Json.format[AgentReadSubscriptionRequestDetail]
 
-  def apply(agentRefNo: String): AgentReadSubscriptionRequestDetail           = new AgentReadSubscriptionRequestDetail("ARN", agentRefNo)
+  def apply(agentRefNo: String): AgentReadSubscriptionRequestDetail               = new AgentReadSubscriptionRequestDetail("ARN", agentRefNo)
   def apply(IDType: String, IDNumber: String): AgentReadSubscriptionRequestDetail = new AgentReadSubscriptionRequestDetail(IDType, IDNumber)
 
 }
 
-case class DisplayAgentSubscriptionDetails(
-                                       requestCommon: AgentRequestCommonForSubscription,
-                                       requestDetail: AgentReadSubscriptionRequestDetail
-)
 
-object DisplayAgentSubscriptionDetails {
-  implicit val format: OFormat[DisplayAgentSubscriptionDetails] =
-    Json.format[DisplayAgentSubscriptionDetails]
-}
-
-case class DisplayAgentSubscriptionForCBCRequest(
-   displayAgentSubscriptionForCBCRequest: DisplayAgentSubscriptionDetails
-)
-
-object DisplayAgentSubscriptionForCBCRequest {
-  implicit val format: OFormat[DisplayAgentSubscriptionForCBCRequest] =
-    Json.format[DisplayAgentSubscriptionForCBCRequest]
-}
