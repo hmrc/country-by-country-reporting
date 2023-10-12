@@ -144,7 +144,7 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
         )
           .thenReturn(
             Future.successful(
-              HttpResponse(403, Json.obj(), Map.empty[String, Seq[String]])
+              HttpResponse(FORBIDDEN, Json.obj(), Map.empty[String, Seq[String]])
             )
           )
 
@@ -228,7 +228,7 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
           .thenReturn(
             Future.successful(
               HttpResponse(
-                409,
+                CONFLICT,
                 Json.toJson(errorDetails),
                 Map.empty[String, Seq[String]]
               )
@@ -361,6 +361,62 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
         }
       }
 
+      "must return a ReadSubscriptionError(NOT_FOUND) when when a 422 response with a 202 error code is received from connector" in {
+
+        val subscriptionResponseJson: String =
+          s"""{"errorDetail":{
+             |  "errorCode":"202",
+             |  "errorMessage":"No Subscription Data Found",
+             |  "source":"ETMP",
+             |  "sourceFaultDetail":{
+             |    "detail":["No Subscription Data Found"]
+             |    },
+             |    "timestamp":"2023-10-10T11:53:48.263Z",
+             |    "correlationId":"db052924-b1b0-444e-8c74-41d9026abccb"
+             |  }
+             |}""".stripMargin
+
+        when(mockAgentSubscriptionConnector.readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](), any[ExecutionContext]()))
+          .thenReturn(Future.successful(HttpResponse(UNPROCESSABLE_ENTITY, subscriptionResponseJson)))
+
+        val result = service.getContactInformation(agentRefNo)
+
+        whenReady(result) { sub =>
+          sub mustBe Left(ReadSubscriptionError(NOT_FOUND))
+          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](),
+            any[ExecutionContext]()
+          )
+        }
+      }
+
+      "must return a ReadSubscriptionError(UNPROCESSABLE_ENTITY) when when a 422 response with a any other error code is received from connector" in {
+
+        val subscriptionResponseJson: String =
+          s"""{"errorDetail":{
+             |  "errorCode":"003",
+             |  "errorMessage":"Request could not be processed",
+             |  "source":"ETMP",
+             |  "sourceFaultDetail":{
+             |    "detail":["Request could not be processed"]
+             |    },
+             |    "timestamp":"2023-10-10T11:53:48.263Z",
+             |    "correlationId":"db052924-b1b0-444e-8c74-41d9026abccb"
+             |  }
+             |}""".stripMargin
+
+        when(mockAgentSubscriptionConnector.readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](), any[ExecutionContext]()))
+          .thenReturn(Future.successful(HttpResponse(UNPROCESSABLE_ENTITY, subscriptionResponseJson)))
+
+        val result = service.getContactInformation(agentRefNo)
+
+        whenReady(result) { sub =>
+          sub mustBe Left(ReadSubscriptionError(UNPROCESSABLE_ENTITY))
+          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](),
+            any[ExecutionContext]()
+          )
+        }
+      }
+
       "must return ReadSubscriptionError from connector when not ok status" in {
         when(mockAgentSubscriptionConnector.readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](), any[ExecutionContext]()))
           .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
@@ -368,7 +424,7 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
         val result = service.getContactInformation(agentRefNo)
 
         whenReady(result) { sub =>
-          sub mustBe Left(ReadSubscriptionError(500))
+          sub mustBe Left(ReadSubscriptionError(INTERNAL_SERVER_ERROR))
           verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](),
             any[ExecutionContext]()
           )

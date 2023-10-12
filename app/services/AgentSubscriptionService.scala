@@ -60,6 +60,16 @@ class AgentSubscriptionService @Inject()(agentSubscriptionConnector: AgentSubscr
               logger.warn("Failed to parse display agent subscription response json")
               Left(ReadSubscriptionError(UNPROCESSABLE_ENTITY))
           }
+        case UNPROCESSABLE_ENTITY =>
+          val errorDetails = Try(Json.parse(response.body).validate[ErrorDetails])
+          errorDetails match {
+            case Success(JsSuccess(value, _)) if value.errorDetail.errorCode == "202" =>
+              logger.info(s"Read Agent subscription - No Subscription data found")
+              Left(ReadSubscriptionError(NOT_FOUND))
+            case _ =>
+              logger.warn(s"Read Agent subscription Got Status ${response.status}")
+              Left(ReadSubscriptionError(response.status))
+          }
         case status =>
           logger.warn(s"Read Agent subscription Got Status $status")
           Left(ReadSubscriptionError(status))
