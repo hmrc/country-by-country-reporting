@@ -41,7 +41,7 @@ class AppConfig @Inject()(config: Configuration,
 
   val fileUploadXSDFilePath: String  = config.get[String]("xsd-files.fileUpload_CBC_XSDFile")
   val submissionXSDFilePath: String  = config.get[String]("xsd-files.submission_DCT52c_XSDFile")
-  val eisResponseXSDFilePath: String = config.get[String]("xsd-files.eisResponse_DCT72B_XSDFile")
+  val eisResponseXSDFilePath: String = config.get[String]("xsd-files.eisResponse_DCT52B_XSDFile")
 
   lazy val sendEmailUrl: String = servicesConfig.baseUrl("email")
 

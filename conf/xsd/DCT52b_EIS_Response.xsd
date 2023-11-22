@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--  edited with XMLSpy v2020 rel. 2 sp1 (x64) (http://www.altova.com) by  (HMRC - HM Revenue & Customs)  -->
+<!-- edited with XMLSpy v2020 rel. 2 sp1 (x64) (http://www.altova.com) by  (HMRC - HM Revenue & Customs) -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:gsm="http://www.hmrc.gsi.gov.uk/gsm" targetNamespace="http://www.hmrc.gsi.gov.uk/gsm">
 	<xs:element name="BREResponse" type="gsm:BREResponse_Type"/>
 	<xs:complexType name="BREResponse_Type">
@@ -7,7 +7,7 @@
 			<xs:element name="requestCommon" type="gsm:requestCommon_Type"/>
 			<xs:element name="requestDetail" type="gsm:requestDetail_Type">
 				<xs:annotation>
-					<xs:documentation>Wrapper tag for the CBC submission XML payload</xs:documentation>
+					<xs:documentation>Wrapper tag for the CBC Business Rule Result XML payload</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>
@@ -18,7 +18,7 @@
 			<xs:element name="regime">
 				<xs:simpleType>
 					<xs:restriction base="xs:string">
-						<xs:enumeration value="CBC"/>
+						<xs:enumeration value="AEOI"/>
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:element>
