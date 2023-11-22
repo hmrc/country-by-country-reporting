@@ -17,7 +17,9 @@
 package controllers
 
 import base.SpecBase
+import models.agentSubscription.AgentContactDetails
 import models.submission._
+import models.xml.ValidationErrors
 import org.mockito.ArgumentMatchers.any
 import org.scalatest.BeforeAndAfterEach
 import play.api.Application
@@ -27,6 +29,7 @@ import play.api.libs.json.JsValue
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{POST, defaultAwaitTimeout, route, running, status, writeableOf_AnyContentAsXml}
 import repositories.submission.FileDetailsRepository
+import services.EmailService
 import services.audit.AuditService
 import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
@@ -40,19 +43,19 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
 
   private val randomUUID                               = UUID.randomUUID()
   val mockFileDetailsRepository: FileDetailsRepository = mock[FileDetailsRepository]
-//  val mockEmailService: EmailService                   = mock[EmailService]
+  val mockEmailService: EmailService                   = mock[EmailService]
   val mockAuditService: AuditService                   = mock[AuditService]
   val headers                                          = ("x-conversation-id" -> randomUUID.toString, HeaderNames.authorisation -> s"Bearer token")
 
   override def beforeEach(): Unit = {
-    reset(mockFileDetailsRepository, mockAuditService)
+    reset(mockFileDetailsRepository, mockEmailService, mockAuditService)
     super.beforeEach()
   }
 
   val application: Application = applicationBuilder()
     .overrides(
       bind[FileDetailsRepository].toInstance(mockFileDetailsRepository),
-//      bind[EmailService].toInstance(mockEmailService),
+      bind[EmailService].toInstance(mockEmailService),
       bind[AuditService].toInstance(mockAuditService)
     )
     .build()
@@ -60,7 +63,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
   val xml: NodeSeq = <gsm:BREResponse xmlns:gsm="http://www.hmrc.gsi.gov.uk/gsm">
     <requestCommon>
       <receiptDate>2001-12-17T09:30:47.400Z</receiptDate>
-      <regime>CBC</regime>
+      <regime>AEOI</regime>
       <conversationID>{randomUUID}</conversationID>
       <schemaVersion>1.0.0</schemaVersion>
     </requestCommon>
@@ -91,9 +94,8 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
         FileDetails(ConversationId("conversationId123456"), "subscriptionId", "messageRefId", "Reporting Entity", Accepted, "file1.xml", LocalDateTime.now(), LocalDateTime.now())
 
       when(mockFileDetailsRepository.updateStatus(any[String], any[FileStatus])).thenReturn(Future.successful(Some(fileDetails)))
-      //TODO: Uncomment all code relating to emailService and add additional email tests when implemented
-//      when(mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Boolean])(any[HeaderCarrier]))
-//        .thenReturn(Future.successful(ACCEPTED))
+      when(mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(Seq(ACCEPTED)))
       when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(Success))
 
       val request = FakeRequest(POST, routes.EISResponseController.processEISResponse.url)
@@ -108,8 +110,8 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
     }
 
     "must return FORBIDDEN when auth token fails the validation" in {
-//      when(mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Boolean])(any[HeaderCarrier]))
-//        .thenReturn(Future.successful(ACCEPTED))
+      when(mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(Seq(ACCEPTED)))
 
       val request = FakeRequest(POST, routes.EISResponseController.processEISResponse.url)
         .withHeaders("x-conversation-id" -> randomUUID.toString, HeaderNames.authorisation -> s"wrong")
@@ -118,6 +120,118 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
       val result = route(application, request).value
 
       status(result) mustEqual FORBIDDEN
+    }
+
+    "must not send an email when on the fast journey and file upload is Rejected" in {
+      val fileDetails =
+        FileDetails(
+          ConversationId("conversationId123456"),
+          "subscriptionId",
+          "messageRefId",
+          "Reporting Entity",
+          Rejected(ValidationErrors(None, None)),
+          "file1.xml",
+          LocalDateTime.now(),
+          LocalDateTime.now()
+        )
+      when(mockAuditService.sendAuditEvent(any[String], any[JsValue])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(Success))
+      when(mockFileDetailsRepository.updateStatus(any[String], any[FileStatus])).thenReturn(Future.successful(Some(fileDetails)))
+      when(mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(Seq(ACCEPTED)))
+
+      val request = FakeRequest(POST, routes.EISResponseController.processEISResponse.url)
+        .withHeaders("x-conversation-id" -> randomUUID.toString, HeaderNames.authorisation -> s"Bearer token")
+        .withXmlBody(xml)
+
+      val result = route(application, request).value
+
+      status(result) mustEqual NO_CONTENT
+      verify(mockEmailService, times(0)).sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean])(any[HeaderCarrier])
+      verify(mockAuditService, times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
+    }
+
+    "must not send an email when on the fast journey and file upload is Pending" in {
+      val fileDetails =
+        FileDetails(
+          ConversationId("conversationId123456"),
+          "subscriptionId",
+          "messageRefId",
+          "Reporting Entity",
+          Pending,
+          "file1.xml",
+          LocalDateTime.now(),
+          LocalDateTime.now()
+        )
+      when(mockAuditService.sendAuditEvent(any[String], any[JsValue])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(Success))
+      when(mockFileDetailsRepository.updateStatus(any[String], any[FileStatus])).thenReturn(Future.successful(Some(fileDetails)))
+      when(mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(Seq(ACCEPTED)))
+
+      val request = FakeRequest(POST, routes.EISResponseController.processEISResponse.url)
+        .withHeaders("x-conversation-id" -> randomUUID.toString, HeaderNames.authorisation -> s"Bearer token")
+        .withXmlBody(xml)
+
+      val result = route(application, request).value
+
+      status(result) mustEqual NO_CONTENT
+      verify(mockEmailService, times(0)).sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean])(any[HeaderCarrier])
+      verify(mockAuditService, times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
+    }
+
+    "must send an email when on the slow journey and file upload is Accepted" in {
+      val fileDetails =
+        FileDetails(
+          ConversationId("conversationId123456"),
+          "subscriptionId",
+          "messageRefId",
+          "Reporting Entity",
+          Accepted,
+          "file1.xml",
+          LocalDateTime.now().minusSeconds(11),
+          LocalDateTime.now()
+        )
+      when(mockAuditService.sendAuditEvent(any[String], any[JsValue])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(Success))
+      when(mockFileDetailsRepository.updateStatus(any[String], any[FileStatus])).thenReturn(Future.successful(Some(fileDetails)))
+      when(mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(Seq(ACCEPTED)))
+
+      val request = FakeRequest(POST, routes.EISResponseController.processEISResponse.url)
+        .withHeaders("x-conversation-id" -> randomUUID.toString, HeaderNames.authorisation -> s"Bearer token")
+        .withXmlBody(xml)
+
+      val result = route(application, request).value
+
+      status(result) mustEqual NO_CONTENT
+      verify(mockEmailService, times(1)).sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean])(any[HeaderCarrier])
+      verify(mockAuditService, times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
+    }
+
+    "must send an email when on the slow journey and file upload is Rejected" in {
+      val fileDetails =
+        FileDetails(
+          ConversationId("conversationId123456"),
+          "subscriptionId",
+          "messageRefId",
+          "Reporting Entity",
+          Rejected(ValidationErrors(None, None)),
+          "file1.xml",
+          LocalDateTime.now().minusSeconds(11),
+          LocalDateTime.now()
+        )
+      when(mockAuditService.sendAuditEvent(any[String], any[JsValue])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(Success))
+      when(mockFileDetailsRepository.updateStatus(any[String], any[FileStatus])).thenReturn(Future.successful(Some(fileDetails)))
+      when(mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(Seq(ACCEPTED)))
+
+      val request = FakeRequest(POST, routes.EISResponseController.processEISResponse.url)
+        .withHeaders("x-conversation-id" -> randomUUID.toString, HeaderNames.authorisation -> s"Bearer token")
+        .withXmlBody(xml)
+
+      val result = route(application, request).value
+
+      status(result) mustEqual NO_CONTENT
+      verify(mockEmailService, times(1)).sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean])(any[HeaderCarrier])
+      verify(mockAuditService, times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
     }
 
     "must return BadRequest when input xml is invalid" in {
