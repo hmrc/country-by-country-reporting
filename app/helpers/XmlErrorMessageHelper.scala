@@ -67,7 +67,7 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
           case invalidTypeErrorFormat(_, "INType", _, _) =>
             Some(Message("xml.not.allowed.length", Seq("INType", maxLength)))
           case invalidTypeErrorFormat(_, attribute, element, _) =>
-            Some(Message("xml.not.allowed.length", Seq(element + " " + attribute, maxLength)))
+            Some(Message("xml.not.allowed.length.aa", Seq(element + " " + attribute, maxLength)))
           case _ => None
         }
       case _ => None
@@ -137,13 +137,19 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
       case fieldTooLongErrorFormat(_, _, allowedLength, _) =>
         formattedError(errorMessage2) match {
           case missingOrInvalidErrorFormat(_, "MessageRefId") =>
-            Some(Message("xml.not.allowed.length", Seq("MessageRefId", "85")))
+            Some(Message("xml.not.allowed.length", Seq("MessageRefId", "100")))
           case missingOrInvalidErrorFormat(_, "DocRefId") =>
-            Some(Message("xml.not.allowed.length", Seq("DocRefId", "100")))
+            Some(Message("xml.not.allowed.length", Seq("DocRefId", "164")))
+          case missingOrInvalidErrorFormat(_, "CorrDocRefId") =>
+            Some(Message("xml.not.allowed.length", Seq("CorrDocRefId", "164")))
+          case missingOrInvalidErrorFormat(_, "CorrMessageRefId") =>
+            Some(Message("xml.not.corrMessageRefId"))
           case missingOrInvalidErrorFormat(_, "SendingEntityIN") =>
             Some(Message("xml.SendingEntityIN.length"))
           case missingOrInvalidErrorFormat(_, element) =>
             Some(Message("xml.not.allowed.length", Seq(element, numberFormatter.format(allowedLength.toInt))))
+          case genericInvalidSecondErrorFormat("TIN") =>
+            Some(Message("xml.not.allowed.length.tin", Seq("TIN", "30" , "200")))
           case genericInvalidSecondErrorFormat(element) =>
               Some(Message("xml.not.allowed.length", Seq(element, numberFormatter.format(allowedLength.toInt))))
           case _ => None
@@ -260,7 +266,8 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
     elementName match {
       case "MessageRefId" | "TIN" | "Name" | "City" | "DocRefId" | "OtherInfo"=> Message("xml.empty.field", Seq(elementName))
       case "SendingEntityIN" => Message("xml.add.sendingEntityIN", Seq(elementName))
-      case "OtherEntityInfo" | "CorrMessageRefId" | "CorrDocRefId" | "IN" | "NameMNEGroup" | "SuiteIdentifier" |  "Warning" | "Contact" |
+      case "CorrMessageRefId" => Message("xml.not.corrMessageRefId")
+      case "OtherEntityInfo" | "CorrDocRefId" | "IN" | "NameMNEGroup" | "SuiteIdentifier" |  "Warning" | "Contact" |
            "AddressFree" | "Street" | "BuildingIdentifier" | "FloorIdentifier" | "DistrictName" | "POB" | "PostCode" | "CountrySubentity" =>
         Message("xml.optional.field.empty", Seq(elementName))
       case _ if vowels.contains(elementName.head) || elementName.toLowerCase.startsWith("cbc") => Message("xml.add.an.element", Seq(elementName))
