@@ -67,7 +67,7 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
           case invalidTypeErrorFormat(_, "INType", _, _) =>
             Some(Message("xml.not.allowed.length", Seq("INType", maxLength)))
           case invalidTypeErrorFormat(_, attribute, element, _) =>
-            Some(Message("xml.not.allowed.length.aa", Seq(element + " " + attribute, maxLength)))
+            Some(Message("xml.not.allowed.length", Seq(element + " " + attribute, maxLength)))
           case _ => None
         }
       case _ => None
@@ -148,8 +148,6 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
             Some(Message("xml.SendingEntityIN.length"))
           case missingOrInvalidErrorFormat(_, element) =>
             Some(Message("xml.not.allowed.length", Seq(element, numberFormatter.format(allowedLength.toInt))))
-          case genericInvalidSecondErrorFormat("TIN") =>
-            Some(Message("xml.not.allowed.length.tin", Seq("TIN", "30" , "200")))
           case genericInvalidSecondErrorFormat(element) =>
               Some(Message("xml.not.allowed.length", Seq(element, numberFormatter.format(allowedLength.toInt))))
           case _ => None
