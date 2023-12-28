@@ -179,7 +179,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           result mustBe List(GenericError(lineNumber, Message("xml.not.allowed.length", List("BuildingIdentifier", "400"))))
         }
 
-        "must return unique error when MessageRefId allowed length exceeds 200 but user is told must be 85 characters or less" in {
+        "must return unique error when MessageRefId allowed length exceeds 200 but user is told must be 100 characters or less" in {
 
           val maxLengthError1 = SaxParseError(
             lineNumber,
@@ -188,10 +188,10 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           val maxlengthError2 = SaxParseError(lineNumber, s"cvc-type.3.1.3: The value '$over400' of element 'cbc:MessageRefId' is not valid.")
 
           val result = helper.generateErrorMessages(ListBuffer(maxLengthError1, maxlengthError2))
-          result mustBe List(GenericError(lineNumber, Message("xml.not.allowed.length", List("MessageRefId", "85"))))
+          result mustBe List(GenericError(lineNumber, Message("xml.not.allowed.length", List("MessageRefId", "100"))))
         }
 
-        "must return unique error when DocRefId allowed length exceeds 200 but user is told must be 100 characters or less" in {
+        "must return unique error when DocRefId allowed length exceeds 200 but user is told must be 164 characters or less" in {
 
           val maxLengthError1 = SaxParseError(
             lineNumber,
@@ -200,7 +200,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           val maxlengthError2 = SaxParseError(lineNumber, s"cvc-type.3.1.3: The value '$over400' of element 'cbc:DocRefId' is not valid.")
 
           val result = helper.generateErrorMessages(ListBuffer(maxLengthError1, maxlengthError2))
-          result mustBe List(GenericError(lineNumber, Message("xml.not.allowed.length", List("DocRefId", "100"))))
+          result mustBe List(GenericError(lineNumber, Message("xml.not.allowed.length", List("DocRefId", "164"))))
         }
 
         "must return correct error when allowed length exceeded 4000 and the number is formatted correctly" in {
@@ -587,7 +587,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           val maxlengthError2 = SaxParseError(lineNumber, s"cvc-type.3.1.3: The value '$over400' of element 'MessageRefId' is not valid.")
 
           val result = helper.generateErrorMessages(ListBuffer(maxLengthError1, maxlengthError2))
-          result mustBe List(GenericError(lineNumber, Message("xml.not.allowed.length", List("MessageRefId", "85"))))
+          result mustBe List(GenericError(lineNumber, Message("xml.not.allowed.length", List("MessageRefId", "100"))))
         }
 
         "must return unique error when DocRefId allowed length exceeds 200 but user is told must be 100 characters or less" in {
@@ -599,7 +599,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           val maxlengthError2 = SaxParseError(lineNumber, s"cvc-type.3.1.3: The value '$over400' of element 'DocRefId' is not valid.")
 
           val result = helper.generateErrorMessages(ListBuffer(maxLengthError1, maxlengthError2))
-          result mustBe List(GenericError(lineNumber, Message("xml.not.allowed.length", List("DocRefId", "100"))))
+          result mustBe List(GenericError(lineNumber, Message("xml.not.allowed.length", List("DocRefId", "164"))))
         }
 
         "must return correct error when allowed length exceeded 4000 and the number is formatted corectly" in {

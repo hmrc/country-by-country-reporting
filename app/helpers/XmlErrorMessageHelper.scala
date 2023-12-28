@@ -137,9 +137,13 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
       case fieldTooLongErrorFormat(_, _, allowedLength, _) =>
         formattedError(errorMessage2) match {
           case missingOrInvalidErrorFormat(_, "MessageRefId") =>
-            Some(Message("xml.not.allowed.length", Seq("MessageRefId", "85")))
+            Some(Message("xml.not.allowed.length", Seq("MessageRefId", "100")))
           case missingOrInvalidErrorFormat(_, "DocRefId") =>
-            Some(Message("xml.not.allowed.length", Seq("DocRefId", "100")))
+            Some(Message("xml.not.allowed.length", Seq("DocRefId", "164")))
+          case missingOrInvalidErrorFormat(_, "CorrDocRefId") =>
+            Some(Message("xml.not.allowed.length", Seq("CorrDocRefId", "164")))
+          case missingOrInvalidErrorFormat(_, "CorrMessageRefId") =>
+            Some(Message("xml.not.corrMessageRefId"))
           case missingOrInvalidErrorFormat(_, "SendingEntityIN") =>
             Some(Message("xml.SendingEntityIN.length"))
           case missingOrInvalidErrorFormat(_, element) =>
@@ -260,7 +264,8 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
     elementName match {
       case "MessageRefId" | "TIN" | "Name" | "City" | "DocRefId" | "OtherInfo"=> Message("xml.empty.field", Seq(elementName))
       case "SendingEntityIN" => Message("xml.add.sendingEntityIN", Seq(elementName))
-      case "OtherEntityInfo" | "CorrMessageRefId" | "CorrDocRefId" | "IN" | "NameMNEGroup" | "SuiteIdentifier" |  "Warning" | "Contact" |
+      case "CorrMessageRefId" => Message("xml.not.corrMessageRefId")
+      case "OtherEntityInfo" | "CorrDocRefId" | "IN" | "NameMNEGroup" | "SuiteIdentifier" |  "Warning" | "Contact" |
            "AddressFree" | "Street" | "BuildingIdentifier" | "FloorIdentifier" | "DistrictName" | "POB" | "PostCode" | "CountrySubentity" =>
         Message("xml.optional.field.empty", Seq(elementName))
       case _ if vowels.contains(elementName.head) || elementName.toLowerCase.startsWith("cbc") => Message("xml.add.an.element", Seq(elementName))
