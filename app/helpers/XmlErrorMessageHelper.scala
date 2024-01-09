@@ -146,10 +146,12 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
             Some(Message("xml.not.corrMessageRefId"))
           case missingOrInvalidErrorFormat(_, "SendingEntityIN") =>
             Some(Message("xml.SendingEntityIN.length"))
+          case genericInvalidSecondErrorFormat("TIN") =>
+            Some(Message("xml.TIN.length"))
           case missingOrInvalidErrorFormat(_, element) =>
             Some(Message("xml.not.allowed.length", Seq(element, numberFormatter.format(allowedLength.toInt))))
           case genericInvalidSecondErrorFormat(element) =>
-              Some(Message("xml.not.allowed.length", Seq(element, numberFormatter.format(allowedLength.toInt))))
+            Some(Message("xml.not.allowed.length", Seq(element, numberFormatter.format(allowedLength.toInt))))
           case _ => None
         }
       case _ => None

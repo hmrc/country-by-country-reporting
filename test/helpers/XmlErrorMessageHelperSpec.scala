@@ -152,7 +152,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           val error2 = SaxParseError(lineNumber, "cvc-complex-type.2.2: Element 'cbc:TIN' must have no element [children], and the value must be valid.")
 
           val result = helper.generateErrorMessages(ListBuffer(error1, error2))
-          result mustBe List(GenericError(lineNumber, Message("xml.not.allowed.length", List("TIN", "200"))))
+          result mustBe List(GenericError(lineNumber, Message("xml.TIN.length")))
         }
 
         "must return correct error for missing org name'" in {
@@ -551,7 +551,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           val error2 = SaxParseError(lineNumber, "cvc-complex-type.2.2: Element 'TIN' must have no element [children], and the value must be valid.")
 
           val result = helper.generateErrorMessages(ListBuffer(error1, error2))
-          result mustBe List(GenericError(lineNumber, Message("xml.not.allowed.length", List("TIN", "200"))))
+          result mustBe List(GenericError(lineNumber, Message("xml.TIN.length")))
         }
 
         "must return correct error for missing org name'" in {
