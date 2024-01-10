@@ -16,10 +16,10 @@
 
 package services
 
-import models.submission.{MessageSpecData, MessageTypeIndic}
+import models.submission._
 
 import javax.inject.Inject
-import scala.xml.Elem
+import scala.xml.{Elem, NodeSeq}
 
 @Inject
 class DataExtraction()() {
@@ -31,5 +31,37 @@ class DataExtraction()() {
       typeIndic <- (xml \\ "MessageTypeIndic").headOption.map(node => MessageTypeIndic.fromString(node.text))
       reportingEntityName <- (xml \\ "ReportingEntity" \\ "Entity" \\ "Name").headOption
     } yield MessageSpecData(messageID.text, typeIndic, reportingEntityName.text)
+
+  def getReportType(messageTypeIndicator: MessageTypeIndic, xml: Elem): ReportType = {
+    val allDocTypeIndicators: Seq[String] = (xml \\ "DocTypeIndic").map(node => node.text)
+    val reportingEntityDocTypeIndicators = (xml \\ "ReportingEntity" \\ "DocTypeIndic").map(node => node.text)
+    val cbcReportAndAdditionalInfoSections = xml \\ "CbcReports" ++ xml \\ "AdditionalInfo"
+
+    val testDataIndicators: Seq[String] = List("OECD10", "OECD11", "OECD12", "OECD13")
+
+    if (allDocTypeIndicators.exists(indic => testDataIndicators.contains(indic))) {
+      TestData
+    }
+    else if (messageTypeIndicator == CBC401) {
+      NewInformation
+    }
+    else if (reportingEntityDocTypeIndicators.contains("OECD3")) {
+      DeletionOfAllInformation
+    }
+    else if (cbcReportAndAdditionalInfoSections.nonEmpty) {
+      val docTypeIndicators: NodeSeq = cbcReportAndAdditionalInfoSections \\ "DocTypeIndic"
+      val uniqueDocTypes = docTypeIndicators.map(node => node.text).distinct
+
+      (uniqueDocTypes.length, uniqueDocTypes.headOption) match {
+        case (1, Some("OECD1")) => NewInformationForExistingReport
+        case (1, Some("OECD2")) => CorrectionForExistingReport
+        case (1, Some("OECD3")) => DeletionForExistingReport
+        case _ => CorrectionAndDeletionForExistingReport
+      }
+    }
+    else {
+      CorrectionForReportingEntity
+    }
+  }
 
 }

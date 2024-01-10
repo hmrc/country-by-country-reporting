@@ -22,7 +22,6 @@ sealed trait MessageTypeIndic
 case object CBC401 extends MessageTypeIndic
 case object CBC402 extends MessageTypeIndic
 
-
 object MessageTypeIndic {
 
   def fromString(typeIndic: String): MessageTypeIndic = typeIndic.toUpperCase match {
@@ -42,7 +41,32 @@ object MessageTypeIndic {
   }
 }
 
-case class MessageSpecData(messageRefId: String, messageTypeIndic: MessageTypeIndic, reportingEntityName: String)
+sealed trait ReportType
+case object TestData extends ReportType
+case object NewInformation extends ReportType
+case object DeletionOfAllInformation extends ReportType
+case object NewInformationForExistingReport extends ReportType
+case object CorrectionForExistingReport extends ReportType
+case object DeletionForExistingReport extends ReportType
+case object CorrectionAndDeletionForExistingReport extends ReportType
+case object CorrectionForReportingEntity extends ReportType
+
+object ReportType {
+  implicit val format: OFormat[ReportType] = {
+    implicit def testDataFormats: OFormat[TestData.type] = Json.format[TestData.type]
+    implicit def newInfoFormats: OFormat[NewInformation.type] = Json.format[NewInformation.type]
+    implicit def deletionFormats: OFormat[DeletionOfAllInformation.type] = Json.format[DeletionOfAllInformation.type]
+    implicit def newInfoForExistingFormats: OFormat[NewInformationForExistingReport.type] = Json.format[NewInformationForExistingReport.type]
+    implicit def correctionForExistingFormats: OFormat[CorrectionForExistingReport.type] = Json.format[CorrectionForExistingReport.type]
+    implicit def deletionForExistingFormats: OFormat[DeletionForExistingReport.type] = Json.format[DeletionForExistingReport.type]
+    implicit def correctionAndDeletionForExistingFormats: OFormat[CorrectionAndDeletionForExistingReport.type] = Json.format[CorrectionAndDeletionForExistingReport.type]
+    implicit def correctionFormats: OFormat[CorrectionForReportingEntity.type] = Json.format[CorrectionForReportingEntity.type]
+
+    Json.format[ReportType]
+  }
+}
+
+case class MessageSpecData(messageRefId: String, messageTypeIndic: MessageTypeIndic, reportingEntityName: String, reportType: ReportType = CorrectionForReportingEntity)
 
 object MessageSpecData {
   implicit val format: OFormat[MessageSpecData] = Json.format[MessageSpecData]
