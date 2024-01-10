@@ -30,7 +30,7 @@ class DataExtraction()() {
       messageID <- (xml \\ "MessageRefId").headOption
       typeIndic <- (xml \\ "MessageTypeIndic").headOption.map(node => MessageTypeIndic.fromString(node.text))
       reportingEntityName <- (xml \\ "ReportingEntity" \\ "Entity" \\ "Name").headOption
-    } yield MessageSpecData(messageID.text, typeIndic, reportingEntityName.text)
+    } yield MessageSpecData(messageID.text, typeIndic, reportingEntityName.text, getReportType(typeIndic, xml))
 
   def getReportType(messageTypeIndicator: MessageTypeIndic, xml: Elem): ReportType = {
     val allDocTypeIndicators: Seq[String] = (xml \\ "DocTypeIndic").map(node => node.text)

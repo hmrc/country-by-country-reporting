@@ -52,21 +52,31 @@ case object CorrectionAndDeletionForExistingReport extends ReportType
 case object CorrectionForReportingEntity extends ReportType
 
 object ReportType {
-  implicit val format: OFormat[ReportType] = {
-    implicit def testDataFormats: OFormat[TestData.type] = Json.format[TestData.type]
-    implicit def newInfoFormats: OFormat[NewInformation.type] = Json.format[NewInformation.type]
-    implicit def deletionFormats: OFormat[DeletionOfAllInformation.type] = Json.format[DeletionOfAllInformation.type]
-    implicit def newInfoForExistingFormats: OFormat[NewInformationForExistingReport.type] = Json.format[NewInformationForExistingReport.type]
-    implicit def correctionForExistingFormats: OFormat[CorrectionForExistingReport.type] = Json.format[CorrectionForExistingReport.type]
-    implicit def deletionForExistingFormats: OFormat[DeletionForExistingReport.type] = Json.format[DeletionForExistingReport.type]
-    implicit def correctionAndDeletionForExistingFormats: OFormat[CorrectionAndDeletionForExistingReport.type] = Json.format[CorrectionAndDeletionForExistingReport.type]
-    implicit def correctionFormats: OFormat[CorrectionForReportingEntity.type] = Json.format[CorrectionForReportingEntity.type]
+  implicit val writes: Writes[ReportType] = Writes[ReportType] {
+    case TestData => JsString("TEST_DATA")
+    case NewInformation => JsString("NEW_INFORMATION")
+    case DeletionOfAllInformation => JsString("DELETION_OF_ALL_INFORMATION")
+    case NewInformationForExistingReport => JsString("NEW_INFORMATION_FOR_EXISTING_REPORT")
+    case CorrectionForExistingReport => JsString("CORRECTION_FOR_EXISTING_REPORT")
+    case DeletionForExistingReport => JsString("DELETION_FOR_EXISTING_REPORT")
+    case CorrectionAndDeletionForExistingReport => JsString("CORRECTION_AND_DELETION_FOR_EXISTING_REPORT")
+    case CorrectionForReportingEntity => JsString("CORRECTION_FOR_REPORTING_ENTITY")
+  }
 
-    Json.format[ReportType]
+  implicit val reads: Reads[ReportType] = Reads[ReportType] {
+    case JsString("TEST_DATA") => JsSuccess(TestData)
+    case JsString("NEW_INFORMATION") => JsSuccess(NewInformation)
+    case JsString("DELETION_OF_ALL_INFORMATION") => JsSuccess(DeletionOfAllInformation)
+    case JsString("NEW_INFORMATION_FOR_EXISTING_REPORT") => JsSuccess(NewInformationForExistingReport)
+    case JsString("CORRECTION_FOR_EXISTING_REPORT") => JsSuccess(CorrectionForExistingReport)
+    case JsString("DELETION_FOR_EXISTING_REPORT") => JsSuccess(DeletionForExistingReport)
+    case JsString("CORRECTION_AND_DELETION_FOR_EXISTING_REPORT") => JsSuccess(CorrectionAndDeletionForExistingReport)
+    case JsString("CORRECTION_FOR_REPORTING_ENTITY") => JsSuccess(CorrectionForReportingEntity)
+    case value              => JsError(s"Unexpected value of _type: $value")
   }
 }
 
-case class MessageSpecData(messageRefId: String, messageTypeIndic: MessageTypeIndic, reportingEntityName: String, reportType: ReportType = CorrectionForReportingEntity)
+case class MessageSpecData(messageRefId: String, messageTypeIndic: MessageTypeIndic, reportingEntityName: String, reportType: ReportType)
 
 object MessageSpecData {
   implicit val format: OFormat[MessageSpecData] = Json.format[MessageSpecData]

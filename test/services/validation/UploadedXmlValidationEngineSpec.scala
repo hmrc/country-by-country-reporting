@@ -19,7 +19,7 @@ package services.validation
 import base.SpecBase
 import config.AppConfig
 import helpers.XmlErrorMessageHelper
-import models.submission.{CBC401, MessageSpecData}
+import models.submission.{CBC401, MessageSpecData, NewInformation}
 import models.validation._
 import org.mockito.ArgumentMatchers.any
 import services.DataExtraction
@@ -35,7 +35,7 @@ class UploadedXmlValidationEngineSpec extends SpecBase {
   val defaultError                        = "There is a problem with this line number"
   val lineNumber                          = 0
   val noErrors: ListBuffer[SaxParseError] = ListBuffer()
-  val messageSpecData: MessageSpecData    = MessageSpecData("XBC99999999999", CBC401, "Reporting Entity")
+  val messageSpecData: MessageSpecData    = MessageSpecData("XBC99999999999", CBC401, "Reporting Entity", NewInformation)
 
   val addressError1: SaxParseError = SaxParseError(20,
                                                    "cvc-minLength-valid: Value '' with length = '0' is " +
