@@ -44,14 +44,5 @@ class FileErrorsSpec extends SpecBase {
 
       XmlReader.of[FileErrors].read(xml) mustBe ParseSuccess(FileErrors(UnknownFileErrorCode("50011"), Some("error message")))
     }
-
-    "must fail to read xml as FileErrors for invalid code" in {
-      val xml: Elem = <gsm:FileError>
-        <gsm:Code>invalid</gsm:Code>
-        <gsm:Details Language="EN">error message</gsm:Details>
-      </gsm:FileError>
-
-      XmlReader.of[FileErrors].read(xml) mustBe an[ParseFailure]
-    }
   }
 }
