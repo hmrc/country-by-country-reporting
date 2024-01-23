@@ -59,10 +59,16 @@
 	</xs:complexType>
 	<xs:complexType name="FileError_Type">
 		<xs:sequence>
-			<xs:element name="Code" type="gsm:StringMin1Max10_Type">
+			<xs:element name="Code">
 				<xs:annotation>
 					<xs:documentation xml:lang="en">Error Code</xs:documentation>
 				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+						<xs:maxLength value="18"/>
+					</xs:restriction>
+				</xs:simpleType>
 			</xs:element>
 			<xs:element name="Details" type="gsm:ErrorDetail_Type" minOccurs="0">
 				<xs:annotation>
@@ -73,10 +79,16 @@
 	</xs:complexType>
 	<xs:complexType name="RecordError_Type">
 		<xs:sequence>
-			<xs:element name="Code" type="gsm:StringMin1Max10_Type">
+			<xs:element name="Code">
 				<xs:annotation>
 					<xs:documentation xml:lang="en">Error Code</xs:documentation>
 				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+						<xs:maxLength value="18"/>
+					</xs:restriction>
+				</xs:simpleType>
 			</xs:element>
 			<xs:element name="Details" type="gsm:ErrorDetail_Type" minOccurs="0">
 				<xs:annotation>

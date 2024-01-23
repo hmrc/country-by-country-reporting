@@ -36,9 +36,9 @@ class FileErrorCodeSpec extends SpecBase with ScalaCheckPropertyChecks {
       FileErrorCode.xmlReads.read(xml) mustBe ParseSuccess(UnknownFileErrorCode("50000"))
     }
 
-    "return ParseFailureError for invalid value" in {
-      val xml = <Code>Invalid</Code>
-      FileErrorCode.xmlReads.read(xml) mustBe an[ParseFailure]
+    "read CBC Error Codes" in {
+      val xml = <Code>CBC Error Code 39a</Code>
+      FileErrorCode.xmlReads.read(xml) mustBe ParseSuccess(UnknownFileErrorCode("CBC Error Code 39a"))
     }
   }
 }

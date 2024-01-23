@@ -68,7 +68,7 @@ object FileErrorCode {
       values.find(x => x.code == xml.text) match {
         case Some(errorCode) => ParseSuccess(errorCode)
         case None =>
-          try ParseSuccess(UnknownFileErrorCode(Integer.parseInt(xml.text).toString))
+          try ParseSuccess(UnknownFileErrorCode(xml.text))
           catch {
             case _: Exception => ParseFailure(FileErrorCodeParseError(s"Invalid or missing FileErrorCode: ${xml.text}"))
           }

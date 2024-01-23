@@ -82,7 +82,7 @@ object RecordErrorCode {
       values.find(x => x.code == xml.text) match {
         case Some(errorCode) => ParseSuccess(errorCode)
         case None =>
-          try ParseSuccess(UnknownRecordErrorCode(Integer.parseInt(xml.text).toString))
+          try ParseSuccess(UnknownRecordErrorCode(xml.text))
           catch {
             case _: Exception => ParseFailure(RecordErrorCodeParseError(s"Invalid or missing RecordErrorCode: ${xml.text}"))
           }

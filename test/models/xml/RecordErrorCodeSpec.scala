@@ -35,9 +35,9 @@ class RecordErrorCodeSpec extends SpecBase {
       RecordErrorCode.xmlReads.read(xml) mustBe ParseSuccess(UnknownRecordErrorCode("50000"))
     }
 
-    "return ParseFailureError for invalid value" in {
-      val xml = <Code>Invalid</Code>
-      RecordErrorCode.xmlReads.read(xml) mustBe an[ParseFailure]
+    "read CBC Error Codes" in {
+      val xml = <Code>CBC Error Code 39a</Code>
+      RecordErrorCode.xmlReads.read(xml) mustBe ParseSuccess(UnknownRecordErrorCode("CBC Error Code 39a"))
     }
   }
 }

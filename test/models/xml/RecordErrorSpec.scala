@@ -47,14 +47,5 @@ class RecordErrorSpec extends SpecBase {
 
       XmlReader.of[RecordError].read(xml) mustBe ParseSuccess(RecordError(UnknownRecordErrorCode("50011"), Some("error message"), None))
     }
-
-    "must fail to read xml as FileErrors for invalid code" in {
-      val xml: Elem = <gsm:FileError>
-        <gsm:Code>invalid</gsm:Code>
-        <gsm:Details Language="EN">error message</gsm:Details>
-      </gsm:FileError>
-
-      XmlReader.of[RecordError].read(xml) mustBe an[ParseFailure]
-    }
   }
 }
