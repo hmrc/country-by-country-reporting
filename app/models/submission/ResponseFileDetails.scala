@@ -24,6 +24,7 @@ case class ResponseFileDetails(conversationId: ConversationId,
                                subscriptionId: String,
                                messageRefId: String,
                                reportingEntityName: String,
+                               reportType: ReportType,
                                status: FileStatus,
                                name: String,
                                submitted: LocalDateTime,
@@ -38,6 +39,7 @@ object ResponseFileDetails {
       (__ \ "subscriptionId").read[String] and
       (__ \ "messageRefId").read[String] and
       (__ \ "reportingEntityName").read[String] and
+      (__ \ "reportType").read[ReportType] and
       (__ \ "status").read[FileStatus] and
       (__ \ "name").read[String] and
       (__ \ "created").read[LocalDateTime](FileDetails.localDateTimeReads) and
@@ -51,6 +53,7 @@ object ResponseFileDetails {
     fileDetails.subscriptionId,
     fileDetails.messageRefId,
     fileDetails.reportingEntityName,
+    fileDetails.reportType,
     fileDetails.status,
     fileDetails.name,
     fileDetails.submitted,

@@ -21,20 +21,20 @@ import connectors.SubmissionConnector
 import controllers.auth.{IdentifierAuthAction, IdentifierRequest}
 import models.agentSubscription.AgentContactDetails
 import models.error.ReadSubscriptionError
-import models.submission.{ConversationId, FileDetails, Pending, SubmissionMetaData}
+import models.submission.{ConversationId, FileDetails, MessageTypeIndic, Pending, SubmissionMetaData}
 import models.subscription.ResponseDetail
 import play.api.libs.json.Json
 import play.api.mvc.{Action, ControllerComponents, Request}
 import play.api.{Logger, Logging}
 import repositories.submission.FileDetailsRepository
 import services.validation.XMLValidationService
-import services.{AgentSubscriptionService, SubscriptionService, TransformService}
+import services.{AgentSubscriptionService, DataExtraction, SubscriptionService, TransformService}
 import uk.gov.hmrc.http.HttpReads.is2xx
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import scala.xml.NodeSeq
+import scala.xml.{Elem, NodeSeq}
 
 class SubmissionController @Inject() (
   authenticate: IdentifierAuthAction,
@@ -45,6 +45,7 @@ class SubmissionController @Inject() (
   submissionConnector: SubmissionConnector,
   fileDetailsRepository: FileDetailsRepository,
   xmlValidationService: XMLValidationService,
+  dataExtraction: DataExtraction,
   appConfig: AppConfig
 )(implicit ec: ExecutionContext)
     extends BackendController(cc)
@@ -61,6 +62,9 @@ class SubmissionController @Inject() (
     val conversationId           = ConversationId()
     val uploadedXmlNode: NodeSeq = xml \ "file" \ "CBC_OECD"
 
+    val messageTypeIndic = MessageTypeIndic.fromString((xml \\ "MessageTypeIndic").text)
+    val reportType = dataExtraction.getReportType(messageTypeIndic, xml.head.asInstanceOf[Elem])
+
     val submissionMetaData = SubmissionMetaData.build(submissionTime, conversationId, fileName)
 
     val result = for {
@@ -68,7 +72,7 @@ class SubmissionController @Inject() (
       agentMayBe <- getAgentDetails
     } yield (org, agentMayBe) match {
       case (Right(orgDetails), Right(agentDetailsMayBe)) =>
-        val submissionDetails = FileDetails(conversationId, subscriptionId, messageRefId, reportingEntityName, Pending, fileName, submissionTime, submissionTime, agentDetailsMayBe)
+        val submissionDetails = FileDetails(conversationId, subscriptionId, messageRefId, reportingEntityName, reportType, Pending, fileName, submissionTime, submissionTime, agentDetailsMayBe)
         addSubscriptionDetails(conversationId, uploadedXmlNode, submissionMetaData, orgDetails, submissionDetails, agentDetailsMayBe)
       case (errorOrg, errorAgent) =>
         logger.warn(s"ReadSubscriptionError Organisation: $errorOrg")
