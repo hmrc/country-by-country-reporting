@@ -44,6 +44,7 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
       "subscriptionId",
       "messageRefId",
       "Reporting Entity",
+      TestData,
       Pending,
       "file1.xml",
       dateTimeNow,
@@ -70,6 +71,7 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
     "subscriptionId2",
     "messageRefId2",
     "Reporting Entity",
+    TestData,
     Pending,
     "file1.xml",
     dateTimeNow,
@@ -154,7 +156,7 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
       val res = repository.updateStatus("conversationId123456", Accepted)
       whenReady(res) { result =>
         result must matchPattern {
-          case Some(FileDetails(ConversationId("conversationId123456"), "subscriptionId", "messageRefId", "Reporting Entity", Accepted, "file1.xml", _, _, _)) =>
+          case Some(FileDetails(ConversationId("conversationId123456"), "subscriptionId", "messageRefId", "Reporting Entity", TestData, Accepted, "file1.xml", _, _, _)) =>
         }
       }
     }
@@ -167,7 +169,7 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
       val res = repository.updateStatus("conversationId1234567", Accepted)
       whenReady(res) { result =>
         result must matchPattern {
-          case Some(FileDetails(ConversationId("conversationId1234567"), "subscriptionId2", "messageRefId2", "Reporting Entity", Accepted, "file1.xml", _, _, _)) =>
+          case Some(FileDetails(ConversationId("conversationId1234567"), "subscriptionId2", "messageRefId2", "Reporting Entity", TestData, Accepted, "file1.xml", _, _, _)) =>
         }
       }
     }
@@ -188,6 +190,7 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
                             "subscriptionId",
                             "messageRefId",
                             "Reporting Entity",
+                            TestData,
                             Rejected(ValidationErrors(Some(Seq(FileErrors(FileErrorCode.FailedSchemaValidation, Some("details")))), None)),
                             "file1.xml",
                             _,

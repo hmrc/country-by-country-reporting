@@ -91,7 +91,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
   "EISResponseController" - {
     "must return NoContent when input xml is valid" in {
       val fileDetails =
-        FileDetails(ConversationId("conversationId123456"), "subscriptionId", "messageRefId", "Reporting Entity", Accepted, "file1.xml", LocalDateTime.now(), LocalDateTime.now())
+        FileDetails(ConversationId("conversationId123456"), "subscriptionId", "messageRefId", "Reporting Entity", TestData, Accepted, "file1.xml", LocalDateTime.now(), LocalDateTime.now())
 
       when(mockFileDetailsRepository.updateStatus(any[String], any[FileStatus])).thenReturn(Future.successful(Some(fileDetails)))
       when(mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean])(any[HeaderCarrier]))
@@ -129,6 +129,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
           "subscriptionId",
           "messageRefId",
           "Reporting Entity",
+          TestData,
           Rejected(ValidationErrors(None, None)),
           "file1.xml",
           LocalDateTime.now(),
@@ -157,6 +158,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
           "subscriptionId",
           "messageRefId",
           "Reporting Entity",
+          TestData,
           Pending,
           "file1.xml",
           LocalDateTime.now(),
@@ -185,6 +187,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
           "subscriptionId",
           "messageRefId",
           "Reporting Entity",
+          TestData,
           Accepted,
           "file1.xml",
           LocalDateTime.now().minusSeconds(11),
@@ -213,6 +216,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
           "subscriptionId",
           "messageRefId",
           "Reporting Entity",
+          TestData,
           Rejected(ValidationErrors(None, None)),
           "file1.xml",
           LocalDateTime.now().minusSeconds(11),
