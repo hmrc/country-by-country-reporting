@@ -176,9 +176,10 @@ class DataExtractionSpec extends SpecBase {
       dataExtraction.getReportType(CBC402, xml) mustBe CorrectionForExistingReport
     }
 
-    "must return DeletionForExistingReport if all the DocTypeIndic values in CbcReports or AdditionalInfo are OECD3" in  {
+    "must return DeletionForExistingReport if all the DocTypeIndic values in CbcReports or AdditionalInfo are OECD3 and ReportingEntity DocTypeIndicators contains OECD0" in  {
       val xml = generateValidXml(
-        additionalInfoDocTypeIndic = List(Some("OECD3"), None)
+        additionalInfoDocTypeIndic = List(Some("OECD3"), None),
+        reportingEntityDocTypeIndic = List(Option("OECD0"))
       )
 
       dataExtraction.getReportType(CBC402, xml) mustBe DeletionForExistingReport
@@ -197,6 +198,15 @@ class DataExtractionSpec extends SpecBase {
       val xml = generateValidXml(
         cbcReportDocTypeIndic = List(None, None),
         additionalInfoDocTypeIndic = List(None)
+      )
+
+      dataExtraction.getReportType(CBC402, xml) mustBe CorrectionAndDeletionForExistingReport
+    }
+
+    "must return CorrectionAndDeletionForExistingReport if CbcReports or AdditionalInfo contains OECD3 and ReportingEntity DocTypeIndicators contains OECD2" in  {
+      val xml = generateValidXml(
+        additionalInfoDocTypeIndic = List(Some("OECD3"), None),
+        reportingEntityDocTypeIndic = List(Option("OECD2"))
       )
 
       dataExtraction.getReportType(CBC402, xml) mustBe CorrectionAndDeletionForExistingReport
