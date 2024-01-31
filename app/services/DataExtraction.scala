@@ -53,10 +53,10 @@ class DataExtraction()() {
       val uniqueDocTypes = docTypeIndicators.map(node => node.text).distinct
 
       (uniqueDocTypes.length, uniqueDocTypes.headOption) match {
-        case (1, Some("OECD1")) => NewInformationForExistingReport
-        case (1, Some("OECD2")) => CorrectionForExistingReport
-        case (1, Some("OECD3")) => DeletionForExistingReport
-        case _ => CorrectionAndDeletionForExistingReport
+        case (1, Some("OECD1"))                                                       => NewInformationForExistingReport
+        case (1, Some("OECD2"))                                                       => CorrectionForExistingReport
+        case (1, Some("OECD3")) if reportingEntityDocTypeIndicators.contains("OECD0") => DeletionForExistingReport
+        case _                                                                        => CorrectionAndDeletionForExistingReport
       }
     }
     else {
