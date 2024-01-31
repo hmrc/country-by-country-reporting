@@ -29,7 +29,8 @@ object EmailRequest {
                            submissionTime: String,
                            messageRefId: String,
                            cbcId: Option[String],
-                           tradingName: Option[String]
+                           tradingName: Option[String],
+                           reportType: Option[String]
   ): EmailRequest = {
 
     val contactName = name.fold("Registrant")(name => name)
@@ -40,8 +41,10 @@ object EmailRequest {
       Map(
         "dateSubmitted" -> submissionTime,
         "messageRefId"  -> messageRefId,
-        "contactName"   -> contactName
-      ) ++ cbcId.map("cbcId" -> _) ++ tradingName.filter(_.nonEmpty).map("clientTradingName" -> _)
+        "contactName"   -> contactName,
+      ) ++ cbcId.map("cbcId" -> _)
+        ++ tradingName.filter(_.nonEmpty).map("clientTradingName" -> _)
+      ++ reportType.map("reportType" -> _)
     )
   }
 }

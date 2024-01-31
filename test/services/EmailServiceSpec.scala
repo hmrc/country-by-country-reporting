@@ -91,6 +91,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
   val messageRefId   = "messageRefId"
   val subscriptionId = "subscriptionId"
   val tradingName    = "tradingName"
+  val reportType     = "someReportType"
 
   val agentDetails = AgentContactDetails("ARN", AgentResponseDetail(subscriptionId, Option(tradingName), isGBUser = true, agentPrimaryContact, Some(agentSecondaryContact)))
   val agentSingleContactDetails = AgentContactDetails("ARN", AgentResponseDetail(subscriptionId, Option(tradingName), isGBUser = true, agentPrimaryContact, None))
@@ -233,7 +234,8 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
             "messageRefId"      -> messageRefId,
             "contactName"       -> agentPrimaryContact.organisationDetails.organisationName,
             "cbcId"             -> subscriptionId,
-            "clientTradingName" -> tradingName
+            "clientTradingName" -> tradingName,
+            "reportType"        -> reportType
           )
         )
 
