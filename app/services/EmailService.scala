@@ -20,6 +20,7 @@ import connectors.EmailConnector
 import models.agentSubscription.AgentContactDetails
 import models.email.{EmailAddress, EmailRequest, EmailTemplate}
 import models.error.ReadSubscriptionError
+import models.submission._
 import play.api.Logging
 import play.api.http.Status._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -34,10 +35,10 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
 
   case class EmailResult(emailType: String, result: Option[HttpResponse])
 
-  def sendAndLogEmail(subscriptionId: String, submissionTime: String, messageRefId: String, agentDetails: Option[AgentContactDetails], isUploadSuccessful: Boolean)(implicit
-                                                                                                                                                                    hc: HeaderCarrier
+  def sendAndLogEmail(subscriptionId: String, submissionTime: String, messageRefId: String, agentDetails: Option[AgentContactDetails], isUploadSuccessful: Boolean, reportType: ReportType)(implicit
+                                                                                                                                                                                            hc: HeaderCarrier
   ): Future[Seq[Int]] =
-    sendEmail(subscriptionId, submissionTime, messageRefId, agentDetails, isUploadSuccessful) map { responses: Seq[EmailResult] =>
+    sendEmail(subscriptionId, submissionTime, messageRefId, agentDetails, isUploadSuccessful, reportType) map { responses: Seq[EmailResult] =>
       responses.map {
         case EmailResult(emailType, Some(resp)) =>
           resp.status match {
@@ -56,25 +57,25 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
       }
     }
 
-  def sendEmail(subscriptionId: String, submissionTime: String, messageRefId: String, agentDetails: Option[AgentContactDetails], isUploadSuccessful: Boolean)(implicit hc: HeaderCarrier): Future[Seq[EmailResult]] = {
+  def sendEmail(subscriptionId: String, submissionTime: String, messageRefId: String, agentDetails: Option[AgentContactDetails], isUploadSuccessful: Boolean, reportType: ReportType)(implicit hc: HeaderCarrier): Future[Seq[EmailResult]] = {
     subscriptionService.getContactInformation(subscriptionId).flatMap {
       case Right(responseDetail) =>
-        val emailAddress          = Some(responseDetail.primaryContact.email)
-        val contactName           = Some(responseDetail.primaryContact.organisationDetails.organisationName)
+        val emailAddress = Some(responseDetail.primaryContact.email)
+        val contactName = Some(responseDetail.primaryContact.organisationDetails.organisationName)
         val secondaryEmailAddress = responseDetail.secondaryContact.map(_.email)
-        val secondaryName         = responseDetail.secondaryContact.map(_.organisationDetails.organisationName)
-        val agentPrimaryEmail     = agentDetails.map(_.subscriptionDetails.primaryContact.email)
-        val agentPrimaryName      = agentDetails.map(_.subscriptionDetails.primaryContact.organisationDetails.organisationName)
-        val agentSecondaryEmail   = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.email))
-        val agentSecondaryName    = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.organisationDetails.organisationName))
-        val cbcId                 = responseDetail.subscriptionID
-        val tradingName           = responseDetail.tradingName
-        val reportType            = "someReportType" //need to bring this in to pass through the string message (e.g getReportTypeContent)
+        val secondaryName = responseDetail.secondaryContact.map(_.organisationDetails.organisationName)
+        val agentPrimaryEmail = agentDetails.map(_.subscriptionDetails.primaryContact.email)
+        val agentPrimaryName = agentDetails.map(_.subscriptionDetails.primaryContact.organisationDetails.organisationName)
+        val agentSecondaryEmail = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.email))
+        val agentSecondaryName = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.organisationDetails.organisationName))
+        val cbcId = responseDetail.subscriptionID
+        val tradingName = responseDetail.tradingName
+        val reportTypeContent = getReportTypeMessage(reportType)
 
         lazy val orgEmails: Seq[Future[EmailResult]] = Seq(
-          send(emailAddress, contactName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId, None, None, Some(reportType))
+          send(emailAddress, contactName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId, None, None, Some(reportTypeContent))
             .map(res => EmailResult("Primary Org", res)),
-          send(secondaryEmailAddress, secondaryName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId, None, None, Some(reportType))
+          send(secondaryEmailAddress, secondaryName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId, None, None, Some(reportTypeContent))
             .map(res => EmailResult("Secondary Org", res))
         )
 
@@ -86,7 +87,7 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
             messageRefId,
             Some(cbcId),
             tradingName,
-            Some(reportType)
+            Some(reportType.toString)
           ).map(res => EmailResult("Primary Agent", res)),
           send(agentSecondaryEmail,
             agentSecondaryName,
@@ -95,7 +96,7 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
             messageRefId,
             Some(cbcId),
             tradingName,
-            Some(reportType)
+            Some(reportType.toString)
           ).map(res => EmailResult("Secondary Agent", res))
         )
 
@@ -135,5 +136,20 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
           .map(Some.apply)
       }
       .getOrElse(Future.successful(None))
+  }
+
+  def getReportTypeMessage(reportType: ReportType): String = {
+    val reportTypeKeyMapMap: Map[ReportType, String] =
+      Map(TestData -> "email.reportType.TestData",
+        NewInformation -> "The file contains new information for the reporting period.",
+        DeletionOfAllInformation -> "The file contains a deletion of all previously reported information for this reporting period.",
+        NewInformationForExistingReport -> "The file contains new information for an existing report.",
+        CorrectionForExistingReport -> "The file contains corrections for an existing report.",
+        DeletionForExistingReport -> "The file contains deletions for an existing report.",
+        CorrectionAndDeletionForExistingReport -> "The file contains corrections and deletions for an existing report.",
+        CorrectionForReportingEntity -> "The file contains a correction for the ReportingEntity.",
+
+      )
+    reportTypeKeyMapMap(reportType)
   }
 }

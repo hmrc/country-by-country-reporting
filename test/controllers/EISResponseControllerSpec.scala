@@ -94,7 +94,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
         FileDetails(ConversationId("conversationId123456"), "subscriptionId", "messageRefId", "Reporting Entity", TestData, Accepted, "file1.xml", LocalDateTime.now(), LocalDateTime.now())
 
       when(mockFileDetailsRepository.updateStatus(any[String], any[FileStatus])).thenReturn(Future.successful(Some(fileDetails)))
-      when(mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean])(any[HeaderCarrier]))
+      when(mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean], any[ReportType])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Seq(ACCEPTED)))
       when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(Success))
 
@@ -110,7 +110,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
     }
 
     "must return FORBIDDEN when auth token fails the validation" in {
-      when(mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean])(any[HeaderCarrier]))
+      when(mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean], any[ReportType])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Seq(ACCEPTED)))
 
       val request = FakeRequest(POST, routes.EISResponseController.processEISResponse.url)
@@ -137,7 +137,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
         )
       when(mockAuditService.sendAuditEvent(any[String], any[JsValue])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(Success))
       when(mockFileDetailsRepository.updateStatus(any[String], any[FileStatus])).thenReturn(Future.successful(Some(fileDetails)))
-      when(mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean])(any[HeaderCarrier]))
+      when(mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean], any[ReportType])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Seq(ACCEPTED)))
 
       val request = FakeRequest(POST, routes.EISResponseController.processEISResponse.url)
@@ -147,7 +147,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
       val result = route(application, request).value
 
       status(result) mustEqual NO_CONTENT
-      verify(mockEmailService, times(0)).sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean])(any[HeaderCarrier])
+      verify(mockEmailService, times(0)).sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean], any[ReportType])(any[HeaderCarrier])
       verify(mockAuditService, times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
     }
 
@@ -166,7 +166,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
         )
       when(mockAuditService.sendAuditEvent(any[String], any[JsValue])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(Success))
       when(mockFileDetailsRepository.updateStatus(any[String], any[FileStatus])).thenReturn(Future.successful(Some(fileDetails)))
-      when(mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean])(any[HeaderCarrier]))
+      when(mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean], any[ReportType])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Seq(ACCEPTED)))
 
       val request = FakeRequest(POST, routes.EISResponseController.processEISResponse.url)
@@ -176,7 +176,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
       val result = route(application, request).value
 
       status(result) mustEqual NO_CONTENT
-      verify(mockEmailService, times(0)).sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean])(any[HeaderCarrier])
+      verify(mockEmailService, times(0)).sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean], any[ReportType])(any[HeaderCarrier])
       verify(mockAuditService, times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
     }
 
@@ -195,7 +195,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
         )
       when(mockAuditService.sendAuditEvent(any[String], any[JsValue])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(Success))
       when(mockFileDetailsRepository.updateStatus(any[String], any[FileStatus])).thenReturn(Future.successful(Some(fileDetails)))
-      when(mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean])(any[HeaderCarrier]))
+      when(mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean], any[ReportType])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Seq(ACCEPTED)))
 
       val request = FakeRequest(POST, routes.EISResponseController.processEISResponse.url)
@@ -205,7 +205,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
       val result = route(application, request).value
 
       status(result) mustEqual NO_CONTENT
-      verify(mockEmailService, times(1)).sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean])(any[HeaderCarrier])
+      verify(mockEmailService, times(1)).sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean], any[ReportType])(any[HeaderCarrier])
       verify(mockAuditService, times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
     }
 
@@ -224,7 +224,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
         )
       when(mockAuditService.sendAuditEvent(any[String], any[JsValue])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(Success))
       when(mockFileDetailsRepository.updateStatus(any[String], any[FileStatus])).thenReturn(Future.successful(Some(fileDetails)))
-      when(mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean])(any[HeaderCarrier]))
+      when(mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean], any[ReportType])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Seq(ACCEPTED)))
 
       val request = FakeRequest(POST, routes.EISResponseController.processEISResponse.url)
@@ -234,7 +234,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
       val result = route(application, request).value
 
       status(result) mustEqual NO_CONTENT
-      verify(mockEmailService, times(1)).sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean])(any[HeaderCarrier])
+      verify(mockEmailService, times(1)).sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean],any[ReportType])(any[HeaderCarrier])
       verify(mockAuditService, times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
     }
 
