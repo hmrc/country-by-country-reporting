@@ -94,6 +94,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
   val subscriptionId = "subscriptionId"
   val tradingName = "tradingName"
   val reportType = TestData
+  val reportTypeContent = "The file contains Test data."
 
   val agentDetails = AgentContactDetails("ARN", AgentResponseDetail(subscriptionId, Option(tradingName), isGBUser = true, agentPrimaryContact, Some(agentSecondaryContact)))
   val agentSingleContactDetails = AgentContactDetails("ARN", AgentResponseDetail(subscriptionId, Option(tradingName), isGBUser = true, agentPrimaryContact, None))
@@ -237,7 +238,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
             "contactName" -> agentPrimaryContact.organisationDetails.organisationName,
             "cbcId" -> subscriptionId,
             "clientTradingName" -> tradingName,
-            "reportType" -> reportType.toString
+            "reportType" -> reportTypeContent
           )
         )
 
@@ -346,7 +347,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
 
       "mus give correct message for respective Report Type" in {
 
-        emailService.getReportTypeMessage(TestData) mustBe "email.reportType.TestData"
+        emailService.getReportTypeMessage(TestData) mustBe "The file contains Test data."
         emailService.getReportTypeMessage(NewInformation) mustBe "The file contains new information for the reporting period."
         emailService.getReportTypeMessage(DeletionOfAllInformation) mustBe "The file contains a deletion of all previously reported information for this reporting period."
         emailService.getReportTypeMessage(NewInformationForExistingReport) mustBe "The file contains new information for an existing report."

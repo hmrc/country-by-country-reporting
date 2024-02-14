@@ -87,7 +87,7 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
             messageRefId,
             Some(cbcId),
             tradingName,
-            Some(reportType.toString)
+            Some(reportTypeContent)
           ).map(res => EmailResult("Primary Agent", res)),
           send(agentSecondaryEmail,
             agentSecondaryName,
@@ -96,7 +96,7 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
             messageRefId,
             Some(cbcId),
             tradingName,
-            Some(reportType.toString)
+            Some(reportTypeContent)
           ).map(res => EmailResult("Secondary Agent", res))
         )
 
@@ -140,7 +140,7 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
 
   def getReportTypeMessage(reportType: ReportType): String = {
     val reportTypeKeyMapMap: Map[ReportType, String] =
-      Map(TestData -> "email.reportType.TestData",
+      Map(TestData -> "The file contains Test data.",
         NewInformation -> "The file contains new information for the reporting period.",
         DeletionOfAllInformation -> "The file contains a deletion of all previously reported information for this reporting period.",
         NewInformationForExistingReport -> "The file contains new information for an existing report.",
