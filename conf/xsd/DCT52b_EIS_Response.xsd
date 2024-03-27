@@ -7,7 +7,7 @@
 			<xs:element name="requestCommon" type="gsm:requestCommon_Type"/>
 			<xs:element name="requestDetail" type="gsm:requestDetail_Type">
 				<xs:annotation>
-					<xs:documentation>Wrapper tag for the CBC Business Rule Result XML payload</xs:documentation>
+					<xs:documentation>Wrapper tag for the Business Rule Result XML payload</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>
@@ -59,16 +59,10 @@
 	</xs:complexType>
 	<xs:complexType name="FileError_Type">
 		<xs:sequence>
-			<xs:element name="Code">
+			<xs:element name="Code" type="gsm:StringMin1Max50_Type">
 				<xs:annotation>
 					<xs:documentation xml:lang="en">Error Code</xs:documentation>
 				</xs:annotation>
-				<xs:simpleType>
-					<xs:restriction base="xs:string">
-						<xs:minLength value="1"/>
-						<xs:maxLength value="18"/>
-					</xs:restriction>
-				</xs:simpleType>
 			</xs:element>
 			<xs:element name="Details" type="gsm:ErrorDetail_Type" minOccurs="0">
 				<xs:annotation>
@@ -79,16 +73,10 @@
 	</xs:complexType>
 	<xs:complexType name="RecordError_Type">
 		<xs:sequence>
-			<xs:element name="Code">
+			<xs:element name="Code" type="gsm:StringMin1Max50_Type">
 				<xs:annotation>
 					<xs:documentation xml:lang="en">Error Code</xs:documentation>
 				</xs:annotation>
-				<xs:simpleType>
-					<xs:restriction base="xs:string">
-						<xs:minLength value="1"/>
-						<xs:maxLength value="18"/>
-					</xs:restriction>
-				</xs:simpleType>
 			</xs:element>
 			<xs:element name="Details" type="gsm:ErrorDetail_Type" minOccurs="0">
 				<xs:annotation>
@@ -155,6 +143,17 @@
 		<xs:restriction base="xs:string">
 			<xs:minLength value="1"/>
 			<xs:maxLength value="10"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<!-- -->
+	<!-- Defines a string with minimum length 1 and maximum length of 50 -->
+	<xs:simpleType name="StringMin1Max50_Type">
+		<xs:annotation>
+			<xs:documentation>Defines a string with minimum length 1 and maximum length of 50</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+			<xs:maxLength value="50"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<!-- -->
