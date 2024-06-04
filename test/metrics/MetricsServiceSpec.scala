@@ -17,18 +17,19 @@
 package metrics
 
 import base.SpecBase
-import com.kenshoo.play.metrics.MetricsImpl
+import com.codahale.metrics.MetricRegistry
 import models.submission.{Accepted, Rejected}
 import models.xml.ValidationErrors
 import org.scalacheck.Gen
 import org.scalatest.BeforeAndAfterEach
 import play.api.test.Injecting
+import services.metrics.MetricsService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class MetricsServiceSpec extends SpecBase with Injecting with BeforeAndAfterEach {
-  val metrics: MetricsImpl           = inject[MetricsImpl]
+  val metrics: MetricRegistry        = inject[MetricRegistry]
   val metricsService: MetricsService = new MetricsService(metrics)
 
   "MetricsService" - {

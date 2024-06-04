@@ -16,16 +16,14 @@
 
 package services.metrics
 
-import com.codahale.metrics.Counter
-import com.kenshoo.play.metrics.Metrics
+import com.codahale.metrics.{Counter, MetricRegistry}
 import models.submission.{Accepted, FileStatus, Rejected}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-
 @Singleton
-class MetricsService @Inject() (metrics: Metrics) {
+class MetricsService @Inject() (metrics: MetricRegistry) {
 
   val fileStatusAcceptedCounter: Counter = getCounter("file-status-accepted-counter")
   val fileStatusPendingCounter: Counter  = getCounter("file-status-pending-counter")
@@ -33,7 +31,7 @@ class MetricsService @Inject() (metrics: Metrics) {
   val failureCounter: Counter            = getCounter("failure-counter")
 
   private def getCounter(counterName: String): Counter =
-    metrics.defaultRegistry.counter(counterName)
+    metrics.counter(counterName)
 
   def getFileStatusCounter(newStatus: FileStatus): Counter =
     newStatus match {

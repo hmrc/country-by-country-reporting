@@ -1,14 +1,16 @@
-import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
+import uk.gov.hmrc.DefaultBuildSettings
 
-val appName = "country-by-country-reporting"
+ThisBuild / majorVersion := 0
+ThisBuild / scalaVersion := "2.13.12"
 
-lazy val microservice = Project(appName, file("."))
-  .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
+lazy val microservice = Project("country-by-country-reporting", file("."))
+  .enablePlugins(PlayScala, SbtDistributablesPlugin)
   .settings(
-    majorVersion                     := 0,
-    scalaVersion                     := "2.13.10",
-    PlayKeys.playDefaultPort         := 10022,
-    libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test,
+    PlayKeys.playDefaultPort := 10022,
+    libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
+    Compile / scalafmtOnCompile                                := true,
+    Test / scalafmtOnCompile                                   := true,
+    ThisBuild / scalafmtOnCompile.withRank(KeyRanks.Invisible) := true,
     scalacOptions ++= Seq(
       "-Wconf:src=routes/.*:s",
       "-Wconf:src=.+/test/.+:s",
@@ -19,13 +21,13 @@ lazy val microservice = Project(appName, file("."))
     )
   )
   .settings(scoverageSettings)
-  .configs(IntegrationTest)
-  .settings(integrationTestSettings(): _*)
   .settings(resolvers += Resolver.jcenterRepo)
   .settings(CodeCoverageSettings.settings: _*)
-  .settings(ThisBuild / libraryDependencySchemes ++= Seq(
-    "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
-  ))
+  .settings(
+    ThisBuild / libraryDependencySchemes ++= Seq(
+      "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
+    )
+  )
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
 
 lazy val scoverageSettings = {
@@ -56,10 +58,17 @@ lazy val scoverageSettings = {
   )
 
   Seq(
-    ScoverageKeys.coverageExcludedFiles := excludedPackages.mkString(";"),
+    ScoverageKeys.coverageExcludedFiles    := excludedPackages.mkString(";"),
     ScoverageKeys.coverageMinimumStmtTotal := 80,
-    ScoverageKeys.coverageFailOnMinimum := true,
-    ScoverageKeys.coverageHighlighting := true
+    ScoverageKeys.coverageFailOnMinimum    := true,
+    ScoverageKeys.coverageHighlighting     := true
   )
 }
 
+lazy val testSettings: Seq[Def.Setting[_]] = Seq(fork := true, unmanagedSourceDirectories += baseDirectory.value / "test-common")
+
+lazy val it = project
+  .enablePlugins(PlayScala)
+  .dependsOn(microservice % "test->test")
+  .settings(DefaultBuildSettings.itSettings())
+  .settings(libraryDependencies ++= AppDependencies.itDependencies)

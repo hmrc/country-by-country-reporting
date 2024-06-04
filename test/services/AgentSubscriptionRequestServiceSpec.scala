@@ -16,7 +16,7 @@
 
 package services
 
-import akka.http.javadsl.model.DateTime
+import org.apache.pekko.http.javadsl.model.DateTime
 import base.SpecBase
 import connectors.AgentSubscriptionConnector
 import generators.Generators
