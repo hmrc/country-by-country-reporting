@@ -43,15 +43,14 @@ class TransformService @Inject() () {
       </cadx:CBCSubmissionRequest>
 
   def addNameSpaceDefinitions(submissionFile: NodeSeq): NodeSeq =
-    for (node <- submissionFile) yield node match {
-      case elem: Elem =>
-        elem.copy(scope =
-          NamespaceBinding(
-            "xsi",
-            "http://www.w3.org/2001/XMLSchema-instance",
-            NamespaceBinding("stf", "urn:oecd:ties:cbcstf:v5", NamespaceBinding("cbc", "urn:oecd:ties:cbc:v2", TopScope))
-          )
+    submissionFile.collect { case elem: Elem =>
+      elem.copy(scope =
+        NamespaceBinding(
+          "xsi",
+          "http://www.w3.org/2001/XMLSchema-instance",
+          NamespaceBinding("stf", "urn:oecd:ties:cbcstf:v5", NamespaceBinding("cbc", "urn:oecd:ties:cbc:v2", TopScope))
         )
+      )
     }
 
   def transformSubscriptionDetails(
@@ -66,7 +65,9 @@ class TransformService @Inject() () {
       Some(<isGBUser>{subscriptionDetails.isGBUser}</isGBUser>),
       Some(<primaryContact>{transformContactInformation(subscriptionDetails.primaryContact)}</primaryContact>),
       subscriptionDetails.secondaryContact.map(sc => <secondaryContact>{transformContactInformation(sc)}</secondaryContact>),
-      agentDetails.map { agentDetail => <agentDetails>{transformAgentSubscriptionDetails(agentDetail.agentReferenceNumber, agentDetail.subscriptionDetails)}</agentDetails>}
+      agentDetails.map { agentDetail =>
+        <agentDetails>{transformAgentSubscriptionDetails(agentDetail.agentReferenceNumber, agentDetail.subscriptionDetails)}</agentDetails>
+      }
     ).filter(_.isDefined).map(_.get)
   def transformAgentSubscriptionDetails(
     agentReferenceNumber: String,

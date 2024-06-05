@@ -16,7 +16,7 @@
 
 package models.submission
 
-import play.api.libs.json.{Json, OWrites, Reads, __}
+import play.api.libs.json.{__, Json, OWrites, Reads}
 
 import java.time.LocalDateTime
 
@@ -29,7 +29,7 @@ case class ResponseFileDetails(conversationId: ConversationId,
                                name: String,
                                submitted: LocalDateTime,
                                lastUpdated: LocalDateTime
-                              )
+)
 object ResponseFileDetails {
 
   import play.api.libs.functional.syntax._
@@ -44,7 +44,7 @@ object ResponseFileDetails {
       (__ \ "name").read[String] and
       (__ \ "created").read[LocalDateTime](FileDetails.localDateTimeReads) and
       (__ \ "updated").read[LocalDateTime](FileDetails.localDateTimeReads)
-    )(ResponseFileDetails.apply _)
+  )(ResponseFileDetails.apply _)
 
   implicit val writes: OWrites[ResponseFileDetails] = Json.writes[ResponseFileDetails]
 

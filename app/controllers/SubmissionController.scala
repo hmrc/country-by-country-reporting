@@ -52,7 +52,6 @@ class SubmissionController @Inject() (
     with Logging {
 
   def submitDisclosure: Action[NodeSeq] = authenticate.async(parse.xml) { implicit request =>
-
     val xml                      = request.body
     val fileName                 = (xml \ "fileName").text
     val messageRefId             = (xml \\ "MessageRefId").text
@@ -63,7 +62,7 @@ class SubmissionController @Inject() (
     val uploadedXmlNode: NodeSeq = xml \ "file" \ "CBC_OECD"
 
     val messageTypeIndic = MessageTypeIndic.fromString((xml \\ "MessageTypeIndic").text)
-    val reportType = dataExtraction.getReportType(messageTypeIndic, xml.head.asInstanceOf[Elem])
+    val reportType       = dataExtraction.getReportType(messageTypeIndic, xml.head.asInstanceOf[Elem])
 
     val submissionMetaData = SubmissionMetaData.build(submissionTime, conversationId, fileName)
 
@@ -72,7 +71,17 @@ class SubmissionController @Inject() (
       agentMayBe <- getAgentDetails
     } yield (org, agentMayBe) match {
       case (Right(orgDetails), Right(agentDetailsMayBe)) =>
-        val submissionDetails = FileDetails(conversationId, subscriptionId, messageRefId, reportingEntityName, reportType, Pending, fileName, submissionTime, submissionTime, agentDetailsMayBe)
+        val submissionDetails = FileDetails(conversationId,
+                                            subscriptionId,
+                                            messageRefId,
+                                            reportingEntityName,
+                                            reportType,
+                                            Pending,
+                                            fileName,
+                                            submissionTime,
+                                            submissionTime,
+                                            agentDetailsMayBe
+        )
         addSubscriptionDetails(conversationId, uploadedXmlNode, submissionMetaData, orgDetails, submissionDetails, agentDetailsMayBe)
       case (errorOrg, errorAgent) =>
         logger.warn(s"ReadSubscriptionError Organisation: $errorOrg")

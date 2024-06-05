@@ -27,7 +27,7 @@ object FileErrors {
   implicit val xmlReader: XmlReader[FileErrors] = (
     (__ \ "Code").read[FileErrorCode],
     (__ \ "Details").read[String].optional
-    ).mapN(apply)
+  ).mapN(apply)
 
   implicit val format: OFormat[FileErrors] = Json.format[FileErrors]
 }

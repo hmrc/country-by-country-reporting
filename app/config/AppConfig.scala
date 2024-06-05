@@ -20,13 +20,10 @@ import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-
 @Singleton
-class AppConfig @Inject()(config: Configuration,
-                          servicesConfig: ServicesConfig
-                         ) {
+class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
 
-  val appName: String     = config.get[String]("appName")
+  val appName: String = config.get[String]("appName")
 
   val eisResponseWaitTime: Int = config.get[Int]("microservice.services.eis-response.wait-time")
 
@@ -45,11 +42,11 @@ class AppConfig @Inject()(config: Configuration,
 
   lazy val sendEmailUrl: String = servicesConfig.baseUrl("email")
 
-  lazy val cacheTtl: Int = config.get[Int]("mongodb.timeToLiveInSeconds")
+  lazy val cacheTtl: Int      = config.get[Int]("mongodb.timeToLiveInSeconds")
   lazy val submissionTtl: Int = config.get[Int]("mongodb.submission.timeToLiveInDays")
 
-  lazy val emailOrganisationSuccessfulTemplate: String = config.get[String]("emailTemplates.fileOrganisationUploadSuccessful")
+  lazy val emailOrganisationSuccessfulTemplate: String   = config.get[String]("emailTemplates.fileOrganisationUploadSuccessful")
   lazy val emailOrganisationUnsuccessfulTemplate: String = config.get[String]("emailTemplates.fileOrganisationUploadUnsuccessful")
-  lazy val emailAgentSuccessfulTemplate: String = config.get[String]("emailTemplates.fileAgentUploadSuccessful")
-  lazy val emailAgentUnsuccessfulTemplate: String = config.get[String]("emailTemplates.fileAgentUploadUnsuccessful")
+  lazy val emailAgentSuccessfulTemplate: String          = config.get[String]("emailTemplates.fileAgentUploadSuccessful")
+  lazy val emailAgentUnsuccessfulTemplate: String        = config.get[String]("emailTemplates.fileAgentUploadUnsuccessful")
 }

@@ -147,17 +147,16 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
             )
           )
 
-        forAll(arbitrary[CreateAgentSubscriptionRequest]) {
-          subscriptionForCBCRequest =>
-            val request =
-              FakeRequest(
-                POST,
-                routes.AgentSubscriptionController.createSubscription.url
-              )
-                .withJsonBody(Json.toJson(subscriptionForCBCRequest))
+        forAll(arbitrary[CreateAgentSubscriptionRequest]) { subscriptionForCBCRequest =>
+          val request =
+            FakeRequest(
+              POST,
+              routes.AgentSubscriptionController.createSubscription.url
+            )
+              .withJsonBody(Json.toJson(subscriptionForCBCRequest))
 
-            val result = route(application, request).value
-            status(result) mustEqual BAD_REQUEST
+          val result = route(application, request).value
+          status(result) mustEqual BAD_REQUEST
         }
       }
 
@@ -177,17 +176,16 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
             )
           )
 
-        forAll(arbitrary[CreateAgentSubscriptionRequest]) {
-          subscriptionForCBCRequest =>
-            val request =
-              FakeRequest(
-                POST,
-                routes.AgentSubscriptionController.createSubscription.url
-              )
-                .withJsonBody(Json.toJson(subscriptionForCBCRequest))
+        forAll(arbitrary[CreateAgentSubscriptionRequest]) { subscriptionForCBCRequest =>
+          val request =
+            FakeRequest(
+              POST,
+              routes.AgentSubscriptionController.createSubscription.url
+            )
+              .withJsonBody(Json.toJson(subscriptionForCBCRequest))
 
-            val result = route(application, request).value
-            status(result) mustEqual FORBIDDEN
+          val result = route(application, request).value
+          status(result) mustEqual FORBIDDEN
         }
       }
 
@@ -207,17 +205,16 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
             )
           )
 
-        forAll(arbitrary[CreateAgentSubscriptionRequest]) {
-          subscriptionForCBCRequest =>
-            val request =
-              FakeRequest(
-                POST,
-                routes.AgentSubscriptionController.createSubscription.url
-              )
-                .withJsonBody(Json.toJson(subscriptionForCBCRequest))
+        forAll(arbitrary[CreateAgentSubscriptionRequest]) { subscriptionForCBCRequest =>
+          val request =
+            FakeRequest(
+              POST,
+              routes.AgentSubscriptionController.createSubscription.url
+            )
+              .withJsonBody(Json.toJson(subscriptionForCBCRequest))
 
-            val result = route(application, request).value
-            status(result) mustEqual SERVICE_UNAVAILABLE
+          val result = route(application, request).value
+          status(result) mustEqual SERVICE_UNAVAILABLE
         }
       }
 
@@ -237,17 +234,16 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
             )
           )
 
-        forAll(arbitrary[CreateAgentSubscriptionRequest]) {
-          subscriptionForCBCRequest =>
-            val request =
-              FakeRequest(
-                POST,
-                routes.AgentSubscriptionController.createSubscription.url
-              )
-                .withJsonBody(Json.toJson(subscriptionForCBCRequest))
+        forAll(arbitrary[CreateAgentSubscriptionRequest]) { subscriptionForCBCRequest =>
+          val request =
+            FakeRequest(
+              POST,
+              routes.AgentSubscriptionController.createSubscription.url
+            )
+              .withJsonBody(Json.toJson(subscriptionForCBCRequest))
 
-            val result = route(application, request).value
-            status(result) mustEqual INTERNAL_SERVER_ERROR
+          val result = route(application, request).value
+          status(result) mustEqual INTERNAL_SERVER_ERROR
         }
       }
 
@@ -277,17 +273,16 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
             )
           )
 
-        forAll(arbitrary[CreateAgentSubscriptionRequest]) {
-          subscriptionForCBCRequest =>
-            val request =
-              FakeRequest(
-                POST,
-                routes.AgentSubscriptionController.createSubscription.url
-              )
-                .withJsonBody(Json.toJson(subscriptionForCBCRequest))
+        forAll(arbitrary[CreateAgentSubscriptionRequest]) { subscriptionForCBCRequest =>
+          val request =
+            FakeRequest(
+              POST,
+              routes.AgentSubscriptionController.createSubscription.url
+            )
+              .withJsonBody(Json.toJson(subscriptionForCBCRequest))
 
-            val result = route(application, request).value
-            status(result) mustEqual CONFLICT
+          val result = route(application, request).value
+          status(result) mustEqual CONFLICT
         }
       }
 
@@ -307,17 +302,16 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
             )
           )
 
-        forAll(arbitrary[CreateAgentSubscriptionRequest]) {
-          subscriptionForCBCRequest =>
-            val request =
-              FakeRequest(
-                POST,
-                routes.AgentSubscriptionController.createSubscription.url
-              )
-                .withJsonBody(Json.toJson(subscriptionForCBCRequest))
+        forAll(arbitrary[CreateAgentSubscriptionRequest]) { subscriptionForCBCRequest =>
+          val request =
+            FakeRequest(
+              POST,
+              routes.AgentSubscriptionController.createSubscription.url
+            )
+              .withJsonBody(Json.toJson(subscriptionForCBCRequest))
 
-            val result = route(application, request).value
-            status(result) mustEqual NOT_FOUND
+          val result = route(application, request).value
+          status(result) mustEqual NOT_FOUND
         }
       }
 
@@ -337,17 +331,16 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
             )
           )
 
-        forAll(arbitrary[CreateAgentSubscriptionRequest]) {
-          subscriptionForCBCRequest =>
-            val request =
-              FakeRequest(
-                POST,
-                routes.AgentSubscriptionController.createSubscription.url
-              )
-                .withJsonBody(Json.toJson(subscriptionForCBCRequest))
+        forAll(arbitrary[CreateAgentSubscriptionRequest]) { subscriptionForCBCRequest =>
+          val request =
+            FakeRequest(
+              POST,
+              routes.AgentSubscriptionController.createSubscription.url
+            )
+              .withJsonBody(Json.toJson(subscriptionForCBCRequest))
 
-            val result = route(application, request).value
-            status(result) mustEqual SERVICE_UNAVAILABLE
+          val result = route(application, request).value
+          status(result) mustEqual SERVICE_UNAVAILABLE
         }
       }
     }
@@ -384,9 +377,8 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
     "UpdateSubscription" - {
 
       "should return OK when updateContactInformation was successful" in {
-        when(mockAgentSubscriptionService.updateContactInformation(
-          any[AgentSubscriptionEtmpRequest])(any[HeaderCarrier], any[ExecutionContext])
-        ).thenReturn(Future.successful(Right(())))
+        when(mockAgentSubscriptionService.updateContactInformation(any[AgentSubscriptionEtmpRequest])(any[HeaderCarrier], any[ExecutionContext]))
+          .thenReturn(Future.successful(Right(())))
 
         val request =
           FakeRequest(
@@ -400,9 +392,8 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
       }
 
       "should return InternalServerError when updateContactInformation fails" in {
-        when(mockAgentSubscriptionService.updateContactInformation(
-          any[AgentSubscriptionEtmpRequest])(any[HeaderCarrier], any[ExecutionContext])
-        ).thenReturn(Future.successful(Left(UpdateSubscriptionError(500))))
+        when(mockAgentSubscriptionService.updateContactInformation(any[AgentSubscriptionEtmpRequest])(any[HeaderCarrier], any[ExecutionContext]))
+          .thenReturn(Future.successful(Left(UpdateSubscriptionError(500))))
 
         val request =
           FakeRequest(

@@ -35,34 +35,34 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class UpScanSessionRepository @Inject() (
-                                          mongoComponent: MongoComponent,
-                                          clock: Clock,
-                                          appConfig: AppConfig
-                                        )(implicit ec: ExecutionContext)
-  extends PlayMongoRepository[UploadSessionDetails](
-    mongoComponent = mongoComponent,
-    collectionName = "upScanSessionRepository",
-    domainFormat = UploadSessionDetails.format,
-    indexes = Seq(
-      IndexModel(
-        ascending("lastUpdated"),
-        IndexOptions()
-          .name("up-scan-last-updated-index")
-          .expireAfter(appConfig.cacheTtl, TimeUnit.SECONDS)
+  mongoComponent: MongoComponent,
+  clock: Clock,
+  appConfig: AppConfig
+)(implicit ec: ExecutionContext)
+    extends PlayMongoRepository[UploadSessionDetails](
+      mongoComponent = mongoComponent,
+      collectionName = "upScanSessionRepository",
+      domainFormat = UploadSessionDetails.format,
+      indexes = Seq(
+        IndexModel(
+          ascending("lastUpdated"),
+          IndexOptions()
+            .name("up-scan-last-updated-index")
+            .expireAfter(appConfig.cacheTtl, TimeUnit.SECONDS)
+        ),
+        IndexModel(ascending("uploadId"),
+                   IndexOptions()
+                     .name("uploadId-index")
+                     .unique(false)
+        ),
+        IndexModel(ascending("reference.value"),
+                   IndexOptions()
+                     .name("reference-index")
+                     .unique(false)
+        )
       ),
-      IndexModel(ascending("uploadId"),
-        IndexOptions()
-          .name("uploadId-index")
-          .unique(false)
-      ),
-      IndexModel(ascending("reference.value"),
-        IndexOptions()
-          .name("reference-index")
-          .unique(false)
-      )
-    ),
-    replaceIndexes = true
-  ) {
+      replaceIndexes = true
+    ) {
 
   implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
 
@@ -73,9 +73,9 @@ class UpScanSessionRepository @Inject() (
       .toFutureOption()
 
   def updateStatus(
-                    reference: Reference,
-                    newStatus: UploadStatus
-                  ): Future[Boolean] = {
+    reference: Reference,
+    newStatus: UploadStatus
+  ): Future[Boolean] = {
 
     val filter: Bson = equal("reference.value", Codecs.toBson(reference.value))
     val modifier: Bson = Updates.combine(

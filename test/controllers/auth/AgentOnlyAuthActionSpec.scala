@@ -29,7 +29,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.status
 import play.api.{Application, Configuration}
 import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve.{Retrieval, ~}
+import uk.gov.hmrc.auth.core.retrieve.{~, Retrieval}
 import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, Enrolment, Enrolments, MissingBearerToken}
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -76,12 +76,12 @@ class AgentOnlyAuthActionSpec extends PlaySpec with GuiceOneAppPerSuite with Moc
 
         type RetrievalType = Enrolments ~ Option[AffinityGroup]
 
-        val authRetrievals: RetrievalType = new~(
+        val authRetrievals: RetrievalType = new ~(
           Enrolments(
             Set(
-              Enrolment("HMRC-AS-AGENT").withIdentifier("AgentReferenceNumber", "arn123"),
+              Enrolment("HMRC-AS-AGENT").withIdentifier("AgentReferenceNumber", "arn123")
             )
-        ),
+          ),
           Some(AffinityGroup.Agent)
         )
 

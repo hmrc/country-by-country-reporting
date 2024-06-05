@@ -23,7 +23,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class SubscriptionConnector @Inject()(
+class SubscriptionConnector @Inject() (
   val config: AppConfig,
   val http: HttpClient
 ) {

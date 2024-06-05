@@ -46,9 +46,9 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
       mockSubscriptionService
     )
 
-  private val mockEmailConnector: EmailConnector = mock[EmailConnector]
+  private val mockEmailConnector: EmailConnector           = mock[EmailConnector]
   private val mockSubscriptionService: SubscriptionService = mock[SubscriptionService]
-  private implicit val mockHeaderCarrier: HeaderCarrier = mock[HeaderCarrier]
+  implicit private val mockHeaderCarrier: HeaderCarrier    = mock[HeaderCarrier]
 
   override lazy val app: Application = new GuiceApplicationBuilder()
     .overrides(
@@ -89,15 +89,17 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
     None
   )
 
-  val submissionTime = DateTimeFormatUtil.displayFormattedDate(LocalDateTime.now)
-  val messageRefId = "messageRefId"
-  val subscriptionId = "subscriptionId"
-  val tradingName = "tradingName"
-  val reportType = TestData
+  val submissionTime    = DateTimeFormatUtil.displayFormattedDate(LocalDateTime.now)
+  val messageRefId      = "messageRefId"
+  val subscriptionId    = "subscriptionId"
+  val tradingName       = "tradingName"
+  val reportType        = TestData
   val reportTypeContent = "The file contains Test data."
 
-  val agentDetails = AgentContactDetails("ARN", AgentResponseDetail(subscriptionId, Option(tradingName), isGBUser = true, agentPrimaryContact, Some(agentSecondaryContact)))
-  val agentSingleContactDetails = AgentContactDetails("ARN", AgentResponseDetail(subscriptionId, Option(tradingName), isGBUser = true, agentPrimaryContact, None))
+  val agentDetails =
+    AgentContactDetails("ARN", AgentResponseDetail(subscriptionId, Option(tradingName), isGBUser = true, agentPrimaryContact, Some(agentSecondaryContact)))
+  val agentSingleContactDetails =
+    AgentContactDetails("ARN", AgentResponseDetail(subscriptionId, Option(tradingName), isGBUser = true, agentPrimaryContact, None))
 
   "Email Service" - {
     "sendAndLogEmail" - {
@@ -233,12 +235,12 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
           List(agentPrimaryContact.email),
           appConfig.emailAgentUnsuccessfulTemplate,
           Map(
-            "dateSubmitted" -> submissionTime,
-            "messageRefId" -> messageRefId,
-            "contactName" -> agentPrimaryContact.organisationDetails.organisationName,
-            "cbcId" -> subscriptionId,
+            "dateSubmitted"     -> submissionTime,
+            "messageRefId"      -> messageRefId,
+            "contactName"       -> agentPrimaryContact.organisationDetails.organisationName,
+            "cbcId"             -> subscriptionId,
             "clientTradingName" -> tradingName,
-            "reportType" -> reportTypeContent
+            "reportType"        -> reportTypeContent
           )
         )
 
@@ -252,7 +254,8 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
             Future.successful(Right(ResponseDetail(subscriptionId, Option(tradingName), isGBUser = true, primaryContact, None)))
           )
 
-        val result = emailService.sendEmail(subscriptionId, submissionTime, messageRefId, Some(agentSingleContactDetails), isUploadSuccessful = false, reportType)
+        val result =
+          emailService.sendEmail(subscriptionId, submissionTime, messageRefId, Some(agentSingleContactDetails), isUploadSuccessful = false, reportType)
 
         whenReady(result) { result =>
           result.map(_.result.map(_.status)) mustBe Seq(Some(ACCEPTED), None)
@@ -294,7 +297,8 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
             Future.successful(Right(ResponseDetail(subscriptionId, None, isGBUser = true, primaryContact, Some(secondaryContact))))
           )
 
-        val result = emailService.sendEmail(subscriptionId, submissionTime, messageRefId, Some(agentSingleContactDetails), isUploadSuccessful = true, reportType)
+        val result =
+          emailService.sendEmail(subscriptionId, submissionTime, messageRefId, Some(agentSingleContactDetails), isUploadSuccessful = true, reportType)
 
         whenReady(result) { result =>
           result.map(_.result.map(_.status)) mustBe Seq(Some(ACCEPTED), None, Some(ACCEPTED), Some(ACCEPTED))
@@ -349,7 +353,9 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
 
         emailService.getReportTypeMessage(TestData) mustBe "The file contains Test data."
         emailService.getReportTypeMessage(NewInformation) mustBe "The file contains new information for the reporting period."
-        emailService.getReportTypeMessage(DeletionOfAllInformation) mustBe "The file contains a deletion of all previously reported information for this reporting period."
+        emailService.getReportTypeMessage(
+          DeletionOfAllInformation
+        ) mustBe "The file contains a deletion of all previously reported information for this reporting period."
         emailService.getReportTypeMessage(NewInformationForExistingReport) mustBe "The file contains new information for an existing report."
         emailService.getReportTypeMessage(CorrectionForExistingReport) mustBe "The file contains corrections for an existing report."
         emailService.getReportTypeMessage(DeletionForExistingReport) mustBe "The file contains deletions for an existing report."

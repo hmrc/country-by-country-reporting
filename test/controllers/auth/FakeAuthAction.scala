@@ -23,27 +23,27 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class FakeAuthAction @Inject() (
-                                 val parser: BodyParsers.Default
-                               )(implicit val executionContext: ExecutionContext)
-  extends AuthAction {
+  val parser: BodyParsers.Default
+)(implicit val executionContext: ExecutionContext)
+    extends AuthAction {
 
   override def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] =
     block(request)
 }
 
 class FakeIdentifierAuthAction @Inject() (
-                                           val parser: BodyParsers.Default
-                                         )(implicit val executionContext: ExecutionContext)
-  extends IdentifierAuthAction {
+  val parser: BodyParsers.Default
+)(implicit val executionContext: ExecutionContext)
+    extends IdentifierAuthAction {
 
   override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] =
     block(IdentifierRequest(request, Organisation))
 }
 
 class FakeAgentOnlyAuthAction @Inject() (
-                                           val parser: BodyParsers.Default
-                                         )(implicit val executionContext: ExecutionContext)
-  extends AgentOnlyAuthAction {
+  val parser: BodyParsers.Default
+)(implicit val executionContext: ExecutionContext)
+    extends AgentOnlyAuthAction {
 
   override def invokeBlock[A](request: Request[A], block: AgentOnlyRequest[A] => Future[Result]): Future[Result] =
     block(AgentOnlyRequest("ARN12345", request))

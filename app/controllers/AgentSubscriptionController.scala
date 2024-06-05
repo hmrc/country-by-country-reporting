@@ -28,8 +28,7 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-
-class AgentSubscriptionController @Inject()(
+class AgentSubscriptionController @Inject() (
   authenticate: AgentOnlyAuthAction,
   cc: ControllerComponents,
   agentSubscriptionService: AgentSubscriptionService
@@ -38,8 +37,7 @@ class AgentSubscriptionController @Inject()(
     with Logging {
 
   def createSubscription(): Action[JsValue] = authenticate(parse.json).async { implicit request =>
-    val subscriptionSubmissionResult
-    : JsResult[CreateAgentSubscriptionRequest] =
+    val subscriptionSubmissionResult: JsResult[CreateAgentSubscriptionRequest] =
       request.body.validate[CreateAgentSubscriptionRequest]
 
     subscriptionSubmissionResult.fold(

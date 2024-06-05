@@ -168,15 +168,16 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
             } else {
               Some(Message("xml.add.cbc"))
             }
+          case _ => None
         }
       case invalidEnumErrorFormat(suppliedValue, allowedValues) =>
         errorMessage2 match {
           case missingOrInvalidErrorFormat(_, element) =>
             if (suppliedValue.isEmpty) {
               element match {
-                case "ReceivingCountry" => Some(Message("xml.empty.receivingCountry"))
+                case "ReceivingCountry"                                                   => Some(Message("xml.empty.receivingCountry"))
                 case "Language" | "Warning" | "Role" | "IncorpCountryCode" | "SummaryRef" => Some(Message("xml.optional.field.empty", Seq(element)))
-                case _ => Some(Message("xml.empty.field", Seq(element)))
+                case _                                                                    => Some(Message("xml.empty.field", Seq(element)))
               }
             } else invalidCodeMessage(element, Some(allowedValues))
           case _ => None
@@ -189,10 +190,10 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
       case genericInvalidErrorFormat(value, "integer") =>
         formattedError(errorMessage2) match {
           case genericInvalidSecondErrorFormat(element) if value == "" => Some(Message("xml.empty.field", Seq(element)))
-          case genericInvalidSecondErrorFormat(element) => Some(Message("xml.must.be.whole.number", Seq(element)))
-          case missingOrInvalidErrorFormat("", element) => Some(Message("xml.empty.field", Seq(element)))
-          case missingOrInvalidErrorFormat(_, element) => Some(Message("xml.must.be.whole.number", Seq(element)))
-          case _ => None
+          case genericInvalidSecondErrorFormat(element)                => Some(Message("xml.must.be.whole.number", Seq(element)))
+          case missingOrInvalidErrorFormat("", element)                => Some(Message("xml.empty.field", Seq(element)))
+          case missingOrInvalidErrorFormat(_, element)                 => Some(Message("xml.must.be.whole.number", Seq(element)))
+          case _                                                       => None
         }
       case _ => None
     }
@@ -202,7 +203,7 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
       case genericInvalidErrorFormat(dateStr, attribute) if attribute == "date" || attribute == "dateTime" =>
         errorMessage2 match {
           case missingOrInvalidErrorFormat("", "ReportingPeriod") => Some(Message("xml.empty.reportingPeriod"))
-          case missingOrInvalidErrorFormat("", element) => Some(Message(s"xml.$attribute.empty", Seq(element)))
+          case missingOrInvalidErrorFormat("", element)           => Some(Message(s"xml.$attribute.empty", Seq(element)))
           case missingOrInvalidErrorFormat(_, element) =>
             Try {
               DateTimeFormatter.ISO_DATE.parse(dateStr)
@@ -211,16 +212,17 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
                 if (e.getMessage contains "could not be parsed at index") {
                   element match {
                     case "ReportingPeriod" => Some(Message("xml.invalid.reportingPeriod"))
-                    case _ => Some(Message(s"xml.$attribute.format", Seq(element)))
+                    case _                 => Some(Message(s"xml.$attribute.format", Seq(element)))
                   }
                 } else {
                   element match {
                     case "ReportingPeriod" => Some(Message("xml.real.reportingPeriod"))
-                    case _ => Some(Message(s"xml.$attribute.format.real", Seq(element)))
+                    case _                 => Some(Message(s"xml.$attribute.format.real", Seq(element)))
                   }
                 }
               case _ => Some(Message(s"xml.$attribute.format", Seq(element)))
             }
+          case _ => None
         }
       case _ => None
     }
@@ -264,11 +266,11 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
   private def missingInfoMessage(elementName: String): Message = {
     val vowels = "aeiouAEIOU"
     elementName match {
-      case "MessageRefId" | "TIN" | "Name" | "City" | "DocRefId" | "OtherInfo"=> Message("xml.empty.field", Seq(elementName))
-      case "SendingEntityIN" => Message("xml.add.sendingEntityIN", Seq(elementName))
-      case "CorrMessageRefId" => Message("xml.not.corrMessageRefId")
-      case "OtherEntityInfo" | "CorrDocRefId" | "IN" | "NameMNEGroup" | "SuiteIdentifier" |  "Warning" | "Contact" |
-           "AddressFree" | "Street" | "BuildingIdentifier" | "FloorIdentifier" | "DistrictName" | "POB" | "PostCode" | "CountrySubentity" =>
+      case "MessageRefId" | "TIN" | "Name" | "City" | "DocRefId" | "OtherInfo" => Message("xml.empty.field", Seq(elementName))
+      case "SendingEntityIN"                                                   => Message("xml.add.sendingEntityIN", Seq(elementName))
+      case "CorrMessageRefId"                                                  => Message("xml.not.corrMessageRefId")
+      case "OtherEntityInfo" | "CorrDocRefId" | "IN" | "NameMNEGroup" | "SuiteIdentifier" | "Warning" | "Contact" | "AddressFree" | "Street" |
+          "BuildingIdentifier" | "FloorIdentifier" | "DistrictName" | "POB" | "PostCode" | "CountrySubentity" =>
         Message("xml.optional.field.empty", Seq(elementName))
       case _ if vowels.contains(elementName.head) || elementName.toLowerCase.startsWith("cbc") => Message("xml.add.an.element", Seq(elementName))
       case _                                                                                   => Message("xml.add.a.element", Seq(elementName))
@@ -278,8 +280,8 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
   def invalidCodeMessage(elementName: String, allowedValues: Option[String] = None): Option[Message] =
     (elementName, allowedValues) match {
       case ("IncorpCountryCode" | "CountryCode" | "ResCountryCode" | "TransmittingCountry", _) => Some(Message("xml.not.ISO.code", Seq(elementName)))
-      case ("ReceivingCountry", _) => Some(Message("xml.not.ISO.code.receivingCountry"))
-      case ("Language", _) => Some(Message("xml.not.ISO.language.code", Seq(elementName)))
+      case ("ReceivingCountry", _)                                                             => Some(Message("xml.not.ISO.code.receivingCountry"))
+      case ("Language", _)                                                                     => Some(Message("xml.not.ISO.language.code", Seq(elementName)))
       case ("BizActivities" | "ReportingRole" | "MessageTypeIndic" | "Role" | "DocTypeIndic" | "SummaryRef", _) =>
         Some(Message("xml.not.allowed.value", Seq(elementName)))
       case _ => None
@@ -288,11 +290,11 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
   private def getErrorMessageForMissingTags(element: String): Option[Message] =
     element match {
       case "ConstEntity" | "ReportingEntity" | "DocSpec" | "Address" | "MessageSpec" => Some(missingInfoMessage(element))
-      case "Entity" | "CbcBody" => Some(Message("xml.add.element", Seq(element)))
-      case "ReceivingCountry" => Some(Message("xml.add.receivingCountry"))
-      case "MessageType" => Some(Message("xml.add.line.messageType", Seq(element)))
-      case "ReportingPeriod" => Some(Message("xml.add.line.reportingPeriod", Seq(element)))
-      case _            => Some(Message("xml.add.line", Seq(element)))
+      case "Entity" | "CbcBody"                                                      => Some(Message("xml.add.element", Seq(element)))
+      case "ReceivingCountry"                                                        => Some(Message("xml.add.receivingCountry"))
+      case "MessageType"                                                             => Some(Message("xml.add.line.messageType", Seq(element)))
+      case "ReportingPeriod"                                                         => Some(Message("xml.add.line.reportingPeriod", Seq(element)))
+      case _                                                                         => Some(Message("xml.add.line", Seq(element)))
     }
 
   private def formattedError(errorMessage: String): String =

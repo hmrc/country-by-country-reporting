@@ -28,7 +28,7 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ValidateAuthTokenActionImpl @Inject() (appConfig: AppConfig)(implicit val executionContext: ExecutionContext)
-  extends ValidateAuthTokenAction
+    extends ValidateAuthTokenAction
     with Logging {
 
   private def validateBearerToken[A](request: Request[A]): Boolean =

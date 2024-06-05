@@ -39,12 +39,16 @@ import org.scalatest.prop.TableDrivenPropertyChecks
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEach with Generators with ScalaCheckPropertyChecks with TableDrivenPropertyChecks {
+class AgentSubscriptionRequestServiceSpec
+    extends SpecBase
+    with BeforeAndAfterEach
+    with Generators
+    with ScalaCheckPropertyChecks
+    with TableDrivenPropertyChecks {
 
   override def beforeEach(): Unit = reset(mockAgentSubscriptionConnector)
 
   val mockAgentSubscriptionConnector = mock[AgentSubscriptionConnector]
-
 
   "AgentSubscriptionService" - {
     val application = applicationBuilder()
@@ -84,7 +88,7 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
         |}
         |""".stripMargin
     )
-      
+
     "createSubscription" - {
 
       val createAgentSubscriptionRequest = agentSubscriptionRequestJson.as[AgentSubscriptionEtmpRequest]
@@ -125,10 +129,9 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
             )
           )
 
-        forAll(arbitrary[AgentSubscriptionEtmpRequest]) {
-          subscriptionForCBCRequest =>
-            val result = service.createContactInformation(subscriptionForCBCRequest)
-            status(result) mustEqual NOT_FOUND
+        forAll(arbitrary[AgentSubscriptionEtmpRequest]) { subscriptionForCBCRequest =>
+          val result = service.createContactInformation(subscriptionForCBCRequest)
+          status(result) mustEqual NOT_FOUND
         }
       }
 
@@ -148,10 +151,9 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
             )
           )
 
-        forAll(arbitrary[AgentSubscriptionEtmpRequest]) {
-          subscriptionForCBCRequest =>
-            val result = service.createContactInformation(subscriptionForCBCRequest)
-            status(result) mustEqual FORBIDDEN
+        forAll(arbitrary[AgentSubscriptionEtmpRequest]) { subscriptionForCBCRequest =>
+          val result = service.createContactInformation(subscriptionForCBCRequest)
+          status(result) mustEqual FORBIDDEN
         }
       }
 
@@ -171,10 +173,9 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
             )
           )
 
-        forAll(arbitrary[AgentSubscriptionEtmpRequest]) {
-          subscriptionForCBCRequest =>
-            val result = service.createContactInformation(subscriptionForCBCRequest)
-            status(result) mustEqual SERVICE_UNAVAILABLE
+        forAll(arbitrary[AgentSubscriptionEtmpRequest]) { subscriptionForCBCRequest =>
+          val result = service.createContactInformation(subscriptionForCBCRequest)
+          status(result) mustEqual SERVICE_UNAVAILABLE
         }
       }
 
@@ -198,10 +199,9 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
             )
           )
 
-        forAll(arbitrary[AgentSubscriptionEtmpRequest]) {
-          subscriptionForCBCRequest =>
-            val result = service.createContactInformation(subscriptionForCBCRequest)
-            status(result) mustEqual BAD_GATEWAY
+        forAll(arbitrary[AgentSubscriptionEtmpRequest]) { subscriptionForCBCRequest =>
+          val result = service.createContactInformation(subscriptionForCBCRequest)
+          status(result) mustEqual BAD_GATEWAY
         }
       }
 
@@ -235,10 +235,9 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
             )
           )
 
-        forAll(arbitrary[AgentSubscriptionEtmpRequest]) {
-          subscriptionForCBCRequest =>
-            val result = service.createContactInformation(subscriptionForCBCRequest)
-            status(result) mustEqual CONFLICT
+        forAll(arbitrary[AgentSubscriptionEtmpRequest]) { subscriptionForCBCRequest =>
+          val result = service.createContactInformation(subscriptionForCBCRequest)
+          status(result) mustEqual CONFLICT
         }
       }
 
@@ -262,10 +261,9 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
             )
           )
 
-        forAll(arbitrary[AgentSubscriptionEtmpRequest]) {
-          subscriptionForCBCRequest =>
-            val result = service.createContactInformation(subscriptionForCBCRequest)
-            status(result) mustEqual UNAUTHORIZED
+        forAll(arbitrary[AgentSubscriptionEtmpRequest]) { subscriptionForCBCRequest =>
+          val result = service.createContactInformation(subscriptionForCBCRequest)
+          status(result) mustEqual UNAUTHORIZED
         }
       }
 
@@ -285,10 +283,9 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
             )
           )
 
-        forAll(arbitrary[AgentSubscriptionEtmpRequest]) {
-          subscriptionForCBCRequest =>
-            val result = service.createContactInformation(subscriptionForCBCRequest)
-            status(result) mustEqual SERVICE_UNAVAILABLE
+        forAll(arbitrary[AgentSubscriptionEtmpRequest]) { subscriptionForCBCRequest =>
+          val result = service.createContactInformation(subscriptionForCBCRequest)
+          status(result) mustEqual SERVICE_UNAVAILABLE
         }
       }
     }
@@ -334,7 +331,7 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
 
         whenReady(result) { sub =>
           sub mustBe Right(
-              AgentResponseDetail(
+            AgentResponseDetail(
               agentRefNo,
               Option("Agent Ltd"),
               isGBUser = true,
@@ -355,9 +352,7 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
             )
           )
 
-          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](),
-            any[ExecutionContext]()
-          )
+          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](), any[ExecutionContext]())
         }
       }
 
@@ -383,9 +378,7 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
 
         whenReady(result) { sub =>
           sub mustBe Left(ReadSubscriptionError(NOT_FOUND))
-          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](),
-            any[ExecutionContext]()
-          )
+          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](), any[ExecutionContext]())
         }
       }
 
@@ -411,9 +404,7 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
 
         whenReady(result) { sub =>
           sub mustBe Left(ReadSubscriptionError(UNPROCESSABLE_ENTITY))
-          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](),
-            any[ExecutionContext]()
-          )
+          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](), any[ExecutionContext]())
         }
       }
 
@@ -425,9 +416,7 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
 
         whenReady(result) { sub =>
           sub mustBe Left(ReadSubscriptionError(INTERNAL_SERVER_ERROR))
-          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](),
-            any[ExecutionContext]()
-          )
+          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](), any[ExecutionContext]())
         }
       }
 
@@ -469,7 +458,7 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
 
         whenReady(result) { sub =>
           sub mustBe Right(
-              AgentResponseDetail(
+            AgentResponseDetail(
               agentRefNo,
               Option("Agent Ltd"),
               isGBUser = true,
@@ -490,9 +479,7 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
             )
           )
 
-          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](),
-            any[ExecutionContext]()
-          )
+          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](), any[ExecutionContext]())
         }
       }
 
@@ -525,7 +512,7 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
 
         whenReady(result) { sub =>
           sub mustBe Right(
-              AgentResponseDetail(
+            AgentResponseDetail(
               agentRefNo,
               Option("Agent Ltd"),
               isGBUser = true,
@@ -539,9 +526,7 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
             )
           )
 
-          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](),
-            any[ExecutionContext]()
-          )
+          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](), any[ExecutionContext]())
         }
       }
 
@@ -566,9 +551,7 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
         whenReady(result) { sub =>
           sub mustBe Left(ReadSubscriptionError(UNPROCESSABLE_ENTITY))
 
-          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](),
-            any[ExecutionContext]()
-          )
+          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](), any[ExecutionContext]())
         }
       }
 
@@ -583,9 +566,7 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
         whenReady(result) { sub =>
           sub mustBe Left(ReadSubscriptionError(UNPROCESSABLE_ENTITY))
 
-          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](),
-            any[ExecutionContext]()
-          )
+          verify(mockAgentSubscriptionConnector, times(1)).readSubscription(eqTo(agentRefNo))(any[HeaderCarrier](), any[ExecutionContext]())
         }
       }
     }
@@ -600,7 +581,9 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
         val result = service.updateContactInformation(updateAgentSubscriptionRequest)
 
         whenReady(result) { sub =>
-          verify(mockAgentSubscriptionConnector, times(1)).updateSubscription(any[AgentSubscriptionEtmpRequest]())(any[HeaderCarrier](), any[ExecutionContext]())
+          verify(mockAgentSubscriptionConnector, times(1)).updateSubscription(any[AgentSubscriptionEtmpRequest]())(any[HeaderCarrier](),
+                                                                                                                   any[ExecutionContext]()
+          )
           sub mustBe Right(())
         }
       }
@@ -615,7 +598,7 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
         (BAD_REQUEST, "BAD_REQUEST"),
         (FORBIDDEN, "FORBIDDEN"),
         (SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE"),
-        (CONFLICT, "CONFLICT"),
+        (CONFLICT, "CONFLICT")
       )
 
       forAll(scenarios) { (expectedStatusCode, description) =>
@@ -626,7 +609,9 @@ class AgentSubscriptionRequestServiceSpec extends SpecBase with BeforeAndAfterEa
           val result = service.updateContactInformation(updateAgentSubscriptionRequest)
 
           whenReady(result) { sub =>
-            verify(mockAgentSubscriptionConnector, times(1)).updateSubscription(any[AgentSubscriptionEtmpRequest]())(any[HeaderCarrier](), any[ExecutionContext]())
+            verify(mockAgentSubscriptionConnector, times(1)).updateSubscription(any[AgentSubscriptionEtmpRequest]())(any[HeaderCarrier](),
+                                                                                                                     any[ExecutionContext]()
+            )
             sub mustBe Left(UpdateSubscriptionError(expectedStatusCode))
           }
         }

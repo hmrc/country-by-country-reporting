@@ -19,7 +19,6 @@ package models
 import com.lucidchart.open.xtract.XmlReader.strictReadSeq
 import com.lucidchart.open.xtract.{ParseFailure, ParseSuccess, XmlReader}
 
-
 package object xml {
   implicit def strictReadOptionSeq[A](implicit reader: XmlReader[A]): XmlReader[Option[Seq[A]]] =
     XmlReader { xml =>

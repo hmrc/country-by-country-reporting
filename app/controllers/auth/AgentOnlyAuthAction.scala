@@ -32,13 +32,12 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class AgentOnlyAuthActionImpl @Inject() (
-                                           override val authConnector: AuthConnector,
-                                           val parser: BodyParsers.Default,
-                                           config: AppConfig
-                                         )(implicit val executionContext: ExecutionContext)
-  extends AgentOnlyAuthAction
+  override val authConnector: AuthConnector,
+  val parser: BodyParsers.Default,
+  config: AppConfig
+)(implicit val executionContext: ExecutionContext)
+    extends AgentOnlyAuthAction
     with AuthorisedFunctions {
-
 
   override def invokeBlock[A](request: Request[A], block: AgentOnlyRequest[A] => Future[Result]): Future[Result] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
@@ -48,7 +47,7 @@ class AgentOnlyAuthActionImpl @Inject() (
         val arn =
           (for {
             enrolment <- enrolments.find(_.key.equals("HMRC-AS-AGENT"))
-            arn <- enrolment.getIdentifier("AgentReferenceNumber")
+            arn       <- enrolment.getIdentifier("AgentReferenceNumber")
           } yield arn.value)
             .getOrElse(throw new IllegalAccessException("Agent Reference Number Required"))
         block(AgentOnlyRequest(arn, request))

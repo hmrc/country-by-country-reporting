@@ -27,12 +27,12 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class FileDetailsController @Inject()(
-                                        authenticate: IdentifierAuthAction,
-                                        cc: ControllerComponents,
-                                        fileDetailsRepository: FileDetailsRepository
-                                      )(implicit ec: ExecutionContext)
-  extends BackendController(cc)
+class FileDetailsController @Inject() (
+  authenticate: IdentifierAuthAction,
+  cc: ControllerComponents,
+  fileDetailsRepository: FileDetailsRepository
+)(implicit ec: ExecutionContext)
+    extends BackendController(cc)
     with Logging {
 
   def getFileDetails(conversationId: ConversationId): Action[AnyContent] = authenticate.async { _ =>

@@ -30,7 +30,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
 trait SpecBase
-  extends AnyFreeSpec
+    extends AnyFreeSpec
     with Matchers
     with GuiceOneAppPerSuite
     with OptionValues

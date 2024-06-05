@@ -50,9 +50,9 @@ class FileDetailsRepository @Inject() (
             .expireAfter(appConfig.submissionTtl, TimeUnit.DAYS)
         ),
         IndexModel(ascending("subscriptionId"),
-          IndexOptions()
-            .name("subscriptionId-index")
-            .unique(false)
+                   IndexOptions()
+                     .name("subscriptionId-index")
+                     .unique(false)
         )
       ),
       replaceIndexes = true

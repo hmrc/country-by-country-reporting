@@ -22,16 +22,13 @@ import play.api.libs.json.OFormat
 
 sealed trait FileStatus
 
-
 case object Pending extends FileStatus
-
 case object Accepted extends FileStatus
 case object RejectedSDES extends FileStatus
 case object RejectedSDESVirus extends FileStatus
 case class Rejected(error: ValidationErrors) extends FileStatus {
   override def toString: String = "Rejected"
 }
-
 
 object FileStatus {
   implicit val format: OFormat[FileStatus] = derived.oformat()

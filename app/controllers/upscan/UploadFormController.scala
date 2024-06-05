@@ -26,14 +26,12 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
-
-class UploadFormController @Inject()(
+class UploadFormController @Inject() (
   uploadProgressTracker: UploadProgressTracker,
   repository: UpScanSessionRepository,
   cc: ControllerComponents
 )(implicit ec: ExecutionContext)
     extends BackendController(cc) {
-
 
   def requestUpload: Action[JsValue] = Action.async(parse.json) { implicit request =>
     val upscanIdentifiers = request.body.validate[UpscanIdentifiers]
@@ -46,14 +44,12 @@ class UploadFormController @Inject()(
     )
   }
 
-
   def getDetails(uploadId: String): Action[AnyContent] = Action.async {
     repository.findByUploadId(UploadId(uploadId)).map {
       case Some(value) => Ok(Json.toJson(value))
       case None        => NotFound
     }
   }
-
 
   def getStatus(uploadId: String): Action[AnyContent] = Action.async {
     uploadProgressTracker.getUploadResult(UploadId(uploadId)).map {

@@ -29,23 +29,29 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: EmailTemplate, subscriptionService: SubscriptionService)(implicit
-                                                                                                                                     executionContext: ExecutionContext
+class EmailService @Inject() (emailConnector: EmailConnector, emailTemplate: EmailTemplate, subscriptionService: SubscriptionService)(implicit
+  executionContext: ExecutionContext
 ) extends Logging {
 
   case class EmailResult(emailType: String, result: Option[HttpResponse])
 
-  def sendAndLogEmail(subscriptionId: String, submissionTime: String, messageRefId: String, agentDetails: Option[AgentContactDetails], isUploadSuccessful: Boolean, reportType: ReportType)(implicit
-                                                                                                                                                                                            hc: HeaderCarrier
+  def sendAndLogEmail(subscriptionId: String,
+                      submissionTime: String,
+                      messageRefId: String,
+                      agentDetails: Option[AgentContactDetails],
+                      isUploadSuccessful: Boolean,
+                      reportType: ReportType
+  )(implicit
+    hc: HeaderCarrier
   ): Future[Seq[Int]] =
     sendEmail(subscriptionId, submissionTime, messageRefId, agentDetails, isUploadSuccessful, reportType) map { responses: Seq[EmailResult] =>
       responses.map {
         case EmailResult(emailType, Some(resp)) =>
           resp.status match {
-            case NOT_FOUND => logger.warn(s"$emailType email: The template cannot be found within the email service")
+            case NOT_FOUND   => logger.warn(s"$emailType email: The template cannot be found within the email service")
             case BAD_REQUEST => logger.warn(s"$emailType email: Missing parameters from email template: ${resp.body}")
-            case ACCEPTED => logger.info(s"$emailType email: Email queued")
-            case _ => logger.warn(s"$emailType email: Unhandled status received from email service ${resp.status}")
+            case ACCEPTED    => logger.info(s"$emailType email: Email queued")
+            case _           => logger.warn(s"$emailType email: Unhandled status received from email service ${resp.status}")
           }
           resp.status
         case EmailResult("Failed to get contact information", None) =>
@@ -57,30 +63,54 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
       }
     }
 
-  def sendEmail(subscriptionId: String, submissionTime: String, messageRefId: String, agentDetails: Option[AgentContactDetails], isUploadSuccessful: Boolean, reportType: ReportType)(implicit hc: HeaderCarrier): Future[Seq[EmailResult]] = {
+  def sendEmail(subscriptionId: String,
+                submissionTime: String,
+                messageRefId: String,
+                agentDetails: Option[AgentContactDetails],
+                isUploadSuccessful: Boolean,
+                reportType: ReportType
+  )(implicit hc: HeaderCarrier): Future[Seq[EmailResult]] =
     subscriptionService.getContactInformation(subscriptionId).flatMap {
       case Right(responseDetail) =>
-        val emailAddress = Some(responseDetail.primaryContact.email)
-        val contactName = Some(responseDetail.primaryContact.organisationDetails.organisationName)
+        val emailAddress          = Some(responseDetail.primaryContact.email)
+        val contactName           = Some(responseDetail.primaryContact.organisationDetails.organisationName)
         val secondaryEmailAddress = responseDetail.secondaryContact.map(_.email)
-        val secondaryName = responseDetail.secondaryContact.map(_.organisationDetails.organisationName)
-        val agentPrimaryEmail = agentDetails.map(_.subscriptionDetails.primaryContact.email)
-        val agentPrimaryName = agentDetails.map(_.subscriptionDetails.primaryContact.organisationDetails.organisationName)
-        val agentSecondaryEmail = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.email))
-        val agentSecondaryName = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.organisationDetails.organisationName))
-        val cbcId = responseDetail.subscriptionID
-        val tradingName = responseDetail.tradingName
-        val reportTypeContent = getReportTypeMessage(reportType)
+        val secondaryName         = responseDetail.secondaryContact.map(_.organisationDetails.organisationName)
+        val agentPrimaryEmail     = agentDetails.map(_.subscriptionDetails.primaryContact.email)
+        val agentPrimaryName      = agentDetails.map(_.subscriptionDetails.primaryContact.organisationDetails.organisationName)
+        val agentSecondaryEmail   = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.email))
+        val agentSecondaryName    = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.organisationDetails.organisationName))
+        val cbcId                 = responseDetail.subscriptionID
+        val tradingName           = responseDetail.tradingName
+        val reportTypeContent     = getReportTypeMessage(reportType)
 
         lazy val orgEmails: Seq[Future[EmailResult]] = Seq(
-          send(emailAddress, contactName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId, None, None, Some(reportTypeContent))
+          send(emailAddress,
+               contactName,
+               emailTemplate.getOrganisationTemplate(isUploadSuccessful),
+               submissionTime,
+               messageRefId,
+               None,
+               None,
+               Some(reportTypeContent)
+          )
             .map(res => EmailResult("Primary Org", res)),
-          send(secondaryEmailAddress, secondaryName, emailTemplate.getOrganisationTemplate(isUploadSuccessful), submissionTime, messageRefId, None, None, Some(reportTypeContent))
+          send(
+            secondaryEmailAddress,
+            secondaryName,
+            emailTemplate.getOrganisationTemplate(isUploadSuccessful),
+            submissionTime,
+            messageRefId,
+            None,
+            None,
+            Some(reportTypeContent)
+          )
             .map(res => EmailResult("Secondary Org", res))
         )
 
         lazy val agentEmails: Seq[Future[EmailResult]] = Seq(
-          send(agentPrimaryEmail,
+          send(
+            agentPrimaryEmail,
             agentPrimaryName,
             emailTemplate.getAgentTemplate(isUploadSuccessful),
             submissionTime,
@@ -89,7 +119,8 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
             tradingName,
             Some(reportTypeContent)
           ).map(res => EmailResult("Primary Agent", res)),
-          send(agentSecondaryEmail,
+          send(
+            agentSecondaryEmail,
             agentSecondaryName,
             emailTemplate.getAgentTemplate(isUploadSuccessful),
             submissionTime,
@@ -115,7 +146,6 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
         logger.warn(s"Failed to get contact information, received ReadSubscriptionError: $value")
         Future.successful(Seq(EmailResult("Failed to get contact information", None)))
     }
-  }
 
   private def send(emailAddress: Option[String],
                    contactName: Option[String],
@@ -125,7 +155,7 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
                    cbcId: Option[String],
                    tradingName: Option[String],
                    reportType: Option[String]
-                  )(implicit hc: HeaderCarrier): Future[Option[HttpResponse]] = {
+  )(implicit hc: HeaderCarrier): Future[Option[HttpResponse]] =
     emailAddress
       .filter(EmailAddress.isValid)
       .map { email =>
@@ -136,19 +166,18 @@ class EmailService @Inject()(emailConnector: EmailConnector, emailTemplate: Emai
           .map(Some.apply)
       }
       .getOrElse(Future.successful(None))
-  }
 
   def getReportTypeMessage(reportType: ReportType): String = {
     val reportTypeKeyMapMap: Map[ReportType, String] =
-      Map(TestData -> "The file contains Test data.",
-        NewInformation -> "The file contains new information for the reporting period.",
-        DeletionOfAllInformation -> "The file contains a deletion of all previously reported information for this reporting period.",
-        NewInformationForExistingReport -> "The file contains new information for an existing report.",
-        CorrectionForExistingReport -> "The file contains corrections for an existing report.",
-        DeletionForExistingReport -> "The file contains deletions for an existing report.",
+      Map(
+        TestData                               -> "The file contains Test data.",
+        NewInformation                         -> "The file contains new information for the reporting period.",
+        DeletionOfAllInformation               -> "The file contains a deletion of all previously reported information for this reporting period.",
+        NewInformationForExistingReport        -> "The file contains new information for an existing report.",
+        CorrectionForExistingReport            -> "The file contains corrections for an existing report.",
+        DeletionForExistingReport              -> "The file contains deletions for an existing report.",
         CorrectionAndDeletionForExistingReport -> "The file contains corrections and deletions for an existing report.",
-        CorrectionForReportingEntity -> "The file contains a correction for the ReportingEntity.",
-
+        CorrectionForReportingEntity           -> "The file contains a correction for the ReportingEntity."
       )
     reportTypeKeyMapMap(reportType)
   }

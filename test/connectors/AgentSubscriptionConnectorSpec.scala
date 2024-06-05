@@ -35,10 +35,10 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockServerHandler
   override lazy val app: Application = applicationBuilder()
     .configure(
       conf = "microservice.services.update-agent-subscription.port" -> server.port(),
-      "microservice.services.create-agent-subscription.port"        -> server.port(),
-      "microservice.services.read-agent-subscription.port"          -> server.port(),
-      "microservice.services.read-agent-subscription.bearer-token"  -> "local-token",
-      "auditing.enabled" -> "false"
+      "microservice.services.create-agent-subscription.port"       -> server.port(),
+      "microservice.services.read-agent-subscription.port"         -> server.port(),
+      "microservice.services.read-agent-subscription.bearer-token" -> "local-token",
+      "auditing.enabled"                                           -> "false"
     )
     .build()
 

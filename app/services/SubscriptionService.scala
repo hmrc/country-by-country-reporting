@@ -18,7 +18,16 @@ package services
 
 import connectors.SubscriptionConnector
 import models.error.{ReadSubscriptionError, UpdateSubscriptionError}
-import models.subscription.{DisplaySubscriptionDetails, DisplaySubscriptionForCBCRequest, DisplaySubscriptionForCBCResponse, ReadSubscriptionRequestDetail, RequestCommonForSubscription, RequestDetailForUpdate, ResponseDetail, UpdateSubscriptionForCBCRequest}
+import models.subscription.{
+  DisplaySubscriptionDetails,
+  DisplaySubscriptionForCBCRequest,
+  DisplaySubscriptionForCBCResponse,
+  ReadSubscriptionRequestDetail,
+  RequestCommonForSubscription,
+  RequestDetailForUpdate,
+  ResponseDetail,
+  UpdateSubscriptionForCBCRequest
+}
 import play.api.Logging
 import play.api.http.Status.OK
 import uk.gov.hmrc.http.HeaderCarrier
@@ -26,7 +35,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class SubscriptionService @Inject()(subscriptionConnector: SubscriptionConnector) extends Logging {
+class SubscriptionService @Inject() (subscriptionConnector: SubscriptionConnector) extends Logging {
 
   def getContactInformation(enrolmentId: String)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Either[ReadSubscriptionError, ResponseDetail]] = {
 

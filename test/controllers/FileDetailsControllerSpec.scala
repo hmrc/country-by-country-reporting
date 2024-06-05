@@ -26,7 +26,7 @@ import play.api.Application
 import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{GET, contentAsJson, defaultAwaitTimeout, route, status, writeableOf_AnyContentAsEmpty}
+import play.api.test.Helpers.{contentAsJson, defaultAwaitTimeout, route, status, writeableOf_AnyContentAsEmpty, GET}
 import repositories.submission.FileDetailsRepository
 
 import java.time.LocalDateTime
@@ -45,24 +45,15 @@ class FileDetailsControllerSpec extends SpecBase with BeforeAndAfterEach {
     )
     .build()
 
-  val submissionTime1 = LocalDateTime.now()
-  val fileDetails1    = FileDetails(ConversationId(), "subscriptionId1", "messageRefId1", "Reporting Entity", TestData, Pending, "fileName1", submissionTime1, submissionTime1)
-  val submissionTime2 = LocalDateTime.now()
-  val fileDetails2    = FileDetails(ConversationId(), "subscriptionId1", "messageRefId1", "Reporting Entity", TestData,Accepted, "fileName2", submissionTime2, submissionTime2)
-  val files           = Seq(fileDetails1, fileDetails2)
+  private val submissionTime1 = LocalDateTime.now()
+  private val fileDetails1 =
+    FileDetails(ConversationId(), "subscriptionId1", "messageRefId1", "Reporting Entity", TestData, Pending, "fileName1", submissionTime1, submissionTime1)
+  private val submissionTime2 = LocalDateTime.now()
+  private val fileDetails2 =
+    FileDetails(ConversationId(), "subscriptionId1", "messageRefId1", "Reporting Entity", TestData, Accepted, "fileName2", submissionTime2, submissionTime2)
+  private val files = Seq(fileDetails1, fileDetails2)
 
-  val conversationId = ConversationId()
-  val fileDetails = FileDetails(
-    conversationId,
-    subscriptionId = "subscriptionId",
-    messageRefId = "messageRefId",
-    reportingEntityName =  "Reporting Entity",
-    reportType = TestData,
-    status = Pending,
-    name = "test.xml",
-    submitted = LocalDateTime.now(),
-    lastUpdated = LocalDateTime.now()
-  )
+  private val conversationId = ConversationId()
 
   "FileDetailsController" - {
     "must return FileDetails for the input 'conversationId'" in {
