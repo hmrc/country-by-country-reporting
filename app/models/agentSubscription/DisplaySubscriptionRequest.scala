@@ -68,5 +68,3 @@ object AgentReadSubscriptionRequestDetail {
   def apply(IDType: String, IDNumber: String): AgentReadSubscriptionRequestDetail = new AgentReadSubscriptionRequestDetail(IDType, IDNumber)
 
 }
-
-

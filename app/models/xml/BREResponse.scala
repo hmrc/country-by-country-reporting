@@ -22,14 +22,13 @@ import play.api.libs.json.{Json, OWrites}
 
 case class BREResponse(regime: String, conversationID: String, genericStatusMessage: GenericStatusMessage)
 
-
 object BREResponse {
 
   implicit val xmlReader: XmlReader[BREResponse] = (
     (__ \ "requestCommon" \ "regime").read[String],
     (__ \ "requestCommon" \ "conversationID").read[String],
     (__ \ "requestDetail" \ "GenericStatusMessage").read[GenericStatusMessage]
-    ).mapN(apply)
+  ).mapN(apply)
 
   implicit val writes: OWrites[BREResponse] = Json.writes[BREResponse]
 }

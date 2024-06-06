@@ -17,7 +17,7 @@
 package models.agentSubscription
 
 import models.subscription.ContactInformation
-import play.api.libs.json.{Json, OFormat, Writes, __}
+import play.api.libs.json.{__, Json, OFormat, Writes}
 
 case class AgentContactDetails(agentReferenceNumber: String, subscriptionDetails: AgentResponseDetail)
 object AgentContactDetails {

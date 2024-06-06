@@ -28,7 +28,7 @@ object RecordError {
     (__ \ "Code").read[RecordErrorCode],
     (__ \ "Details").read[String].optional,
     (__ \ "DocRefIDInError").read(strictReadOptionSeq[String])
-    ).mapN(apply)
+  ).mapN(apply)
 
   implicit val format: OFormat[RecordError] = Json.format[RecordError]
 }

@@ -36,7 +36,7 @@ class SubscriptionConnectorSpec extends SpecBase with WireMockServerHandler with
       conf = "microservice.services.update-subscription.port" -> server.port(),
       "microservice.services.read-subscription.port"         -> server.port(),
       "microservice.services.read-subscription.bearer-token" -> "local-token",
-      "auditing.enabled" -> "false"
+      "auditing.enabled"                                     -> "false"
     )
     .build()
 

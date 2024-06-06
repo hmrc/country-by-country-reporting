@@ -33,7 +33,7 @@ class UploadedXmlValidationEngine @Inject() (xmlValidationService: XMLValidation
                                              xmlErrorMessageHelper: XmlErrorMessageHelper,
                                              dataExtraction: DataExtraction,
                                              appConfig: AppConfig
-                                            ) extends Logging {
+) extends Logging {
 
   def validateUploadSubmission(upScanUrl: String): Future[SubmissionValidationResult] =
     try performXmlValidation(upScanUrl) match {

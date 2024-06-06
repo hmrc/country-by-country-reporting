@@ -80,7 +80,7 @@ object DisplaySubscriptionDetails {
 }
 
 case class DisplaySubscriptionForCBCRequest(
-    displaySubscriptionForCBCRequest: DisplaySubscriptionDetails
+  displaySubscriptionForCBCRequest: DisplaySubscriptionDetails
 )
 
 object DisplaySubscriptionForCBCRequest {

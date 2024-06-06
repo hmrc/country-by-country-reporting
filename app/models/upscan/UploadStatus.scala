@@ -33,7 +33,6 @@ case class UploadedSuccessfully(
 
 case class UploadRejected(details: ErrorDetails) extends UploadStatus
 
-
 object UploadStatus {
 
   implicit val uploadedSuccessfullyFormat: OFormat[UploadedSuccessfully] =

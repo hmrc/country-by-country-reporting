@@ -33,14 +33,16 @@ case class FileDetails(_id: ConversationId,
                        submitted: LocalDateTime,
                        lastUpdated: LocalDateTime,
                        agentDetails: Option[AgentContactDetails] = None
-                      )
+)
 object FileDetails {
   final val localDateTimeReads: Reads[LocalDateTime] =
-    Reads.at[String](__ \ "$date" \ "$numberLong")
+    Reads
+      .at[String](__ \ "$date" \ "$numberLong")
       .map(dateTime => Instant.ofEpochMilli(dateTime.toLong).atZone(ZoneOffset.UTC).toLocalDateTime)
 
   final val localDateTimeWrites: Writes[LocalDateTime] =
-    Writes.at[String](__ \ "$date" \ "$numberLong")
+    Writes
+      .at[String](__ \ "$date" \ "$numberLong")
       .contramap(_.toInstant(ZoneOffset.UTC).toEpochMilli.toString)
 
   implicit val mongoDateTime: Format[LocalDateTime] = Format(localDateTimeReads, localDateTimeWrites)

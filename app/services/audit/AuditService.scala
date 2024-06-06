@@ -28,7 +28,7 @@ import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuditService @Inject()(
+class AuditService @Inject() (
   appConfig: AppConfig,
   auditConnector: AuditConnector
 ) extends Logging {

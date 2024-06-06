@@ -19,12 +19,12 @@ package models.agentSubscription
 import play.api.libs.json.{Json, OFormat}
 
 case class AgentRequestDetail(
-    IDType: String,
-    IDNumber: String,
-    tradingName: Option[String],
-    isGBUser: Boolean,
-    primaryContact: AgentContactInformation,
-    secondaryContact: Option[AgentContactInformation]
+  IDType: String,
+  IDNumber: String,
+  tradingName: Option[String],
+  isGBUser: Boolean,
+  primaryContact: AgentContactInformation,
+  secondaryContact: Option[AgentContactInformation]
 )
 
 object AgentRequestDetail {
@@ -33,8 +33,8 @@ object AgentRequestDetail {
 }
 
 case class AgentCreateSubscriptionRequest(
-                                requestCommon: AgentRequestCommonForSubscription,
-                                requestDetail: AgentRequestDetail
+  requestCommon: AgentRequestCommonForSubscription,
+  requestDetail: AgentRequestDetail
 )
 
 object AgentCreateSubscriptionRequest {

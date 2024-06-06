@@ -17,13 +17,13 @@
 package repositories.submission
 
 import config.AppConfig
-import metrics.MetricsService
 import models.submission.{ConversationId, FileDetails, FileStatus}
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.Updates.set
 import org.mongodb.scala.model._
+import services.metrics.MetricsService
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
@@ -50,9 +50,9 @@ class FileDetailsRepository @Inject() (
             .expireAfter(appConfig.submissionTtl, TimeUnit.DAYS)
         ),
         IndexModel(ascending("subscriptionId"),
-          IndexOptions()
-            .name("subscriptionId-index")
-            .unique(false)
+                   IndexOptions()
+                     .name("subscriptionId-index")
+                     .unique(false)
         )
       ),
       replaceIndexes = true

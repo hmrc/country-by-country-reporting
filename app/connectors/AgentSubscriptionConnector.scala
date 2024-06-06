@@ -23,13 +23,12 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AgentSubscriptionConnector @Inject()(
+class AgentSubscriptionConnector @Inject() (
   val config: AppConfig,
   val http: HttpClient
 ) {
 
-  def createSubscription(agentSubscription: AgentSubscriptionEtmpRequest)
-                        (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
+  def createSubscription(agentSubscription: AgentSubscriptionEtmpRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
     val serviceName = "create-agent-subscription"
 
     http.POST[AgentSubscriptionEtmpRequest, HttpResponse](
@@ -44,8 +43,7 @@ class AgentSubscriptionConnector @Inject()(
     )
   }
 
-  def readSubscription(agentRefNo: String)
-                      (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
+  def readSubscription(agentRefNo: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
     val serviceName = "read-agent-subscription"
 
     http.GET[HttpResponse](
@@ -58,8 +56,7 @@ class AgentSubscriptionConnector @Inject()(
     )
   }
 
-  def updateSubscription(agentSubscription: AgentSubscriptionEtmpRequest)
-                        (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
+  def updateSubscription(agentSubscription: AgentSubscriptionEtmpRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
 
     val serviceName = "update-agent-subscription"
 
@@ -74,7 +71,6 @@ class AgentSubscriptionConnector @Inject()(
       ec = ec
     )
   }
-
 
   private def extraHeaders(serviceName: String)(implicit hc: HeaderCarrier): Seq[(String, String)] = Seq()
     .withBearerToken(s"${config.bearerToken(serviceName)}")

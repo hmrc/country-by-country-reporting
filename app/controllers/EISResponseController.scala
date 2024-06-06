@@ -20,7 +20,7 @@ import config.AppConfig
 import controllers.actions.EISResponsePreConditionCheckActionRefiner
 import controllers.auth.ValidateAuthTokenAction
 import models.audit.AuditType
-import models.submission.{FileStatus, Rejected, Accepted => FileStatusAccepted}
+import models.submission.{Accepted => FileStatusAccepted, FileStatus, Rejected}
 import models.xml.{BREResponse, ValidationStatus}
 import play.api.Logging
 import play.api.libs.json.Json
@@ -43,18 +43,17 @@ class EISResponseController @Inject() (cc: ControllerComponents,
                                        appConfig: AppConfig,
                                        customAlertUtil: CustomAlertUtil,
                                        auditService: AuditService
-                                      )(implicit ec: ExecutionContext)
-  extends BackendController(cc)
+)(implicit ec: ExecutionContext)
+    extends BackendController(cc)
     with Logging {
 
   private def convertToFileStatus(breResponse: BREResponse): FileStatus =
     breResponse.genericStatusMessage.status match {
       case ValidationStatus.accepted => FileStatusAccepted
-      case ValidationStatus.rejected =>
+      case _ =>
         customAlertUtil.alertForProblemStatus(breResponse.genericStatusMessage.validationErrors)
         Rejected(breResponse.genericStatusMessage.validationErrors)
     }
-
 
   def processEISResponse(): Action[NodeSeq] = (Action(parse.xml) andThen validateAuth andThen actionRefiner).async { implicit request =>
     auditService.sendAuditEvent(AuditType.eisResponse, Json.toJson(request.BREResponse))
@@ -71,7 +70,8 @@ class EISResponseController @Inject() (cc: ControllerComponents,
               updatedFileDetails.subscriptionId,
               DateTimeFormatUtil.displayFormattedDate(updatedFileDetails.submitted),
               updatedFileDetails.messageRefId,
-              updatedFileDetails.agentDetails, updatedFileDetails.status == FileStatusAccepted,
+              updatedFileDetails.agentDetails,
+              updatedFileDetails.status == FileStatusAccepted,
               updatedFileDetails.reportType
             )
           case _ =>

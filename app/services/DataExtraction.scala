@@ -24,33 +24,29 @@ import scala.xml.{Elem, NodeSeq}
 @Inject
 class DataExtraction()() {
 
-
   def messageSpecData(xml: Elem): Option[MessageSpecData] =
     for {
-      messageID <- (xml \\ "MessageRefId").headOption
-      typeIndic <- (xml \\ "MessageTypeIndic").headOption.map(node => MessageTypeIndic.fromString(node.text))
+      messageID           <- (xml \\ "MessageRefId").headOption
+      typeIndic           <- (xml \\ "MessageTypeIndic").headOption.map(node => MessageTypeIndic.fromString(node.text))
       reportingEntityName <- (xml \\ "ReportingEntity" \\ "Entity" \\ "Name").headOption
     } yield MessageSpecData(messageID.text, typeIndic, reportingEntityName.text, getReportType(typeIndic, xml))
 
   def getReportType(messageTypeIndicator: MessageTypeIndic, xml: Elem): ReportType = {
-    val allDocTypeIndicators: Seq[String] = (xml \\ "DocTypeIndic").map(node => node.text)
-    val reportingEntityDocTypeIndicators = (xml \\ "ReportingEntity" \\ "DocTypeIndic").map(node => node.text)
+    val allDocTypeIndicators: Seq[String]  = (xml \\ "DocTypeIndic").map(node => node.text)
+    val reportingEntityDocTypeIndicators   = (xml \\ "ReportingEntity" \\ "DocTypeIndic").map(node => node.text)
     val cbcReportAndAdditionalInfoSections = xml \\ "CbcReports" ++ xml \\ "AdditionalInfo"
 
     val testDataIndicators: Seq[String] = List("OECD10", "OECD11", "OECD12", "OECD13")
 
     if (allDocTypeIndicators.exists(indic => testDataIndicators.contains(indic))) {
       TestData
-    }
-    else if (messageTypeIndicator == CBC401) {
+    } else if (messageTypeIndicator == CBC401) {
       NewInformation
-    }
-    else if (reportingEntityDocTypeIndicators.contains("OECD3")) {
+    } else if (reportingEntityDocTypeIndicators.contains("OECD3")) {
       DeletionOfAllInformation
-    }
-    else if (cbcReportAndAdditionalInfoSections.nonEmpty) {
+    } else if (cbcReportAndAdditionalInfoSections.nonEmpty) {
       val docTypeIndicators: NodeSeq = cbcReportAndAdditionalInfoSections \\ "DocTypeIndic"
-      val uniqueDocTypes = docTypeIndicators.map(node => node.text).distinct
+      val uniqueDocTypes             = docTypeIndicators.map(node => node.text).distinct
 
       (uniqueDocTypes.length, uniqueDocTypes.headOption) match {
         case (1, Some("OECD1"))                                                       => NewInformationForExistingReport
@@ -58,8 +54,7 @@ class DataExtraction()() {
         case (1, Some("OECD3")) if reportingEntityDocTypeIndicators.contains("OECD0") => DeletionForExistingReport
         case _                                                                        => CorrectionAndDeletionForExistingReport
       }
-    }
-    else {
+    } else {
       CorrectionForReportingEntity
     }
   }

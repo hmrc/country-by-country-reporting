@@ -26,7 +26,6 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.play.bootstrap.controller.WithJsonBody
 
-
 @Singleton
 class UploadCallbackController @Inject() (
   val controllerComponents: MessagesControllerComponents,

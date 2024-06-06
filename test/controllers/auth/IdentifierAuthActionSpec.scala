@@ -16,7 +16,7 @@
 
 package controllers.auth
 
-import akka.util.Timeout
+import org.apache.pekko.util.Timeout
 import org.mockito.ArgumentMatchers.any
 import org.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
@@ -31,7 +31,7 @@ import play.api.{Application, Configuration}
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve.{Retrieval, ~}
+import uk.gov.hmrc.auth.core.retrieve.{~, Retrieval}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.duration._
@@ -54,7 +54,13 @@ class IdentifierAuthActionSpec extends PlaySpec with GuiceOneAppPerSuite with Mo
   implicit val timeout: Timeout = 5 seconds
 
   val application: Application = new GuiceApplicationBuilder()
-    .configure(Configuration("metrics.enabled" -> "false", "enrolmentKeys.cbc.key" -> "HMRC-CBC-ORG", "enrolmentKeys.cbc.identifier" -> "cbcId", "auditing.enabled" -> false))
+    .configure(
+      Configuration("metrics.enabled"              -> "false",
+                    "enrolmentKeys.cbc.key"        -> "HMRC-CBC-ORG",
+                    "enrolmentKeys.cbc.identifier" -> "cbcId",
+                    "auditing.enabled"             -> false
+      )
+    )
     .overrides(
       bind[AuthConnector].toInstance(mockAuthConnector)
     )
@@ -73,20 +79,22 @@ class IdentifierAuthActionSpec extends PlaySpec with GuiceOneAppPerSuite with Mo
 
       }
       "must return UNAUTHORIZED for not known enrolment" in {
-        val retrieval: RetrievalType = new ~(Enrolments(Set(Enrolment("HMRC-TEST-ORG", Seq(EnrolmentIdentifier("TESTID", "subscriptionID")), "ACTIVE"))), Some(Organisation))
+        val retrieval: RetrievalType =
+          new ~(Enrolments(Set(Enrolment("HMRC-TEST-ORG", Seq(EnrolmentIdentifier("TESTID", "subscriptionID")), "ACTIVE"))), Some(Organisation))
         when(mockAuthConnector.authorise(any[Predicate](), any[Retrieval[RetrievalType]]())(any[HeaderCarrier](), any[ExecutionContext]()))
           .thenReturn(Future.successful(retrieval))
 
         val authAction = application.injector.instanceOf[IdentifierAuthAction]
         val controller = new Harness(authAction)
-        val result = controller.onPageLoad()(FakeRequest("", ""))
+        val result     = controller.onPageLoad()(FakeRequest("", ""))
         status(result) mustBe UNAUTHORIZED
       }
     }
 
     "the user is logged in" must {
       "for an Organisation must return the request" in {
-        val retrieval: RetrievalType = new ~(Enrolments(Set(Enrolment("HMRC-CBC-ORG", Seq(EnrolmentIdentifier("cbcId", "subscriptionID")), "ACTIVE"))), Some(Organisation))
+        val retrieval: RetrievalType =
+          new ~(Enrolments(Set(Enrolment("HMRC-CBC-ORG", Seq(EnrolmentIdentifier("cbcId", "subscriptionID")), "ACTIVE"))), Some(Organisation))
         when(mockAuthConnector.authorise(any[Predicate](), any[Retrieval[RetrievalType]]())(any[HeaderCarrier](), any[ExecutionContext]()))
           .thenReturn(Future.successful(retrieval))
 
@@ -98,7 +106,8 @@ class IdentifierAuthActionSpec extends PlaySpec with GuiceOneAppPerSuite with Mo
       }
 
       "for a Non UK Organisation must return the request" in {
-        val retrieval: RetrievalType = new ~(Enrolments(Set(Enrolment("HMRC-CBC-NONUK-ORG", Seq(EnrolmentIdentifier("cbcId", "subscriptionID")), "ACTIVE"))), Some(Organisation))
+        val retrieval: RetrievalType =
+          new ~(Enrolments(Set(Enrolment("HMRC-CBC-NONUK-ORG", Seq(EnrolmentIdentifier("cbcId", "subscriptionID")), "ACTIVE"))), Some(Organisation))
         when(mockAuthConnector.authorise(any[Predicate](), any[Retrieval[RetrievalType]]())(any[HeaderCarrier](), any[ExecutionContext]()))
           .thenReturn(Future.successful(retrieval))
 
@@ -110,7 +119,8 @@ class IdentifierAuthActionSpec extends PlaySpec with GuiceOneAppPerSuite with Mo
       }
 
       "for an Agent must return the request" in {
-        val retrieval: RetrievalType = new ~(Enrolments(Set(Enrolment("HMRC-AS-AGENT", Seq(EnrolmentIdentifier("AgentReferenceNumber", "arn")), "ACTIVE"))), Some(Agent))
+        val retrieval: RetrievalType =
+          new ~(Enrolments(Set(Enrolment("HMRC-AS-AGENT", Seq(EnrolmentIdentifier("AgentReferenceNumber", "arn")), "ACTIVE"))), Some(Agent))
         when(mockAuthConnector.authorise(any[Predicate](), any[Retrieval[RetrievalType]]())(any[HeaderCarrier](), any[ExecutionContext]()))
           .thenReturn(Future.successful(retrieval))
 

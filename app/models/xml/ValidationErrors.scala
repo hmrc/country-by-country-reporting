@@ -27,7 +27,7 @@ object ValidationErrors {
   implicit val xmlReader: XmlReader[ValidationErrors] = (
     (__ \ "FileError").read(strictReadOptionSeq[FileErrors]),
     (__ \ "RecordError").read(strictReadOptionSeq[RecordError])
-    ).mapN(apply)
+  ).mapN(apply)
 
   implicit val format: OFormat[ValidationErrors] = Json.format[ValidationErrors]
 }

@@ -18,11 +18,11 @@ package repositories.submission
 
 import base.SpecBase
 import config.AppConfig
-import metrics.MetricsService
 import models.agentSubscription.{AgentContactDetails, AgentResponseDetail}
 import models.submission._
 import models.subscription.{ContactInformation, OrganisationDetails}
 import models.xml.{FileErrorCode, FileErrors, ValidationErrors}
+import services.metrics.MetricsService
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import java.time.LocalDateTime
@@ -30,7 +30,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepositorySupport[FileDetails] {
 
-  lazy val metricsService      = app.injector.instanceOf[MetricsService]
+  lazy val metricsService: MetricsService = app.injector.instanceOf[MetricsService]
 
   private val mockAppConfig = mock[AppConfig]
   when(mockAppConfig.cacheTtl) thenReturn 1

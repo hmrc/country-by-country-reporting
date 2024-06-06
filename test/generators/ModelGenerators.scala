@@ -48,7 +48,7 @@ trait ModelGenerators {
   implicit val arbitraryAgentRequestCommonForSubscription: Arbitrary[AgentRequestCommonForSubscription] =
     Arbitrary {
       for {
-        receiptDate <- arbitrary[String]
+        receiptDate        <- arbitrary[String]
         acknowledgementRef <- stringsWithMaxLength(32)
       } yield AgentRequestCommonForSubscription(
         regime = "CBC",
@@ -112,9 +112,9 @@ trait ModelGenerators {
   implicit val arbitraryAgentContactInformation: Arbitrary[AgentContactInformation] = Arbitrary {
     for {
       contactType <- arbitrary[AgentDetails]
-      email <- arbitrary[String]
-      phone <- Gen.option(arbitrary[String])
-      mobile <- Gen.option(arbitrary[String])
+      email       <- arbitrary[String]
+      phone       <- Gen.option(arbitrary[String])
+      mobile      <- Gen.option(arbitrary[String])
     } yield AgentContactInformation(contactType, email, phone, mobile)
   }
 
@@ -131,10 +131,10 @@ trait ModelGenerators {
 
   implicit val arbitraryAgentRequestDetailForUpdate: Arbitrary[AgentRequestDetailForUpdate] = Arbitrary {
     for {
-      idNumber <- arbitrary[String]
-      tradingName <- Gen.option(arbitrary[String])
-      isGBUser <- arbitrary[Boolean]
-      primaryContact <- arbitrary[AgentContactInformation]
+      idNumber         <- arbitrary[String]
+      tradingName      <- Gen.option(arbitrary[String])
+      isGBUser         <- arbitrary[Boolean]
+      primaryContact   <- arbitrary[AgentContactInformation]
       secondaryContact <- Gen.option(arbitrary[AgentContactInformation])
     } yield AgentRequestDetailForUpdate("ARN", idNumber, tradingName, isGBUser, primaryContact, secondaryContact)
   }
@@ -156,7 +156,7 @@ trait ModelGenerators {
   implicit val arbitraryAgentRequestCommonForUpdate: Arbitrary[AgentRequestCommonForUpdate] =
     Arbitrary {
       for {
-        receiptDate <- arbitrary[String]
+        receiptDate        <- arbitrary[String]
         acknowledgementRef <- stringsWithMaxLength(32)
       } yield AgentRequestCommonForUpdate(
         regime = "CBC",
@@ -179,7 +179,7 @@ trait ModelGenerators {
 
   implicit val arbitraryUpdateAgentSubscriptionDetails: Arbitrary[UpdateAgentSubscriptionDetails] = Arbitrary {
     for {
-      reqCommonForUpdate <- arbitrary[AgentRequestCommonForUpdate]
+      reqCommonForUpdate        <- arbitrary[AgentRequestCommonForUpdate]
       reqRequestDetailForUpdate <- arbitrary[AgentRequestDetailForUpdate]
     } yield UpdateAgentSubscriptionDetails(
       reqCommonForUpdate,
@@ -205,8 +205,7 @@ trait ModelGenerators {
       )
     }
 
-  implicit val arbitraryCreateAgentSubscriptionRequest
-  : Arbitrary[CreateAgentSubscriptionRequest] =
+  implicit val arbitraryCreateAgentSubscriptionRequest: Arbitrary[CreateAgentSubscriptionRequest] =
     Arbitrary {
       for {
         requestCommon <- arbitrary[AgentRequestCommonForSubscription]
@@ -218,55 +217,53 @@ trait ModelGenerators {
 
   implicit val arbitraryAgentRequestDetail: Arbitrary[AgentRequestDetail] = Arbitrary {
     for {
-      idNumber <- arbitrary[String]
-      tradingName <- Gen.option(arbitrary[String])
-      isGBUser <- arbitrary[Boolean]
-      primaryContact <- arbitrary[AgentContactInformation]
+      idNumber         <- arbitrary[String]
+      tradingName      <- Gen.option(arbitrary[String])
+      isGBUser         <- arbitrary[Boolean]
+      primaryContact   <- arbitrary[AgentContactInformation]
       secondaryContact <- Gen.option(arbitrary[AgentContactInformation])
     } yield AgentRequestDetail("ARN", idNumber, tradingName, isGBUser, primaryContact, secondaryContact)
   }
 
   implicit val arbitraryEmailRequest: Arbitrary[EmailRequest] = Arbitrary {
     for {
-      to <- arbitrary[List[String]]
-      id <- arbitrary[String]
+      to     <- arbitrary[List[String]]
+      id     <- arbitrary[String]
       params <- arbitrary[Map[String, String]]
 
     } yield EmailRequest(to, id, params)
   }
 
-  implicit val arbitraryIndividualContact: Arbitrary[Individual] = {
+  implicit val arbitraryIndividualContact: Arbitrary[Individual] =
     Arbitrary {
       for {
-        firstName <- arbitrary[String]
-        lastName <- arbitrary[String]
+        firstName  <- arbitrary[String]
+        lastName   <- arbitrary[String]
         middleName <- Gen.option(arbitrary[String])
       } yield Individual(firstName, lastName, middleName)
     }
-  }
 
   implicit val arbitraryOrganisationContact: Arbitrary[Organisation] =
-    Arbitrary { arbitrary[String].map(Organisation(_)) }
+    Arbitrary(arbitrary[String].map(Organisation(_)))
 
   implicit val arbitraryContact: Arbitrary[Contact] =
     Arbitrary {
       for {
-        email <- arbitrary[String]
-        individualContact <- Gen.option(arbitrary[Individual])
+        email               <- arbitrary[String]
+        individualContact   <- Gen.option(arbitrary[Individual])
         organisationContact <- Gen.option(arbitrary[Organisation])
-        phone <- Gen.option(arbitrary[String])
-        mobile <- Gen.option(arbitrary[String])
+        phone               <- Gen.option(arbitrary[String])
+        mobile              <- Gen.option(arbitrary[String])
       } yield Contact(s"$email@domain.com", individualContact, organisationContact, phone, mobile)
     }
 
-  implicit val arbitraryCreateAgentSubscriptionEtmpRequest
-  : Arbitrary[AgentSubscriptionEtmpRequest] =
+  implicit val arbitraryCreateAgentSubscriptionEtmpRequest: Arbitrary[AgentSubscriptionEtmpRequest] =
     Arbitrary {
       for {
-        idNumber <- arbitrary[String]
-        tradingName <- Gen.option(arbitrary[String])
-        isGBUser <- arbitrary[Boolean]
-        primaryContact <- arbitrary[Contact]
+        idNumber         <- arbitrary[String]
+        tradingName      <- Gen.option(arbitrary[String])
+        isGBUser         <- arbitrary[Boolean]
+        primaryContact   <- arbitrary[Contact]
         secondaryContact <- Gen.option(arbitrary[Contact])
       } yield AgentSubscriptionEtmpRequest("ARN", idNumber, isGBUser, primaryContact, tradingName, secondaryContact)
     }

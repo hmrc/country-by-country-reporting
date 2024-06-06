@@ -30,9 +30,9 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.xml.NodeSeq
 
 class EISResponsePreConditionCheckActionRefiner @Inject() (validationService: XMLValidationService, appConfig: AppConfig)(implicit
-                                                                                                                          val executionContext: ExecutionContext
+  val executionContext: ExecutionContext
 ) extends ActionRefiner[Request, EISRequest]
-  with Logging {
+    with Logging {
 
   override protected def refine[A](request: Request[A]): Future[Either[Result, EISRequest[A]]] =
     request.body match {

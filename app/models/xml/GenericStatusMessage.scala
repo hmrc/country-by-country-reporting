@@ -23,12 +23,11 @@ import play.api.libs.json.{Json, OWrites}
 
 case class GenericStatusMessage(validationErrors: ValidationErrors, status: ValidationStatus.Value)
 
-
 object GenericStatusMessage {
   implicit val xmlReader: XmlReader[GenericStatusMessage] = (
     (__ \ "ValidationErrors").read[ValidationErrors],
     (__ \ "ValidationResult" \ "Status").read(enum(ValidationStatus))
-    ).mapN(apply)
+  ).mapN(apply)
 
   implicit val writes: OWrites[GenericStatusMessage] = Json.writes[GenericStatusMessage]
 }
