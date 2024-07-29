@@ -16,20 +16,42 @@
 
 package connectors
 
-import base.{SpecBase, WireMockServerHandler}
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, urlEqualTo}
+import base.SpecBase
 import models.submission.ConversationId
-import org.scalatest.concurrent.ScalaFutures
+import models.upscan.UploadId
+import org.scalatest.concurrent.IntegrationPatience
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
+import wiremock.WireMockHelper
 
-class SubmissionConnectorSpec extends SpecBase with GuiceOneAppPerSuite with WireMockServerHandler with ScalaFutures {
+import java.util.UUID
+
+class SubmissionConnectorSpec extends SpecBase with GuiceOneAppPerSuite with WireMockHelper with IntegrationPatience {
+
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    startWireMock()
+  }
+
+  override def afterAll(): Unit = {
+    stopWireMock()
+    super.afterAll()
+  }
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    resetWireMock()
+  }
+
+  private val submissionUrl = "/dac6/dct52c/v1"
+
+  private val conversationId = ConversationId.fromUploadId(UploadId(UUID.randomUUID().toString))
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder()
     .configure(
-      "microservice.services.submission.port"         -> server.port(),
+      "microservice.services.submission.port"         -> wireMockServer.port(),
       "microservice.services.submission.environment"  -> "local",
       "microservice.services.submission.bearer-token" -> "token"
     )
@@ -40,17 +62,11 @@ class SubmissionConnectorSpec extends SpecBase with GuiceOneAppPerSuite with Wir
   "Submission Connector" - {
     "should return OK" - {
       "when the backend returns a valid successful response" in {
-        server.stubFor(
-          post(urlEqualTo("/dac6/dct52c/v1"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-            )
-        )
+        stubResponse(submissionUrl, OK)
 
         val xml = <test></test>
 
-        whenReady(connector.submitDisclosure(xml, ConversationId())) { result =>
+        whenReady(connector.submitDisclosure(xml, conversationId)) { result =>
           result.status mustBe OK
         }
       }
@@ -58,33 +74,19 @@ class SubmissionConnectorSpec extends SpecBase with GuiceOneAppPerSuite with Wir
 
     "throw an exception" - {
       "when upscan returns a 4xx response" in {
-        server.stubFor(
-          post(
-            urlEqualTo("/dac6/dct52c/v1")
-          )
-            .willReturn(
-              aResponse()
-                .withStatus(BAD_REQUEST)
-            )
-        )
+        stubResponse(submissionUrl, BAD_REQUEST)
 
         val xml    = <test></test>
-        val result = connector.submitDisclosure(xml, ConversationId())
+        val result = connector.submitDisclosure(xml, conversationId)
 
         result.futureValue.status mustBe BAD_REQUEST
       }
 
       "when upscan returns 5xx response" in {
-        server.stubFor(
-          post(urlEqualTo("/dac6/dct52c/v1"))
-            .willReturn(
-              aResponse()
-                .withStatus(SERVICE_UNAVAILABLE)
-            )
-        )
+        stubResponse(submissionUrl, SERVICE_UNAVAILABLE)
 
         val xml    = <test></test>
-        val result = connector.submitDisclosure(xml, ConversationId())
+        val result = connector.submitDisclosure(xml, conversationId)
         result.futureValue.status mustBe SERVICE_UNAVAILABLE
       }
     }

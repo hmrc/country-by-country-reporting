@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-package base
+package models.xml
 
-import org.mockito.MockitoSugar
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.must.Matchers
-import org.scalatest.{OptionValues, TryValues}
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import java.net.URL
+import scala.xml.Elem
 
-trait SpecBase
-  extends AnyFreeSpec
-    with Matchers
-    with GuiceOneAppPerSuite
-    with OptionValues
-    with TryValues
-    with ScalaFutures
-    with IntegrationPatience
-    with MockitoSugar
+class XmlHandler {
+
+  def load(url: String): Elem =
+    new scala.xml.factory.XMLLoader[scala.xml.Elem] {
+      override def adapter = new scala.xml.parsing.NoBindingFactoryAdapter
+    }.load(new URL(url))
+}

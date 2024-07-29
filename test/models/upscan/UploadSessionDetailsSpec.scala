@@ -211,7 +211,7 @@ class UploadSessionDetailsSpec extends SpecBase {
       )
     }
 
-    "must written correctly for status: UploadedSuccessfully" in {
+    "must marshall UploadedSuccessfully object to JSON" in {
       val expectedUploadSessionDetails =
         """{
           |"_id": { "$oid": "111111111111111111111111"},
@@ -221,7 +221,9 @@ class UploadSessionDetailsSpec extends SpecBase {
           |     "_type": "UploadedSuccessfully",
           |     "name": "name",
           |     "mimeType": "xml",
-          |     "downloadUrl": "downloadUrl"
+          |     "downloadUrl": "downloadUrl",
+          |     "size": 20,
+          |     "checksum": "12345"
           |   },
           |"lastUpdated": {
           |    "$date": {
@@ -234,7 +236,7 @@ class UploadSessionDetailsSpec extends SpecBase {
         objectId,
         UploadId("121"),
         Reference("ref"),
-        UploadedSuccessfully("name", "xml", "downloadUrl", None),
+        UploadedSuccessfully("name", "xml", "downloadUrl", Option(20L), Option("12345")),
         Instant.ofEpochMilli(1682406843785L)
       )
 
@@ -243,7 +245,7 @@ class UploadSessionDetailsSpec extends SpecBase {
       )
     }
 
-    "must be able to be marshalled correctly for status: UploadedSuccessfully" in {
+    "must unmarshall UploadedSuccessfully JSON to object" in {
       val json =
         """{
           |"_id": { "$oid": "111111111111111111111111"},
@@ -253,7 +255,9 @@ class UploadSessionDetailsSpec extends SpecBase {
           |     "_type": "UploadedSuccessfully",
           |     "name": "name",
           |     "mimeType": "xml",
-          |     "downloadUrl": "downloadUrl"
+          |     "downloadUrl": "downloadUrl",
+          |     "size": 20,
+          |     "checksum": "12345"
           |   },
           |"lastUpdated": {
           |    "$date": {
@@ -266,7 +270,7 @@ class UploadSessionDetailsSpec extends SpecBase {
         objectId,
         UploadId("121"),
         Reference("ref"),
-        UploadedSuccessfully("name", "xml", "downloadUrl", None),
+        UploadedSuccessfully("name", "xml", "downloadUrl", Option(20L), Option("12345")),
         Instant.ofEpochMilli(1682406843785L)
       )
 

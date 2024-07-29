@@ -24,6 +24,8 @@ case object CBC402 extends MessageTypeIndic
 
 object MessageTypeIndic {
 
+  val values: Seq[MessageTypeIndic] = Seq(CBC401, CBC402)
+
   def fromString(typeIndic: String): MessageTypeIndic = typeIndic.toUpperCase match {
     case "CBC401" => CBC401
     case "CBC402" => CBC402
@@ -52,6 +54,18 @@ case object CorrectionAndDeletionForExistingReport extends ReportType
 case object CorrectionForReportingEntity extends ReportType
 
 object ReportType {
+
+  val values: Seq[ReportType] = Seq(
+    TestData,
+    NewInformation,
+    DeletionOfAllInformation,
+    NewInformationForExistingReport,
+    CorrectionForExistingReport,
+    DeletionForExistingReport,
+    CorrectionAndDeletionForExistingReport,
+    CorrectionForReportingEntity
+  )
+
   implicit val writes: Writes[ReportType] = Writes[ReportType] {
     case TestData                               => JsString("TEST_DATA")
     case NewInformation                         => JsString("NEW_INFORMATION")

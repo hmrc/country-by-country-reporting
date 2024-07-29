@@ -18,189 +18,134 @@ package controllers.submission
 
 import base.SpecBase
 import config.AppConfig
-import connectors.{SubmissionConnector, SubscriptionConnector}
-import controllers.auth.{FakeIdentifierAuthAction, IdentifierAuthAction}
+import controllers.auth.{FakeIdentifierAuthAction, IdentifierAuthAction, IdentifierRequest}
 import controllers.routes._
-import controllers.submission.SubmissionFixture._
-import models.error.ReadSubscriptionError
-import models.submission.{ConversationId, FileDetails}
-import models.validation.SaxParseError
-import org.mockito.ArgumentMatchers.any
-import org.mockito.{ArgumentCaptor, MockitoSugar}
-import org.scalatest.BeforeAndAfterEach
+import generators.Generators
+import models.error.SubmissionServiceError
+import models.submission.{ConversationId, SubmissionDetails}
+import org.mockito.ArgumentMatchers.{any, eq => mEq}
+import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.inject.bind
-import play.api.mvc.Result
+import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{status, _}
-import repositories.submission.FileDetailsRepository
-import services.{AgentSubscriptionService, SubscriptionService, TransformService}
-import services.validation.XMLValidationService
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import play.api.test.Helpers._
+import services.submission.SubmissionService
+import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.collection.mutable.ListBuffer
-import scala.concurrent.{ExecutionContext, Future}
-import scala.xml.NodeSeq
-class SubmissionControllerSpec extends SpecBase with MockitoSugar with ScalaCheckDrivenPropertyChecks with BeforeAndAfterEach {
+import scala.concurrent.Future
 
-  val mockTransformService                                       = mock[TransformService]
-  val mockSubmissionConnector: SubmissionConnector               = mock[SubmissionConnector]
-  val mockSubscriptionConnector: SubscriptionConnector           = mock[SubscriptionConnector]
-  val mockReadSubscriptionService: SubscriptionService           = mock[SubscriptionService]
-  val mockAgentReadSubscriptionService: AgentSubscriptionService = mock[AgentSubscriptionService]
+class SubmissionControllerSpec extends SpecBase with Generators with ScalaCheckDrivenPropertyChecks {
 
-  val mockFileDetailsRepository: FileDetailsRepository = mock[FileDetailsRepository]
-  val mockXMLValidationService: XMLValidationService   = mock[XMLValidationService]
-  val mockAppConf: AppConfig                           = mock[AppConfig]
+  private val mockAppConf           = mock[AppConfig]
+  private val mockSubmissionService = mock[SubmissionService]
 
-  val errorStatusCodes: Seq[Int] = Seq(BAD_REQUEST, FORBIDDEN, NOT_FOUND, METHOD_NOT_ALLOWED, CONFLICT, INTERNAL_SERVER_ERROR, SERVICE_UNAVAILABLE)
+  override def beforeEach(): Unit = reset(mockAppConf, mockSubmissionService)
 
-  override def beforeEach(): Unit =
-    reset(
-      mockAppConf,
-      mockXMLValidationService,
-      mockReadSubscriptionService,
-      mockSubscriptionConnector,
-      mockSubmissionConnector,
-      mockFileDetailsRepository,
-      mockAgentReadSubscriptionService
-    )
+  "Submission controller" - {
 
-  "submission controller" - {
+    "must treat file having size <= maxNormalFileSizeBytes as normal file" in {
+      forAll(arbitrary[SubmissionDetails]) { submissionDetails =>
+        val conversationId = ConversationId.fromUploadId(submissionDetails.uploadId)
 
-    val application = applicationBuilder()
+        when(mockAppConf.maxNormalFileSizeBytes).thenReturn(submissionDetails.fileSize)
+        when(mockAppConf.maxLargeFileSizeBytes).thenReturn(submissionDetails.fileSize + 1)
+        when(mockSubmissionService.submitNormalFile(mEq(submissionDetails))(any[IdentifierRequest[JsValue]], any[HeaderCarrier]))
+          .thenReturn(Future.successful(Right(conversationId)))
+
+        val application = buildApplication()
+        running(application) {
+          val request = FakeRequest(POST, SubmissionController.submitDisclosure.url).withBody(Json.toJson(submissionDetails))
+
+          val result = route(application, request).value
+
+          status(result) mustBe OK
+          contentAsJson(result) mustBe Json.toJson(conversationId)
+        }
+      }
+    }
+
+    "must treat file having size > maxNormalFileSizeBytes as large file" in {
+      forAll(arbitrary[SubmissionDetails]) { submissionDetails =>
+        val conversationId = ConversationId.fromUploadId(submissionDetails.uploadId)
+
+        when(mockAppConf.maxNormalFileSizeBytes).thenReturn(submissionDetails.fileSize - 1)
+        when(mockAppConf.maxLargeFileSizeBytes).thenReturn(submissionDetails.fileSize + 1)
+        when(mockSubmissionService.submitLargeFile(mEq(submissionDetails))(any[IdentifierRequest[JsValue]], any[HeaderCarrier]))
+          .thenReturn(Future.successful(Right(conversationId)))
+
+        val application = buildApplication()
+        running(application) {
+          val request = FakeRequest(POST, SubmissionController.submitDisclosure.url).withBody(Json.toJson(submissionDetails))
+
+          val result = route(application, request).value
+
+          status(result) mustBe OK
+          contentAsJson(result) mustBe Json.toJson(conversationId)
+        }
+      }
+    }
+
+    "must return INTERNAL_SERVER_ERROR when file is larger than maxLargeFileSizeBytes" in {
+      forAll(arbitrary[SubmissionDetails]) { submissionDetails =>
+        when(mockAppConf.maxNormalFileSizeBytes).thenReturn(0)
+        when(mockAppConf.maxLargeFileSizeBytes).thenReturn(submissionDetails.fileSize - 1)
+
+        val application = buildApplication()
+        running(application) {
+          val request = FakeRequest(POST, SubmissionController.submitDisclosure.url).withBody(Json.toJson(submissionDetails))
+
+          val result = route(application, request).value
+
+          status(result) mustBe INTERNAL_SERVER_ERROR
+          verifyZeroInteractions(mockSubmissionService)
+        }
+      }
+    }
+
+    "must return InternalServerError when a service error occurs during normal file submission" in {
+      forAll(arbitrary[SubmissionDetails]) { submissionDetails =>
+        when(mockAppConf.maxNormalFileSizeBytes).thenReturn(submissionDetails.fileSize)
+        when(mockAppConf.maxLargeFileSizeBytes).thenReturn(submissionDetails.fileSize + 1)
+        when(mockSubmissionService.submitNormalFile(mEq(submissionDetails))(any[IdentifierRequest[JsValue]], any[HeaderCarrier]))
+          .thenReturn(Future.successful(Left(SubmissionServiceError("Some service error"))))
+
+        val application = buildApplication()
+        running(application) {
+          val request = FakeRequest(POST, SubmissionController.submitDisclosure.url).withBody(Json.toJson(submissionDetails))
+
+          val result = route(application, request).value
+
+          status(result) mustBe INTERNAL_SERVER_ERROR
+        }
+      }
+    }
+
+    "must return INTERNAL_SERVER_ERROR when a service error occurs during large file submission" in {
+      forAll(arbitrary[SubmissionDetails]) { submissionDetails =>
+        when(mockAppConf.maxNormalFileSizeBytes).thenReturn(submissionDetails.fileSize - 1)
+        when(mockAppConf.maxLargeFileSizeBytes).thenReturn(submissionDetails.fileSize + 1)
+        when(mockSubmissionService.submitLargeFile(mEq(submissionDetails))(any[IdentifierRequest[JsValue]], any[HeaderCarrier]))
+          .thenReturn(Future.successful(Left(SubmissionServiceError("Some service error"))))
+
+        val application = buildApplication()
+        running(application) {
+          val request = FakeRequest(POST, SubmissionController.submitDisclosure.url).withBody(Json.toJson(submissionDetails))
+
+          val result = route(application, request).value
+
+          status(result) mustBe INTERNAL_SERVER_ERROR
+        }
+      }
+    }
+  }
+
+  private def buildApplication() =
+    applicationBuilder()
       .overrides(
-        bind[SubscriptionConnector].toInstance(mockSubscriptionConnector),
-        bind[SubmissionConnector].toInstance(mockSubmissionConnector),
-        bind[SubscriptionService].toInstance(mockReadSubscriptionService),
-        bind[AgentSubscriptionService].toInstance(mockAgentReadSubscriptionService),
-        bind[FileDetailsRepository].toInstance(mockFileDetailsRepository),
-        bind[XMLValidationService].toInstance(mockXMLValidationService),
         bind[AppConfig].toInstance(mockAppConf),
+        bind[SubmissionService].toInstance(mockSubmissionService),
         bind[IdentifierAuthAction].to[FakeIdentifierAuthAction]
       )
       .build()
-
-    "when a file is posted we transform it, send it to the HOD and return OK" in {
-      when(mockFileDetailsRepository.insert(any[FileDetails]()))
-        .thenReturn(Future.successful(true))
-      when(mockReadSubscriptionService.getContactInformation(any[String]())(any[HeaderCarrier](), any[ExecutionContext]()))
-        .thenReturn(Future.successful(Right(responseDetail)))
-      when(mockSubmissionConnector.submitDisclosure(any[NodeSeq](), any[ConversationId])(any[HeaderCarrier]()))
-        .thenReturn(Future.successful(HttpResponse(NO_CONTENT, "")))
-      when(mockXMLValidationService.validate(any[NodeSeq], any[String]))
-        .thenReturn(Right(basicXml))
-      val submission = basicXml
-
-      val request                = FakeRequest(POST, SubmissionController.submitDisclosure.url).withXmlBody(submission)
-      val result: Future[Result] = route(application, request).value
-
-      status(result) mustBe OK
-
-      val argumentCaptor: ArgumentCaptor[NodeSeq]                      = ArgumentCaptor.forClass(classOf[NodeSeq])
-      val argumentCaptorSubmissionDetails: ArgumentCaptor[FileDetails] = ArgumentCaptor.forClass(classOf[FileDetails])
-      val argumentCaptorConversationId: ArgumentCaptor[ConversationId] = ArgumentCaptor.forClass(classOf[ConversationId])
-
-      verify(mockFileDetailsRepository, times(1)).insert(argumentCaptorSubmissionDetails.capture())
-      verify(mockSubmissionConnector, times(1)).submitDisclosure(argumentCaptor.capture(), argumentCaptorConversationId.capture())(any[HeaderCarrier]())
-    }
-
-    "when a file is posted we transform it and trim and blank spaces on the node send it to the HOD expect return OK" in {
-      when(mockFileDetailsRepository.insert(any[FileDetails]()))
-        .thenReturn(Future.successful(true))
-      when(mockReadSubscriptionService.getContactInformation(any[String]())(any[HeaderCarrier](), any[ExecutionContext]()))
-        .thenReturn(Future.successful(Right(responseDetail)))
-      when(mockSubmissionConnector.submitDisclosure(any[NodeSeq](), any[ConversationId])(any[HeaderCarrier]()))
-        .thenReturn(Future.successful(HttpResponse(NO_CONTENT, "")))
-      when(mockXMLValidationService.validate(any[NodeSeq], any[String]))
-        .thenReturn(Right(basicXml))
-      val submission = basicXml
-
-      val request                = FakeRequest(POST, SubmissionController.submitDisclosure.url).withXmlBody(submission)
-      val result: Future[Result] = route(application, request).value
-
-      status(result) mustBe OK
-
-      val argumentCaptor: ArgumentCaptor[NodeSeq]                      = ArgumentCaptor.forClass(classOf[NodeSeq])
-      val argumentCaptorSubmissionDetails: ArgumentCaptor[FileDetails] = ArgumentCaptor.forClass(classOf[FileDetails])
-      val argumentCaptorConversationId: ArgumentCaptor[ConversationId] = ArgumentCaptor.forClass(classOf[ConversationId])
-
-      verify(mockFileDetailsRepository, times(1)).insert(argumentCaptorSubmissionDetails.capture())
-      verify(mockSubmissionConnector, times(1)).submitDisclosure(argumentCaptor.capture(), argumentCaptorConversationId.capture())(any[HeaderCarrier]())
-    }
-
-    "when a file is posted we transform it and trim and blank spaces on the node send it to the HOD expect return OK for Agent" in {
-      when(mockFileDetailsRepository.insert(any[FileDetails]()))
-        .thenReturn(Future.successful(true))
-      when(mockReadSubscriptionService.getContactInformation(any[String]())(any[HeaderCarrier](), any[ExecutionContext]()))
-        .thenReturn(Future.successful(Right(responseDetail)))
-      when(mockAgentReadSubscriptionService.getContactInformation(any[String]())(any[HeaderCarrier](), any[ExecutionContext]()))
-        .thenReturn(Future.successful(Right(agentResponseDetail)))
-      when(mockSubmissionConnector.submitDisclosure(any[NodeSeq](), any[ConversationId])(any[HeaderCarrier]()))
-        .thenReturn(Future.successful(HttpResponse(NO_CONTENT, "")))
-      when(mockXMLValidationService.validate(any[NodeSeq], any[String]))
-        .thenReturn(Right(basicXml))
-      val submission = basicXml
-
-      val request                = FakeRequest(POST, SubmissionController.submitDisclosure.url).withXmlBody(submission)
-      val result: Future[Result] = route(application, request).value
-
-      status(result) mustBe OK
-
-      val argumentCaptor: ArgumentCaptor[NodeSeq]                      = ArgumentCaptor.forClass(classOf[NodeSeq])
-      val argumentCaptorSubmissionDetails: ArgumentCaptor[FileDetails] = ArgumentCaptor.forClass(classOf[FileDetails])
-      val argumentCaptorConversationId: ArgumentCaptor[ConversationId] = ArgumentCaptor.forClass(classOf[ConversationId])
-
-      verify(mockFileDetailsRepository, times(1)).insert(argumentCaptorSubmissionDetails.capture())
-      verify(mockSubmissionConnector, times(1)).submitDisclosure(argumentCaptor.capture(), argumentCaptorConversationId.capture())(any[HeaderCarrier]())
-    }
-
-    "when a read subscription returns not OK response INTERNAL_SERVER_ERROR" in {
-      when(mockFileDetailsRepository.insert(any[FileDetails]()))
-        .thenReturn(Future.successful(true))
-      when(mockReadSubscriptionService.getContactInformation(any[String]())(any[HeaderCarrier](), any[ExecutionContext]()))
-        .thenReturn(Future.successful(Left(ReadSubscriptionError(500))))
-      when(mockSubmissionConnector.submitDisclosure(any[NodeSeq](), any[ConversationId])(any[HeaderCarrier]()))
-        .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
-
-      val submission = basicXml
-
-      val request                = FakeRequest(POST, SubmissionController.submitDisclosure.url).withXmlBody(submission)
-      val result: Future[Result] = route(application, request).value
-
-      status(result) mustBe INTERNAL_SERVER_ERROR
-
-      val argumentCaptor: ArgumentCaptor[NodeSeq]                      = ArgumentCaptor.forClass(classOf[NodeSeq])
-      val argumentCaptorSubmissionDetails: ArgumentCaptor[FileDetails] = ArgumentCaptor.forClass(classOf[FileDetails])
-      val argumentCaptorConversationId: ArgumentCaptor[ConversationId] = ArgumentCaptor.forClass(classOf[ConversationId])
-
-      verify(mockFileDetailsRepository, times(0)).insert(argumentCaptorSubmissionDetails.capture())
-      verify(mockSubmissionConnector, times(0)).submitDisclosure(argumentCaptor.capture(), argumentCaptorConversationId.capture())(any[HeaderCarrier]())
-    }
-
-    "when a submission xml is invalid return INTERNAL_SERVER_ERROR" in {
-      when(mockFileDetailsRepository.insert(any[FileDetails]()))
-        .thenReturn(Future.successful(true))
-      when(mockReadSubscriptionService.getContactInformation(any[String]())(any[HeaderCarrier](), any[ExecutionContext]()))
-        .thenReturn(Future.successful(Left(ReadSubscriptionError(500))))
-      when(mockSubmissionConnector.submitDisclosure(any[NodeSeq](), any[ConversationId])(any[HeaderCarrier]()))
-        .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
-
-      val submission = basicXml
-      when(mockXMLValidationService.validate(any[NodeSeq], any[String]))
-        .thenReturn(Left(ListBuffer(SaxParseError(1, "Invalid Node at line 1"))))
-
-      val request                = FakeRequest(POST, SubmissionController.submitDisclosure.url).withXmlBody(submission)
-      val result: Future[Result] = route(application, request).value
-
-      status(result) mustBe INTERNAL_SERVER_ERROR
-
-      val argumentCaptor: ArgumentCaptor[NodeSeq]                      = ArgumentCaptor.forClass(classOf[NodeSeq])
-      val argumentCaptorSubmissionDetails: ArgumentCaptor[FileDetails] = ArgumentCaptor.forClass(classOf[FileDetails])
-      val argumentCaptorConversationId: ArgumentCaptor[ConversationId] = ArgumentCaptor.forClass(classOf[ConversationId])
-
-      verify(mockFileDetailsRepository, times(0)).insert(argumentCaptorSubmissionDetails.capture())
-      verify(mockSubmissionConnector, times(0)).submitDisclosure(argumentCaptor.capture(), argumentCaptorConversationId.capture())(any[HeaderCarrier]())
-    }
-  }
 }

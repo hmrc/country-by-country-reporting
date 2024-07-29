@@ -16,33 +16,48 @@
 
 package connectors
 
-import base.{SpecBase, WireMockServerHandler}
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, request, urlEqualTo}
+import base.SpecBase
 import com.github.tomakehurst.wiremock.http.RequestMethod
-import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import generators.Generators
 import models.agentSubscription.AgentSubscriptionEtmpRequest
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
+import org.scalatest.concurrent.IntegrationPatience
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
 import play.api.http.Status.OK
+import wiremock.WireMockHelper
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class AgentSubscriptionConnectorSpec extends SpecBase with WireMockServerHandler with Generators with ScalaCheckPropertyChecks {
+class AgentSubscriptionConnectorSpec extends SpecBase with WireMockHelper with IntegrationPatience with Generators with ScalaCheckPropertyChecks {
+
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    startWireMock()
+  }
+
+  override def afterAll(): Unit = {
+    stopWireMock()
+    super.afterAll()
+  }
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    resetWireMock()
+  }
 
   override lazy val app: Application = applicationBuilder()
     .configure(
-      conf = "microservice.services.update-agent-subscription.port" -> server.port(),
-      "microservice.services.create-agent-subscription.port"       -> server.port(),
-      "microservice.services.read-agent-subscription.port"         -> server.port(),
+      conf = "microservice.services.update-agent-subscription.port" -> wireMockServer.port(),
+      "microservice.services.create-agent-subscription.port"       -> wireMockServer.port(),
+      "microservice.services.read-agent-subscription.port"         -> wireMockServer.port(),
       "microservice.services.read-agent-subscription.bearer-token" -> "local-token",
       "auditing.enabled"                                           -> "false"
     )
     .build()
 
-  lazy val connector: AgentSubscriptionConnector =
+  private lazy val connector: AgentSubscriptionConnector =
     app.injector.instanceOf[AgentSubscriptionConnector]
 
   private val errorCodes: Gen[Int] = Gen.chooseNum(400, 599)
@@ -53,11 +68,7 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockServerHandler
       val agentCreateSubscriptionEndpoint = "/dac6/dct51a/v1"
 
       "must return status as OK for create Subscription" in {
-        stubResponse(
-          RequestMethod.POST,
-          agentCreateSubscriptionEndpoint,
-          OK
-        )
+        stubResponse(agentCreateSubscriptionEndpoint, OK, RequestMethod.POST)
 
         forAll(arbitrary[AgentSubscriptionEtmpRequest]) { sub =>
           val result = connector.createSubscription(sub)
@@ -68,11 +79,7 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockServerHandler
 
       "must return an error status for invalid create Subscription" in {
         forAll(arbitrary[AgentSubscriptionEtmpRequest], errorCodes) { (sub, errorCode) =>
-          stubResponse(
-            RequestMethod.POST,
-            agentCreateSubscriptionEndpoint,
-            errorCode
-          )
+          stubResponse(agentCreateSubscriptionEndpoint, errorCode, RequestMethod.POST)
 
           val result = connector.createSubscription(sub)
           result.futureValue.status mustBe errorCode
@@ -85,11 +92,7 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockServerHandler
 
       "must return status as OK for read Subscription" in {
         forAll(Gen.alphaNumStr) { agentRefNo =>
-          stubResponse(
-            RequestMethod.GET,
-            s"$agentReadSubscriptionEndpoint/ARN/$agentRefNo",
-            OK
-          )
+          stubResponse(s"$agentReadSubscriptionEndpoint/ARN/$agentRefNo", OK, RequestMethod.GET)
 
           val result = connector.readSubscription(agentRefNo)
 
@@ -100,11 +103,7 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockServerHandler
       "must return an error status for  invalid read Subscription" in {
 
         forAll(Gen.alphaNumStr, errorCodes) { (agentRefNo, errorCode) =>
-          stubResponse(
-            RequestMethod.GET,
-            s"$agentReadSubscriptionEndpoint/ARN/$agentRefNo",
-            errorCode
-          )
+          stubResponse(s"$agentReadSubscriptionEndpoint/ARN/$agentRefNo", errorCode, RequestMethod.GET)
 
           val result = connector.readSubscription(agentRefNo)
           result.futureValue.status mustBe errorCode
@@ -116,11 +115,7 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockServerHandler
       val agentUpdateSubscriptionEndpoint = "/dac6/dct51b/v1"
 
       "must return status as OK for update Subscription" in {
-        stubResponse(
-          RequestMethod.PUT,
-          agentUpdateSubscriptionEndpoint,
-          OK
-        )
+        stubResponse(agentUpdateSubscriptionEndpoint, OK, RequestMethod.PUT)
 
         forAll(arbitrary[AgentSubscriptionEtmpRequest]) { sub =>
           val result = connector.updateSubscription(sub)
@@ -130,11 +125,7 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockServerHandler
 
       "must return an error status for failed update Subscription" in {
         forAll(arbitrary[AgentSubscriptionEtmpRequest], errorCodes) { (sub, errorCode) =>
-          stubResponse(
-            RequestMethod.PUT,
-            agentUpdateSubscriptionEndpoint,
-            errorCode
-          )
+          stubResponse(agentUpdateSubscriptionEndpoint, errorCode, RequestMethod.PUT)
 
           val result = connector.updateSubscription(sub)
           result.futureValue.status mustBe errorCode
@@ -143,17 +134,4 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockServerHandler
     }
 
   }
-
-  private def stubResponse(
-    requestMethod: RequestMethod,
-    expectedUrl: String,
-    expectedStatus: Int
-  ): StubMapping =
-    server.stubFor(
-      request(requestMethod.getName, urlEqualTo(expectedUrl))
-        .willReturn(
-          aResponse()
-            .withStatus(expectedStatus)
-        )
-    )
 }

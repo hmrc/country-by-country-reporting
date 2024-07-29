@@ -20,6 +20,7 @@ lazy val microservice = Project("country-by-country-reporting", file("."))
       "-Wconf:cat=unused&src=.*Routes\\.scala:s"
     )
   )
+  .settings(inConfig(Test)(testSettings): _*)
   .settings(scoverageSettings)
   .settings(resolvers += Resolver.jcenterRepo)
   .settings(CodeCoverageSettings.settings: _*)

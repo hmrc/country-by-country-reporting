@@ -16,23 +16,38 @@
 
 package connectors
 
-import base.{SpecBase, WireMockServerHandler}
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, urlEqualTo}
-import com.github.tomakehurst.wiremock.stubbing.StubMapping
+import base.SpecBase
 import generators.Generators
 import models.email.EmailRequest
 import org.scalacheck.Arbitrary.arbitrary
+import org.scalatest.concurrent.IntegrationPatience
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
 import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK}
 import play.api.inject.guice.GuiceApplicationBuilder
+import wiremock.WireMockHelper
 
-class EmailConnectorSpec extends SpecBase with WireMockServerHandler with Generators with ScalaCheckPropertyChecks {
+class EmailConnectorSpec extends SpecBase with WireMockHelper with IntegrationPatience with Generators with ScalaCheckPropertyChecks {
+
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    startWireMock()
+  }
+
+  override def afterAll(): Unit = {
+    stopWireMock()
+    super.afterAll()
+  }
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    resetWireMock()
+  }
+
+  private val emailUrl = "/hmrc/email"
 
   override lazy val app: Application = new GuiceApplicationBuilder()
-    .configure(
-      conf = "microservice.services.email.port" -> server.port()
-    )
+    .configure(conf = "microservice.services.email.port" -> wireMockServer.port())
     .build()
 
   lazy val connector: EmailConnector = app.injector.instanceOf[EmailConnector]
@@ -41,7 +56,7 @@ class EmailConnectorSpec extends SpecBase with WireMockServerHandler with Genera
     "must return status as OK for valid email submission" in {
 
       forAll(arbitrary[EmailRequest]) { emailRequest =>
-        stubResponse(OK)
+        stubResponse(emailUrl, OK)
 
         val result = connector.sendEmail(emailRequest)
         result.futureValue.status mustBe OK
@@ -51,7 +66,7 @@ class EmailConnectorSpec extends SpecBase with WireMockServerHandler with Genera
     "must return status as BAD_REQUEST for invalid email submission" in {
 
       forAll(arbitrary[EmailRequest]) { emailRequest =>
-        stubResponse(BAD_REQUEST)
+        stubResponse(emailUrl, BAD_REQUEST)
 
         val result = connector.sendEmail(emailRequest)
         result.futureValue.status mustBe BAD_REQUEST
@@ -61,21 +76,12 @@ class EmailConnectorSpec extends SpecBase with WireMockServerHandler with Genera
     "must return status as NOT_FOUND for invalid email submission" in {
 
       forAll(arbitrary[EmailRequest]) { emailRequest =>
-        stubResponse(NOT_FOUND)
+        stubResponse(emailUrl, NOT_FOUND)
 
         val result = connector.sendEmail(emailRequest)
         result.futureValue.status mustBe NOT_FOUND
       }
     }
   }
-
-  private def stubResponse(expectedStatus: Int): StubMapping =
-    server.stubFor(
-      post(urlEqualTo("/hmrc/email"))
-        .willReturn(
-          aResponse()
-            .withStatus(expectedStatus)
-        )
-    )
 
 }

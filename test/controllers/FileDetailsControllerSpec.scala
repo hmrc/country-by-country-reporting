@@ -19,6 +19,7 @@ package controllers
 import base.SpecBase
 import controllers.auth.{FakeIdentifierAuthAction, IdentifierAuthAction}
 import models.submission._
+import models.upscan.UploadId
 import models.xml.ValidationErrors
 import org.mockito.ArgumentMatchers.any
 import org.scalatest.BeforeAndAfterEach
@@ -30,6 +31,7 @@ import play.api.test.Helpers.{contentAsJson, defaultAwaitTimeout, route, status,
 import repositories.submission.FileDetailsRepository
 
 import java.time.LocalDateTime
+import java.util.UUID
 import scala.concurrent.Future
 
 class FileDetailsControllerSpec extends SpecBase with BeforeAndAfterEach {
@@ -37,6 +39,8 @@ class FileDetailsControllerSpec extends SpecBase with BeforeAndAfterEach {
   val mockFileDetailsRepository: FileDetailsRepository = mock[FileDetailsRepository]
 
   override def beforeEach(): Unit = reset(mockFileDetailsRepository)
+
+  private val conversationId = ConversationId.fromUploadId(UploadId(UUID.randomUUID().toString))
 
   val application: Application = applicationBuilder()
     .overrides(
@@ -47,17 +51,14 @@ class FileDetailsControllerSpec extends SpecBase with BeforeAndAfterEach {
 
   private val submissionTime1 = LocalDateTime.now()
   private val fileDetails1 =
-    FileDetails(ConversationId(), "subscriptionId1", "messageRefId1", "Reporting Entity", TestData, Pending, "fileName1", submissionTime1, submissionTime1)
+    FileDetails(conversationId, "subscriptionId1", "messageRefId1", "Reporting Entity", TestData, Pending, "fileName1", submissionTime1, submissionTime1)
   private val submissionTime2 = LocalDateTime.now()
   private val fileDetails2 =
-    FileDetails(ConversationId(), "subscriptionId1", "messageRefId1", "Reporting Entity", TestData, Accepted, "fileName2", submissionTime2, submissionTime2)
+    FileDetails(conversationId, "subscriptionId1", "messageRefId1", "Reporting Entity", TestData, Accepted, "fileName2", submissionTime2, submissionTime2)
   private val files = Seq(fileDetails1, fileDetails2)
-
-  private val conversationId = ConversationId()
 
   "FileDetailsController" - {
     "must return FileDetails for the input 'conversationId'" in {
-      val conversationId = ConversationId()
       val fileDetails = FileDetails(
         conversationId,
         subscriptionId = "subscriptionId",
@@ -84,7 +85,7 @@ class FileDetailsControllerSpec extends SpecBase with BeforeAndAfterEach {
       when(mockFileDetailsRepository.findByConversationId(any[ConversationId]())).thenReturn(Future.successful(None))
 
       val request =
-        FakeRequest(GET, routes.FileDetailsController.getFileDetails(ConversationId()).url)
+        FakeRequest(GET, routes.FileDetailsController.getFileDetails(conversationId).url)
 
       val result = route(application, request).value
       status(result) mustBe NOT_FOUND

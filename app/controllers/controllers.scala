@@ -22,7 +22,7 @@ import play.api.mvc.Result
 import play.api.mvc.Results._
 import uk.gov.hmrc.http.HttpResponse
 
-import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
+import java.time.{Clock, LocalDateTime, ZoneId, ZonedDateTime}
 import java.time.format.DateTimeFormatter
 import scala.util.{Success, Try}
 
@@ -68,7 +68,7 @@ package object controllers {
   val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
   val timeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("h:mma")
 
-  def dateTimeNow(): LocalDateTime = ZonedDateTime.now(euLondonZoneId).toLocalDateTime
+  def dateTimeNow(implicit clock: Clock): LocalDateTime = ZonedDateTime.now(clock.withZone(euLondonZoneId)).toLocalDateTime
 
   def displayFormattedDate(dateTime: LocalDateTime): String =
     s"${dateTime.atZone(euLondonZoneId).format(timeFormatter).toLowerCase} on ${dateTime.atZone(euLondonZoneId).format(dateFormatter)}"

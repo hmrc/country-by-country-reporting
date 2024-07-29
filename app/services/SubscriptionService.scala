@@ -17,7 +17,7 @@
 package services
 
 import connectors.SubscriptionConnector
-import models.error.{ReadSubscriptionError, UpdateSubscriptionError}
+import models.error.{BackendError, ReadSubscriptionError, UpdateSubscriptionError}
 import models.subscription.{
   DisplaySubscriptionDetails,
   DisplaySubscriptionForCBCRequest,
@@ -37,7 +37,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class SubscriptionService @Inject() (subscriptionConnector: SubscriptionConnector) extends Logging {
 
-  def getContactInformation(enrolmentId: String)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Either[ReadSubscriptionError, ResponseDetail]] = {
+  def getContactInformation(enrolmentId: String)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Either[BackendError, ResponseDetail]] = {
 
     val subscriptionRequest: DisplaySubscriptionForCBCRequest =
       DisplaySubscriptionForCBCRequest(

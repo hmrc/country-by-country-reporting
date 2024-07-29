@@ -64,7 +64,8 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
     None,
     None
   )
-  val agentDetails: AgentContactDetails = AgentContactDetails("ARN", AgentResponseDetail("subscriptionId2", None, isGBUser = true, agentPrimaryContact, Some(agentSecondaryContact)))
+  val agentDetails: AgentContactDetails =
+    AgentContactDetails("ARN", AgentResponseDetail("subscriptionId2", None, isGBUser = true, agentPrimaryContact, Some(agentSecondaryContact)))
 
   val agentFileDetails: FileDetails = FileDetails(
     ConversationId("conversationId1234567"),
@@ -156,7 +157,19 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
       val res = repository.updateStatus("conversationId123456", Accepted)
       whenReady(res) { result =>
         result must matchPattern {
-          case Some(FileDetails(ConversationId("conversationId123456"), "subscriptionId", "messageRefId", "Reporting Entity", TestData, Accepted, "file1.xml", _, _, _)) =>
+          case Some(
+                FileDetails(ConversationId("conversationId123456"),
+                            "subscriptionId",
+                            "messageRefId",
+                            "Reporting Entity",
+                            TestData,
+                            Accepted,
+                            "file1.xml",
+                            _,
+                            _,
+                            _
+                )
+              ) =>
         }
       }
     }
@@ -169,7 +182,19 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
       val res = repository.updateStatus("conversationId1234567", Accepted)
       whenReady(res) { result =>
         result must matchPattern {
-          case Some(FileDetails(ConversationId("conversationId1234567"), "subscriptionId2", "messageRefId2", "Reporting Entity", TestData, Accepted, "file1.xml", _, _, _)) =>
+          case Some(
+                FileDetails(ConversationId("conversationId1234567"),
+                            "subscriptionId2",
+                            "messageRefId2",
+                            "Reporting Entity",
+                            TestData,
+                            Accepted,
+                            "file1.xml",
+                            _,
+                            _,
+                            _
+                )
+              ) =>
         }
       }
     }
