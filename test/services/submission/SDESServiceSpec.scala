@@ -24,7 +24,6 @@ import models.sdes._
 import models.submission._
 import models.subscription.ResponseDetail
 import org.mockito.ArgumentMatchers.any
-import org.scalacheck.Arbitrary.arbitrary
 import org.scalatest.concurrent.IntegrationPatience
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Application
@@ -57,7 +56,7 @@ class SDESServiceSpec extends SpecBase with IntegrationPatience with Generators 
   "SDESService" - {
     "sendFileNotification" - {
       "must send file submission notification to SDES connector and return success status when connector returns a Right" in {
-        forAll(arbitrary[ResponseDetail], arbitrary[SubmissionDetails]) { (responseDetail, submissionDetails) =>
+        forAll { (responseDetail: ResponseDetail, submissionDetails: SubmissionDetails) =>
           mockSdesConnectorWithResponse(Future.successful(Right(NO_CONTENT)))
           val conversationId = ConversationId.fromUploadId(submissionDetails.uploadId)
 
@@ -68,7 +67,7 @@ class SDESServiceSpec extends SpecBase with IntegrationPatience with Generators 
       }
 
       "must send file submission to SDES connector and return error status when connector returns a Left" in {
-        forAll(arbitrary[ResponseDetail], arbitrary[SubmissionDetails]) { (responseDetail, submissionDetails) =>
+        forAll { (responseDetail: ResponseDetail, submissionDetails: SubmissionDetails) =>
           mockSdesConnectorWithResponse(Future.successful(Left(INTERNAL_SERVER_ERROR)))
           val conversationId = ConversationId.fromUploadId(submissionDetails.uploadId)
 

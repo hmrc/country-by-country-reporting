@@ -37,6 +37,7 @@ import uk.gov.hmrc.http.HttpReads.is2xx
 import java.time.{Clock, LocalDateTime}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 import scala.xml.{Elem, NodeSeq}
 
 class SubmissionService @Inject() (
@@ -74,24 +75,28 @@ class SubmissionService @Inject() (
     val conversationId = ConversationId.fromUploadId(submissionDetails.uploadId)
     logger.info(s"Submitting normal sized file with conversation Id: [${conversationId.value}]")
     val submissionTime = dateTimeNow
-    val submittedXml   = xmlHandler.load(submissionDetails.documentUrl)
-
-    val result = submittedXml.headOption match {
-      case Some(rootNode) =>
-        val xmlElement = Elem.apply(rootNode.prefix, rootNode.label, rootNode.attributes, rootNode.scope, true, rootNode.child: _*)
-        val reportType = dataExtraction.getReportType(submissionDetails.messageSpecData.messageTypeIndic, xmlElement)
-        for {
-          orgContactDetails        <- EitherT(subscriptionService.getContactInformation(submissionDetails.enrolmentId))
-          maybeAgentContactDetails <- EitherT(getAgentContactDetails())
-          submissionMetaData = SubmissionMetaData.build(submissionTime, conversationId, submissionDetails.fileName)
-          fileDetails        = createFilePendingDetails(conversationId, submissionDetails, submissionTime, reportType, maybeAgentContactDetails)
-          _ <- EitherT(addSubscriptionDetailsToXml(submittedXml, submissionMetaData, orgContactDetails, fileDetails))
-          _ <- EitherT(persistFileDetails(fileDetails))
-        } yield conversationId
-      case None =>
-        EitherT.left(
-          Future.successful(SubmissionServiceError(s"Failed to extract root xml node file with conversation Id [${conversationId.value}]"))
-        )
+    val documentUrl    = submissionDetails.documentUrl
+    val result = xmlHandler.load(documentUrl) match {
+      case Success(xml) =>
+        xml.headOption match {
+          case Some(rootNode) =>
+            val xmlElement = Elem.apply(rootNode.prefix, rootNode.label, rootNode.attributes, rootNode.scope, true, rootNode.child: _*)
+            val reportType = dataExtraction.getReportType(submissionDetails.messageSpecData.messageTypeIndic, xmlElement)
+            for {
+              orgContactDetails        <- EitherT(subscriptionService.getContactInformation(submissionDetails.enrolmentId))
+              maybeAgentContactDetails <- EitherT(getAgentContactDetails())
+              submissionMetaData = SubmissionMetaData.build(submissionTime, conversationId, submissionDetails.fileName)
+              fileDetails        = createFilePendingDetails(conversationId, submissionDetails, submissionTime, reportType, maybeAgentContactDetails)
+              _ <- EitherT(addSubscriptionDetailsToXml(xml, submissionMetaData, orgContactDetails, fileDetails))
+              _ <- EitherT(persistFileDetails(fileDetails))
+            } yield conversationId
+          case None =>
+            val error = SubmissionServiceError(s"Xml file with conversation Id [${conversationId.value}] is empty")
+            EitherT.left(Future.successful(error))
+        }
+      case Failure(_) =>
+        val error = SubmissionServiceError(s"Failed to load xml file [$documentUrl] with conversation Id [${conversationId.value}]")
+        EitherT.left(Future.successful(error))
     }
 
     result.value
@@ -116,11 +121,11 @@ class SubmissionService @Inject() (
         )
       case Right(_) =>
         submissionConnector.submitDisclosure(submissionXml, submissionMetaData.conversationId).flatMap { httpResponse =>
-          httpResponse.status match {
-            case status if is2xx(status) =>
-              Future.successful(Right(submissionMetaData.conversationId))
-            case errorStatus =>
-              Future.successful(Left(SubmissionServiceError(s"Failed to submit file with conversation Id [${conversationId.value}]. Got status: $errorStatus")))
+          val statusCode = httpResponse.status
+          if (is2xx(statusCode)) {
+            Future.successful(Right(submissionMetaData.conversationId))
+          } else {
+            Future.successful(Left(SubmissionServiceError(s"Failed to submit file with conversation Id [${conversationId.value}]. Got status: $statusCode")))
           }
         }
     }

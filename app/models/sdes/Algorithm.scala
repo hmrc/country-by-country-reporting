@@ -27,13 +27,15 @@ case object SHA512 extends Algorithm
 
 object Algorithm {
 
-  def apply(algorithm: String): Algorithm = algorithm match {
+  val values: Set[Algorithm] = Set(MD5, SHA1, SHA2, SHA256, SHA512)
+
+  def apply(algorithm: String): Algorithm = algorithm.toLowerCase match {
     case "md5"     => MD5
-    case "SHA1"    => SHA1
-    case "SHA2"    => SHA2
-    case "SHA-256" => SHA256
-    case "SHA-512" => SHA512
-    case _         => throw new IllegalArgumentException()
+    case "sha1"    => SHA1
+    case "sha2"    => SHA2
+    case "sha-256" => SHA256
+    case "sha-512" => SHA512
+    case _         => throw new IllegalArgumentException(s"Unsupported algorithm $algorithm")
   }
 
   implicit val writes: Writes[Algorithm] = Writes[Algorithm] {
@@ -50,6 +52,6 @@ object Algorithm {
     case JsString("SHA2")    => JsSuccess(SHA2)
     case JsString("SHA-256") => JsSuccess(SHA256)
     case JsString("SHA-512") => JsSuccess(SHA512)
-    case value               => JsError(s"Unexpected value of _type: $value")
+    case value               => JsError(s"Unexpected Algorithm: $value")
   }
 }

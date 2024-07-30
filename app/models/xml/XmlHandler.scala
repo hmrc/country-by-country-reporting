@@ -17,12 +17,15 @@
 package models.xml
 
 import java.net.URL
+import scala.util.Try
 import scala.xml.Elem
 
 class XmlHandler {
 
-  def load(url: String): Elem =
-    new scala.xml.factory.XMLLoader[scala.xml.Elem] {
-      override def adapter = new scala.xml.parsing.NoBindingFactoryAdapter
-    }.load(new URL(url))
+  def load(urlString: String): Try[Elem] =
+    Try(new URL(urlString)).map { url =>
+      new scala.xml.factory.XMLLoader[scala.xml.Elem] {
+        override def adapter = new scala.xml.parsing.NoBindingFactoryAdapter
+      }.load(url)
+    }
 }

@@ -16,7 +16,6 @@
 
 package generators
 
-import models.sdes.{Algorithm, MD5, SHA1, SHA2}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen._
 import org.scalacheck.{Gen, Shrink}
@@ -85,7 +84,7 @@ trait Generators extends ModelGenerators {
       .suchThat(_ != "false")
 
   def nonEmptyString: Gen[String] =
-    arbitrary[String] suchThat (_.nonEmpty)
+    Gen.alphaNumStr suchThat (_.nonEmpty)
 
   def stringsWithMaxLength(maxLength: Int): Gen[String] =
     for {
@@ -151,5 +150,4 @@ trait Generators extends ModelGenerators {
       items <- Gen.listOfN(size, gen)
     } yield items
 
-  def checksumAlgorithm: Gen[Algorithm] = Gen.oneOf(List(MD5, SHA1, SHA2))
 }

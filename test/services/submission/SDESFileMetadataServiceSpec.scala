@@ -21,7 +21,6 @@ import generators.Generators
 import models.submission.ConversationId
 import models.subscription.ResponseDetail
 import org.mockito.MockitoSugar
-import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 import java.time.LocalDateTime
@@ -36,11 +35,7 @@ class SDESFileMetadataServiceSpec extends SpecBase with MockitoSugar with ScalaC
     "compileMetaData" - {
 
       "must compile metadata for an organisation" in {
-        forAll(
-          arbitrary[ResponseDetail],
-          arbitrary[ConversationId],
-          arbitrary[String].suchThat(_.nonEmpty)
-        ) { (responseDetail, conversationId, fileName) =>
+        forAll { (responseDetail: ResponseDetail, conversationId: ConversationId, fileName: String) =>
           val result = sdesFileMetaDataService.compileMetadata(responseDetail, conversationId, dateTime, fileName)
 
           val primaryContact        = responseDetail.primaryContact

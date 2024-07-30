@@ -18,7 +18,7 @@ package generators
 
 import models.agentSubscription._
 import models.email.EmailRequest
-import models.sdes.{Audit, Checksum, FileTransferNotification, Property}
+import models.sdes.{Algorithm, Audit, Checksum, FileTransferNotification, Property}
 import models.submission.{ConversationId, MessageSpecData, MessageTypeIndic, ReportType, SubmissionDetails}
 import models.subscription._
 import models.upscan.UploadId
@@ -37,6 +37,12 @@ trait ModelGenerators {
   implicit lazy val arbitraryLocalDate: Arbitrary[LocalDate] = Arbitrary {
     datesBetween(LocalDate.of(1900, 1, 1), LocalDate.of(2100, 1, 1))
   }
+
+  implicit val arbitraryNonEmptyString: Arbitrary[String] = Arbitrary(nonEmptyString)
+
+  implicit val arbitraryShort: Arbitrary[Short] = Arbitrary(Gen.chooseNum(0, Short.MaxValue))
+
+  implicit val arbitraryAlgorithm: Arbitrary[Algorithm] = Arbitrary(Gen.oneOf(Algorithm.values))
 
   implicit val arbitraryRequestCommonForSubscription: Arbitrary[RequestCommonForSubscription] =
     Arbitrary {
@@ -266,7 +272,7 @@ trait ModelGenerators {
 
   implicit val arbitraryCheckSum: Arbitrary[Checksum] = Arbitrary {
     for {
-      algorithm <- checksumAlgorithm
+      algorithm <- arbitrary[Algorithm]
       value     <- arbitrary[String]
     } yield Checksum(algorithm, value)
   }

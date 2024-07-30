@@ -19,7 +19,6 @@ package connectors
 import base.SpecBase
 import generators.Generators
 import models.sdes._
-import org.scalacheck.Arbitrary.arbitrary
 import org.scalatest.concurrent.IntegrationPatience
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
@@ -63,7 +62,7 @@ class SDESConnectorSpec extends SpecBase with IntegrationPatience with WireMockH
       s"sendFileNotification must return $expectedConnectorResult when SDES returns status $sdesStatusCode" in {
         stubResponse("/sdes-stub/notification/fileready", sdesStatusCode)
 
-        forAll(arbitrary[FileTransferNotification]) { fileTransferNotification =>
+        forAll { fileTransferNotification: FileTransferNotification =>
           val result = connector.sendFileNotification(fileTransferNotification)
 
           result.futureValue mustBe expectedConnectorResult

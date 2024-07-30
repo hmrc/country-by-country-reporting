@@ -29,7 +29,6 @@ import models.subscription.ResponseDetail
 import models.xml.XmlHandler
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => mEq}
-import org.scalacheck.Arbitrary.arbitrary
 import org.scalatest.concurrent.IntegrationPatience
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Application
@@ -43,8 +42,10 @@ import services.{AgentSubscriptionService, DataExtraction, SubscriptionService, 
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
+import java.io.IOException
 import java.time.Clock
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 import scala.xml.{Elem, NodeSeq, TopScope}
 
 class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Generators with ScalaCheckDrivenPropertyChecks {
@@ -100,12 +101,7 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
   "SubmissionService" - {
     "submitLargeFile" - {
       "must send notification to SDES and persist the file details with Pending status" in {
-        forAll(
-          arbitrary[String],
-          arbitrary[SubmissionDetails],
-          arbitrary[AgentResponseDetail],
-          arbitrary[ResponseDetail]
-        ) { (agentRefNo, submissionDetails, agentDetails, orgDetails) =>
+        forAll { (agentRefNo: String, submissionDetails: SubmissionDetails, agentDetails: AgentResponseDetail, orgDetails: ResponseDetail) =>
           implicit val fakeIdentifierRequest: IdentifierRequest[JsValue] = IdentifierRequest(mockRequest, AffinityGroup.Agent, Option(agentRefNo))
 
           val conversationId = ConversationId.fromUploadId(submissionDetails.uploadId)
@@ -123,27 +119,28 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
       }
 
       "must return error when a failure occurs during SDES notification" in {
-        forAll(
-          arbitrary[String],
-          arbitrary[SubmissionDetails],
-          arbitrary[AgentResponseDetail],
-          arbitrary[ResponseDetail],
-          arbitrary[Short]
-        ) { (agentRefNo, submissionDetails, agentDetails, orgDetails, errorStatus) =>
-          implicit val fakeIdentifierRequest: IdentifierRequest[JsValue] = IdentifierRequest(mockRequest, AffinityGroup.Agent, Option(agentRefNo))
+        forAll {
+          (
+            agentRefNo: String,
+            submissionDetails: SubmissionDetails,
+            agentDetails: AgentResponseDetail,
+            orgDetails: ResponseDetail,
+            errorStatus: Short
+          ) =>
+            implicit val fakeIdentifierRequest: IdentifierRequest[JsValue] = IdentifierRequest(mockRequest, AffinityGroup.Agent, Option(agentRefNo))
 
-          mockSuccessfulOrgDetailsRetrieval(submissionDetails, orgDetails)
-          mockSuccessfulAgentDetailsRetrieval(agentRefNo, agentDetails)
-          mockFailedFileNotification(errorStatus)
+            mockSuccessfulOrgDetailsRetrieval(submissionDetails, orgDetails)
+            mockSuccessfulAgentDetailsRetrieval(agentRefNo, agentDetails)
+            mockFailedFileNotification(errorStatus)
 
-          val result = submissionService.submitLargeFile(submissionDetails)
+            val result = submissionService.submitLargeFile(submissionDetails)
 
-          result.futureValue.left.value mustBe SdesSubmissionError(errorStatus)
+            result.futureValue.left.value mustBe SdesSubmissionError(errorStatus)
         }
       }
 
       "must return error when a failure occurs during org contact details retrieval" in {
-        forAll(arbitrary[String], arbitrary[SubmissionDetails], arbitrary[Short]) { (agentRefNo, submissionDetails, errorStatus) =>
+        forAll { (agentRefNo: String, submissionDetails: SubmissionDetails, errorStatus: Short) =>
           implicit val fakeIdentifierRequest: IdentifierRequest[JsValue] = IdentifierRequest(mockRequest, AffinityGroup.Agent, Option(agentRefNo))
 
           mockFailedOrgDetailsRetrieval(errorStatus)
@@ -155,12 +152,7 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
       }
 
       "must return error when a failure occurs during agent contact details retrieval" in {
-        forAll(
-          arbitrary[String],
-          arbitrary[SubmissionDetails],
-          arbitrary[ResponseDetail],
-          arbitrary[Short]
-        ) { (agentRefNo, submissionDetails, orgDetails, errorStatus) =>
+        forAll { (agentRefNo: String, submissionDetails: SubmissionDetails, orgDetails: ResponseDetail, errorStatus: Short) =>
           implicit val fakeIdentifierRequest: IdentifierRequest[JsValue] = IdentifierRequest(mockRequest, AffinityGroup.Agent, Option(agentRefNo))
 
           mockSuccessfulOrgDetailsRetrieval(submissionDetails, orgDetails)
@@ -173,12 +165,7 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
       }
 
       "must return error when unable to persist file details" in {
-        forAll(
-          arbitrary[String],
-          arbitrary[SubmissionDetails],
-          arbitrary[AgentResponseDetail],
-          arbitrary[ResponseDetail]
-        ) { (agentRefNo, submissionDetails, agentDetails, orgDetails) =>
+        forAll { (agentRefNo: String, submissionDetails: SubmissionDetails, agentDetails: AgentResponseDetail, orgDetails: ResponseDetail) =>
           implicit val fakeIdentifierRequest: IdentifierRequest[JsValue] = IdentifierRequest(mockRequest, AffinityGroup.Agent, Option(agentRefNo))
 
           val conversationId = ConversationId.fromUploadId(submissionDetails.uploadId)
@@ -201,12 +188,7 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
       val testXml               = Elem("CBC_OECD", "CBC_OECD", xml.Null, TopScope, minimizeEmpty = true)
 
       "must submit file to EIS and persist the file details with Pending status" in {
-        forAll(
-          arbitrary[String],
-          arbitrary[SubmissionDetails],
-          arbitrary[AgentResponseDetail],
-          arbitrary[ResponseDetail]
-        ) { (agentRefNo, submissionDetails, agentDetails, orgDetails) =>
+        forAll { (agentRefNo: String, submissionDetails: SubmissionDetails, agentDetails: AgentResponseDetail, orgDetails: ResponseDetail) =>
           implicit val fakeIdentifierRequest: IdentifierRequest[JsValue] = IdentifierRequest(mockRequest, AffinityGroup.Agent, Option(agentRefNo))
 
           val conversationId      = ConversationId.fromUploadId(submissionDetails.uploadId)
@@ -219,7 +201,7 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
           )
             .thenReturn(testXml)
           when(mockAppConfig.submissionXSDFilePath).thenReturn(xmlSubmissionFilePath)
-          when(mockXmlHandler.load(submissionDetails.documentUrl)).thenReturn(testXml)
+          when(mockXmlHandler.load(submissionDetails.documentUrl)).thenReturn(Success(testXml))
           when(mockXmlValidationService.validate(any[NodeSeq], mEq(xmlSubmissionFilePath))).thenReturn(Right(testXml))
           mockSuccessfulOrgDetailsRetrieval(submissionDetails, orgDetails)
           mockSuccessfulAgentDetailsRetrieval(agentRefNo, agentDetails)
@@ -234,105 +216,131 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
       }
 
       "must return error when a failure occurs during file submission to EIS" in {
-        forAll(
-          arbitrary[String],
-          arbitrary[SubmissionDetails],
-          arbitrary[AgentResponseDetail],
-          arbitrary[ResponseDetail],
-          arbitrary[Short]
-        ) { (agentRefNo, submissionDetails, agentDetails, orgDetails, errorStatus) =>
-          implicit val fakeIdentifierRequest: IdentifierRequest[JsValue] = IdentifierRequest(mockRequest, AffinityGroup.Agent, Option(agentRefNo))
+        forAll {
+          (
+            agentRefNo: String,
+            submissionDetails: SubmissionDetails,
+            agentDetails: AgentResponseDetail,
+            orgDetails: ResponseDetail,
+            errorStatus: Short
+          ) =>
+            implicit val fakeIdentifierRequest: IdentifierRequest[JsValue] = IdentifierRequest(mockRequest, AffinityGroup.Agent, Option(agentRefNo))
 
-          val conversationId      = ConversationId.fromUploadId(submissionDetails.uploadId)
-          val submissionMetaData  = SubmissionMetaData.build(dateTimeNow, conversationId, submissionDetails.fileName)
-          val agentContactDetails = AgentContactDetails(agentRefNo, agentDetails)
+            val conversationId      = ConversationId.fromUploadId(submissionDetails.uploadId)
+            val submissionMetaData  = SubmissionMetaData.build(dateTimeNow, conversationId, submissionDetails.fileName)
+            val agentContactDetails = AgentContactDetails(agentRefNo, agentDetails)
 
-          mockSuccessfulReportTypeExtraction(submissionDetails)
-          when(
-            mockTransformService.addSubscriptionDetailsToSubmission(any[NodeSeq], mEq(orgDetails), mEq(submissionMetaData), mEq(Option(agentContactDetails)))
-          )
-            .thenReturn(testXml)
-          when(mockAppConfig.submissionXSDFilePath).thenReturn(xmlSubmissionFilePath)
-          when(mockXmlHandler.load(submissionDetails.documentUrl)).thenReturn(testXml)
-          when(mockXmlValidationService.validate(any[NodeSeq], mEq(xmlSubmissionFilePath))).thenReturn(Right(testXml))
-          mockSuccessfulOrgDetailsRetrieval(submissionDetails, orgDetails)
-          mockSuccessfulAgentDetailsRetrieval(agentRefNo, agentDetails)
-          mockFailedSubmissionToEIS(errorStatus)
+            mockSuccessfulReportTypeExtraction(submissionDetails)
+            when(
+              mockTransformService.addSubscriptionDetailsToSubmission(any[NodeSeq], mEq(orgDetails), mEq(submissionMetaData), mEq(Option(agentContactDetails)))
+            )
+              .thenReturn(testXml)
+            when(mockAppConfig.submissionXSDFilePath).thenReturn(xmlSubmissionFilePath)
+            when(mockXmlHandler.load(submissionDetails.documentUrl)).thenReturn(Success(testXml))
+            when(mockXmlValidationService.validate(any[NodeSeq], mEq(xmlSubmissionFilePath))).thenReturn(Right(testXml))
+            mockSuccessfulOrgDetailsRetrieval(submissionDetails, orgDetails)
+            mockSuccessfulAgentDetailsRetrieval(agentRefNo, agentDetails)
+            mockFailedSubmissionToEIS(errorStatus)
 
-          val result = submissionService.submitNormalFile(submissionDetails)
+            val result = submissionService.submitNormalFile(submissionDetails)
 
-          result.futureValue.left.value mustBe a[SubmissionServiceError]
+            result.futureValue.left.value mustBe a[SubmissionServiceError]
         }
       }
 
       "must return error when a failure occurs during org contact details retrieval" in {
-        forAll(
-          arbitrary[String],
-          arbitrary[SubmissionDetails],
-          arbitrary[AgentResponseDetail],
-          arbitrary[ResponseDetail],
-          arbitrary[Short]
-        ) { (agentRefNo, submissionDetails, agentDetails, orgDetails, errorStatus) =>
-          implicit val fakeIdentifierRequest: IdentifierRequest[JsValue] = IdentifierRequest(mockRequest, AffinityGroup.Agent, Option(agentRefNo))
+        forAll {
+          (
+            agentRefNo: String,
+            submissionDetails: SubmissionDetails,
+            agentDetails: AgentResponseDetail,
+            orgDetails: ResponseDetail,
+            errorStatus: Short
+          ) =>
+            implicit val fakeIdentifierRequest: IdentifierRequest[JsValue] = IdentifierRequest(mockRequest, AffinityGroup.Agent, Option(agentRefNo))
 
-          val conversationId      = ConversationId.fromUploadId(submissionDetails.uploadId)
-          val submissionMetaData  = SubmissionMetaData.build(dateTimeNow, conversationId, submissionDetails.fileName)
-          val agentContactDetails = AgentContactDetails(agentRefNo, agentDetails)
+            val conversationId      = ConversationId.fromUploadId(submissionDetails.uploadId)
+            val submissionMetaData  = SubmissionMetaData.build(dateTimeNow, conversationId, submissionDetails.fileName)
+            val agentContactDetails = AgentContactDetails(agentRefNo, agentDetails)
 
-          mockSuccessfulReportTypeExtraction(submissionDetails)
-          when(
-            mockTransformService.addSubscriptionDetailsToSubmission(any[NodeSeq], mEq(orgDetails), mEq(submissionMetaData), mEq(Option(agentContactDetails)))
-          )
-            .thenReturn(testXml)
-          when(mockAppConfig.submissionXSDFilePath).thenReturn(xmlSubmissionFilePath)
-          when(mockXmlHandler.load(submissionDetails.documentUrl)).thenReturn(testXml)
-          when(mockXmlValidationService.validate(any[NodeSeq], mEq(xmlSubmissionFilePath))).thenReturn(Right(testXml))
-          mockFailedOrgDetailsRetrieval(errorStatus)
+            mockSuccessfulReportTypeExtraction(submissionDetails)
+            when(
+              mockTransformService.addSubscriptionDetailsToSubmission(any[NodeSeq], mEq(orgDetails), mEq(submissionMetaData), mEq(Option(agentContactDetails)))
+            )
+              .thenReturn(testXml)
+            when(mockAppConfig.submissionXSDFilePath).thenReturn(xmlSubmissionFilePath)
+            when(mockXmlHandler.load(submissionDetails.documentUrl)).thenReturn(Success(testXml))
+            when(mockXmlValidationService.validate(any[NodeSeq], mEq(xmlSubmissionFilePath))).thenReturn(Right(testXml))
+            mockFailedOrgDetailsRetrieval(errorStatus)
 
-          val result = submissionService.submitNormalFile(submissionDetails)
+            val result = submissionService.submitNormalFile(submissionDetails)
 
-          result.futureValue.left.value mustBe ReadSubscriptionError(errorStatus)
+            result.futureValue.left.value mustBe ReadSubscriptionError(errorStatus)
         }
       }
 
       "must return error when a failure occurs during agent contact details retrieval" in {
-        forAll(
-          arbitrary[String],
-          arbitrary[SubmissionDetails],
-          arbitrary[AgentResponseDetail],
-          arbitrary[ResponseDetail],
-          arbitrary[Short]
-        ) { (agentRefNo, submissionDetails, agentDetails, orgDetails, errorStatus) =>
-          implicit val fakeIdentifierRequest: IdentifierRequest[JsValue] = IdentifierRequest(mockRequest, AffinityGroup.Agent, Option(agentRefNo))
+        forAll {
+          (
+            agentRefNo: String,
+            submissionDetails: SubmissionDetails,
+            agentDetails: AgentResponseDetail,
+            orgDetails: ResponseDetail,
+            errorStatus: Short
+          ) =>
+            implicit val fakeIdentifierRequest: IdentifierRequest[JsValue] = IdentifierRequest(mockRequest, AffinityGroup.Agent, Option(agentRefNo))
 
-          val conversationId      = ConversationId.fromUploadId(submissionDetails.uploadId)
-          val submissionMetaData  = SubmissionMetaData.build(dateTimeNow, conversationId, submissionDetails.fileName)
-          val agentContactDetails = AgentContactDetails(agentRefNo, agentDetails)
+            val conversationId      = ConversationId.fromUploadId(submissionDetails.uploadId)
+            val submissionMetaData  = SubmissionMetaData.build(dateTimeNow, conversationId, submissionDetails.fileName)
+            val agentContactDetails = AgentContactDetails(agentRefNo, agentDetails)
 
-          mockSuccessfulReportTypeExtraction(submissionDetails)
-          when(
-            mockTransformService.addSubscriptionDetailsToSubmission(any[NodeSeq], mEq(orgDetails), mEq(submissionMetaData), mEq(Option(agentContactDetails)))
-          )
-            .thenReturn(testXml)
-          when(mockAppConfig.submissionXSDFilePath).thenReturn(xmlSubmissionFilePath)
-          when(mockXmlHandler.load(submissionDetails.documentUrl)).thenReturn(testXml)
-          when(mockXmlValidationService.validate(any[NodeSeq], mEq(xmlSubmissionFilePath))).thenReturn(Right(testXml))
-          mockSuccessfulOrgDetailsRetrieval(submissionDetails, orgDetails)
-          mockFailedAgentDetailsRetrieval(errorStatus)
+            mockSuccessfulReportTypeExtraction(submissionDetails)
+            when(
+              mockTransformService.addSubscriptionDetailsToSubmission(any[NodeSeq], mEq(orgDetails), mEq(submissionMetaData), mEq(Option(agentContactDetails)))
+            )
+              .thenReturn(testXml)
+            when(mockAppConfig.submissionXSDFilePath).thenReturn(xmlSubmissionFilePath)
+            when(mockXmlHandler.load(submissionDetails.documentUrl)).thenReturn(Success(testXml))
+            when(mockXmlValidationService.validate(any[NodeSeq], mEq(xmlSubmissionFilePath))).thenReturn(Right(testXml))
+            mockSuccessfulOrgDetailsRetrieval(submissionDetails, orgDetails)
+            mockFailedAgentDetailsRetrieval(errorStatus)
 
-          val result = submissionService.submitNormalFile(submissionDetails)
+            val result = submissionService.submitNormalFile(submissionDetails)
 
-          result.futureValue.left.value mustBe ReadSubscriptionError(errorStatus)
+            result.futureValue.left.value mustBe ReadSubscriptionError(errorStatus)
+        }
+      }
+
+      "must return error when unable to load xml file" in {
+        forAll {
+          (
+            agentRefNo: String,
+            submissionDetails: SubmissionDetails,
+            agentDetails: AgentResponseDetail,
+            orgDetails: ResponseDetail
+          ) =>
+            implicit val fakeIdentifierRequest: IdentifierRequest[JsValue] = IdentifierRequest(mockRequest, AffinityGroup.Agent, Option(agentRefNo))
+
+            val conversationId      = ConversationId.fromUploadId(submissionDetails.uploadId)
+            val submissionMetaData  = SubmissionMetaData.build(dateTimeNow, conversationId, submissionDetails.fileName)
+            val agentContactDetails = AgentContactDetails(agentRefNo, agentDetails)
+
+            mockSuccessfulReportTypeExtraction(submissionDetails)
+            when(
+              mockTransformService.addSubscriptionDetailsToSubmission(any[NodeSeq], mEq(orgDetails), mEq(submissionMetaData), mEq(Option(agentContactDetails)))
+            )
+              .thenReturn(testXml)
+            when(mockAppConfig.submissionXSDFilePath).thenReturn(xmlSubmissionFilePath)
+            when(mockXmlHandler.load(submissionDetails.documentUrl)).thenReturn(Failure(new IOException("File load error")))
+
+            val result = submissionService.submitNormalFile(submissionDetails)
+
+            result.futureValue.left.value mustBe a[SubmissionServiceError]
         }
       }
 
       "must return error when unable to persist file details" in {
-        forAll(
-          arbitrary[String],
-          arbitrary[SubmissionDetails],
-          arbitrary[AgentResponseDetail],
-          arbitrary[ResponseDetail]
-        ) { (agentRefNo, submissionDetails, agentDetails, orgDetails) =>
+        forAll { (agentRefNo: String, submissionDetails: SubmissionDetails, agentDetails: AgentResponseDetail, orgDetails: ResponseDetail) =>
           implicit val fakeIdentifierRequest: IdentifierRequest[JsValue] = IdentifierRequest(mockRequest, AffinityGroup.Agent, Option(agentRefNo))
 
           val conversationId      = ConversationId.fromUploadId(submissionDetails.uploadId)
@@ -345,7 +353,7 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
           )
             .thenReturn(testXml)
           when(mockAppConfig.submissionXSDFilePath).thenReturn(xmlSubmissionFilePath)
-          when(mockXmlHandler.load(submissionDetails.documentUrl)).thenReturn(testXml)
+          when(mockXmlHandler.load(submissionDetails.documentUrl)).thenReturn(Success(testXml))
           when(mockXmlValidationService.validate(any[NodeSeq], mEq(xmlSubmissionFilePath))).thenReturn(Right(testXml))
           mockSuccessfulOrgDetailsRetrieval(submissionDetails, orgDetails)
           mockSuccessfulAgentDetailsRetrieval(agentRefNo, agentDetails)

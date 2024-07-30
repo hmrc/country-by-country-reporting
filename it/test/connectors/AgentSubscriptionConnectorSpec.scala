@@ -70,18 +70,18 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockHelper with I
       "must return status as OK for create Subscription" in {
         stubResponse(agentCreateSubscriptionEndpoint, OK, RequestMethod.POST)
 
-        forAll(arbitrary[AgentSubscriptionEtmpRequest]) { sub =>
-          val result = connector.createSubscription(sub)
+        forAll { request: AgentSubscriptionEtmpRequest =>
+          val result = connector.createSubscription(request)
 
           result.futureValue.status mustBe OK
         }
       }
 
       "must return an error status for invalid create Subscription" in {
-        forAll(arbitrary[AgentSubscriptionEtmpRequest], errorCodes) { (sub, errorCode) =>
+        forAll(arbitrary[AgentSubscriptionEtmpRequest], errorCodes) { (request: AgentSubscriptionEtmpRequest, errorCode) =>
           stubResponse(agentCreateSubscriptionEndpoint, errorCode, RequestMethod.POST)
 
-          val result = connector.createSubscription(sub)
+          val result = connector.createSubscription(request)
           result.futureValue.status mustBe errorCode
         }
       }
@@ -91,7 +91,7 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockHelper with I
       val agentReadSubscriptionEndpoint = "/dac6/dct51c/v1"
 
       "must return status as OK for read Subscription" in {
-        forAll(Gen.alphaNumStr) { agentRefNo =>
+        forAll { agentRefNo: String =>
           stubResponse(s"$agentReadSubscriptionEndpoint/ARN/$agentRefNo", OK, RequestMethod.GET)
 
           val result = connector.readSubscription(agentRefNo)
@@ -117,17 +117,17 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockHelper with I
       "must return status as OK for update Subscription" in {
         stubResponse(agentUpdateSubscriptionEndpoint, OK, RequestMethod.PUT)
 
-        forAll(arbitrary[AgentSubscriptionEtmpRequest]) { sub =>
-          val result = connector.updateSubscription(sub)
+        forAll { request: AgentSubscriptionEtmpRequest =>
+          val result = connector.updateSubscription(request)
           result.futureValue.status mustBe OK
         }
       }
 
       "must return an error status for failed update Subscription" in {
-        forAll(arbitrary[AgentSubscriptionEtmpRequest], errorCodes) { (sub, errorCode) =>
+        forAll(arbitrary[AgentSubscriptionEtmpRequest], errorCodes) { (request, errorCode) =>
           stubResponse(agentUpdateSubscriptionEndpoint, errorCode, RequestMethod.PUT)
 
-          val result = connector.updateSubscription(sub)
+          val result = connector.updateSubscription(request)
           result.futureValue.status mustBe errorCode
         }
       }
