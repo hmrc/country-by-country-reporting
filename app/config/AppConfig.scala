@@ -16,6 +16,8 @@
 
 package config
 
+import models.sdes.Algorithm
+
 import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -49,4 +51,16 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   lazy val emailOrganisationUnsuccessfulTemplate: String = config.get[String]("emailTemplates.fileOrganisationUploadUnsuccessful")
   lazy val emailAgentSuccessfulTemplate: String          = config.get[String]("emailTemplates.fileAgentUploadSuccessful")
   lazy val emailAgentUnsuccessfulTemplate: String        = config.get[String]("emailTemplates.fileAgentUploadUnsuccessful")
+
+  lazy val maxNormalFileSizeBytes: Long = config.get[Long]("max-normal-file-size-bytes")
+  lazy val maxLargeFileSizeBytes: Long  = config.get[Long]("max-large-file-size-bytes")
+
+  lazy val sdesClientId: String = config.get[String]("sdes.client-id")
+
+  lazy val sdesRecipientOrSender: String   = config.get[String]("sdes.recipient-or-sender")
+  lazy val sdesInformationType: String     = config.get[String]("sdes.information-type")
+  private val sdesLocation: Option[String] = Option(config.get[String]("sdes.location")).filter(_.nonEmpty)
+  lazy val sdesUrl: String = List(Option(servicesConfig.baseUrl("sdes")), sdesLocation, Some("notification"), Some("fileready")).flatten.mkString("/")
+
+  lazy val sdesChecksumAlgorithm: Algorithm = Algorithm(config.get[String]("sdes.checksum-algorithm"))
 }

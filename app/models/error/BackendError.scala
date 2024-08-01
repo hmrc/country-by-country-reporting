@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package config
+package models.error
 
-import com.google.inject.AbstractModule
-import services.upscan.{MongoBackedUploadProgressTracker, UploadProgressTracker}
-
-import java.time.{Clock, ZoneOffset}
-
-class Module() extends AbstractModule {
-
-  override def configure(): Unit = {
-    bind(classOf[UploadProgressTracker]).to(classOf[MongoBackedUploadProgressTracker])
-    bind(classOf[Clock]).toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC))
-  }
+trait BackendError {
+  def detail: String
 }
+
+final case class SdesSubmissionError(status: Int) extends BackendError {
+  override def detail: String = s"SDES submission failed with status $status"
+}
+final case class RepositoryError(detail: String) extends BackendError
+final case class SubmissionServiceError(detail: String) extends BackendError

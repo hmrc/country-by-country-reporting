@@ -17,7 +17,7 @@
 package utils
 
 import java.time.format.DateTimeFormatter
-import java.time.{LocalDateTime, ZoneId}
+import java.time.{Clock, LocalDateTime, ZoneId, ZonedDateTime}
 
 object DateTimeFormatUtil {
 
@@ -25,6 +25,8 @@ object DateTimeFormatUtil {
 
   val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
   val timeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("h:mma")
+
+  def zonedDateTimeNow(implicit clock: Clock): ZonedDateTime = ZonedDateTime.now(clock.withZone(euLondonZoneId))
 
   def displayFormattedDate(dateTime: LocalDateTime): String =
     s"${dateTime.atZone(euLondonZoneId).format(timeFormatter)} on ${dateTime.atZone(euLondonZoneId).format(dateFormatter).capitalize}"

@@ -16,8 +16,14 @@
 
 package models.error
 
-sealed trait ApiError
+sealed trait ApiError extends BackendError {
+  override def detail: String
+}
 
-case class UpdateSubscriptionError(status: Int) extends ApiError
+case class UpdateSubscriptionError(status: Int) extends ApiError {
+  override def detail: String = s"Failed to update subscription. Got status $status"
+}
 
-case class ReadSubscriptionError(status: Int) extends ApiError
+case class ReadSubscriptionError(status: Int) extends ApiError {
+  override def detail: String = s"Failed to read subscription. Got status $status"
+}

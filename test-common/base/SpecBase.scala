@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package base
 
 import org.mockito.MockitoSugar
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import org.scalatest.{OptionValues, TryValues}
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, EitherValues, OptionValues, TryValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
 import play.api.inject.Injector
@@ -29,21 +29,27 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.{Clock, Instant, ZoneId}
+
 trait SpecBase
     extends AnyFreeSpec
     with Matchers
     with GuiceOneAppPerSuite
     with OptionValues
+    with EitherValues
     with TryValues
     with ScalaFutures
-    with IntegrationPatience
-    with MockitoSugar {
+    with MockitoSugar
+    with BeforeAndAfterEach
+    with BeforeAndAfterAll {
 
   def injector: Injector = app.injector
 
   def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
+
+  implicit val fixedClock: Clock = Clock.fixed(Instant.now(), ZoneId.of("UTC"))
 
   protected def applicationBuilder(): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()

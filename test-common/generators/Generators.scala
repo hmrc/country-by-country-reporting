@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package generators
 
-import org.scalacheck.Arbitrary.{arbitrary, _}
+import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen._
 import org.scalacheck.{Gen, Shrink}
 import wolfendale.scalacheck.regexp.RegexpGen
@@ -25,7 +25,7 @@ import java.time.{Instant, LocalDate, ZoneOffset}
 
 trait Generators extends ModelGenerators {
 
-  implicit val dontShrink: Shrink[String] = Shrink.shrinkAny
+  implicit val noShrink: Shrink[String] = Shrink.shrinkAny
 
   def genIntersperseString(
     gen: Gen[String],
@@ -60,13 +60,13 @@ trait Generators extends ModelGenerators {
     arbitrary[BigInt] suchThat (x => x < Int.MinValue)
 
   def nonNumerics: Gen[String] =
-    alphaStr suchThat (_.size > 0)
+    alphaStr suchThat (_.nonEmpty)
 
   def decimals: Gen[String] =
     arbitrary[BigDecimal]
       .suchThat(_.abs < Int.MaxValue)
       .suchThat(!_.isValidInt)
-      .map(_.formatted("%f"))
+      .map("%f".format(_))
 
   def intsBelowValue(value: Int): Gen[Int] =
     arbitrary[Int] suchThat (_ < value)
@@ -84,7 +84,7 @@ trait Generators extends ModelGenerators {
       .suchThat(_ != "false")
 
   def nonEmptyString: Gen[String] =
-    arbitrary[String] suchThat (_.nonEmpty)
+    Gen.alphaNumStr suchThat (_.nonEmpty)
 
   def stringsWithMaxLength(maxLength: Int): Gen[String] =
     for {
@@ -149,4 +149,5 @@ trait Generators extends ModelGenerators {
       size  <- Gen.choose(1, maxSize)
       items <- Gen.listOfN(size, gen)
     } yield items
+
 }

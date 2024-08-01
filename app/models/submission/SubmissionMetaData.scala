@@ -17,16 +17,16 @@
 package models.submission
 
 import java.time.format.DateTimeFormatter
-import java.time.{LocalDateTime, OffsetDateTime}
+import java.time.{Clock, LocalDateTime, OffsetDateTime}
 
 case class SubmissionMetaData(submissionTime: String, conversationId: ConversationId, fileName: Option[String])
 
 object SubmissionMetaData {
   val dateTimeFormat: DateTimeFormatter = DateTimeFormatter.ISO_INSTANT
 
-  def build(submissionTime: LocalDateTime, conversationID: ConversationId, fileName: String): SubmissionMetaData =
+  def build(submissionTime: LocalDateTime, conversationID: ConversationId, fileName: String)(implicit clock: Clock): SubmissionMetaData =
     SubmissionMetaData(
-      dateTimeFormat.format(submissionTime.toInstant(OffsetDateTime.now().getOffset)),
+      dateTimeFormat.format(submissionTime.toInstant(OffsetDateTime.now(clock).getOffset)),
       conversationID,
       Option(fileName)
     )

@@ -14,17 +14,8 @@
  * limitations under the License.
  */
 
-package config
+package controllers.auth
 
-import com.google.inject.AbstractModule
-import services.upscan.{MongoBackedUploadProgressTracker, UploadProgressTracker}
+import play.api.mvc.{Request, WrappedRequest}
 
-import java.time.{Clock, ZoneOffset}
-
-class Module() extends AbstractModule {
-
-  override def configure(): Unit = {
-    bind(classOf[UploadProgressTracker]).to(classOf[MongoBackedUploadProgressTracker])
-    bind(classOf[Clock]).toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC))
-  }
-}
+final case class UserRequest[+A](subscriptionId: String, request: Request[A]) extends WrappedRequest[A](request)

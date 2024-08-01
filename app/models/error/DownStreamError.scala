@@ -20,8 +20,8 @@ import play.api.libs.json.{Json, OFormat}
 
 import java.time.LocalDateTime
 
-sealed trait DownStreamError {
-  def detail: String
+sealed trait DownStreamError extends BackendError {
+  override def detail: String
 }
 
 final case class BusinessErrorDetail(processingDate: LocalDateTime, code: String, text: String)
