@@ -18,14 +18,15 @@ package generators
 
 import models.agentSubscription._
 import models.email.EmailRequest
-import models.sdes.{Algorithm, Audit, Checksum, FileTransferNotification, Property}
-import models.submission.{ConversationId, MessageSpecData, MessageTypeIndic, ReportType, SubmissionDetails}
+import models.sdes.NotificationType.{FileProcessingFailure, NotificationType}
+import models.sdes._
+import models.submission._
 import models.subscription._
 import models.upscan.UploadId
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 
-import java.time.LocalDate
+import java.time.{Instant, LocalDate, LocalDateTime, ZoneOffset, ZonedDateTime}
 
 trait ModelGenerators {
   self: Generators =>
@@ -288,6 +289,87 @@ trait ModelGenerators {
     } yield models.sdes.File(recipientOrSender, name, location, checksum, size, properties)
   }
 
+  implicit val arbitraryReportType: Arbitrary[ReportType] = Arbitrary {
+    Gen.oneOf(ReportType.values)
+  }
+
+  implicit val arbitraryFileStatus: Arbitrary[FileStatus] = Arbitrary {
+    for {
+      status <- Gen.oneOf(models.submission.Pending, models.submission.Accepted, models.submission.RejectedSDES, models.submission.RejectedSDESVirus)
+    } yield status
+  }
+
+  implicit val arbitraryFileDetails: Arbitrary[models.submission.FileDetails] = Arbitrary {
+    for {
+      _id                 <- arbitrary[ConversationId]
+      subscriptionId      <- arbitrary[String]
+      messageRefId        <- arbitrary[String]
+      reportingEntityName <- arbitrary[String]
+      reportType          <- arbitrary[ReportType]
+      status              <- arbitrary[FileStatus]
+      name                <- arbitrary[String]
+      submitted           <- arbitrary[LocalDateTime]
+      lastUpdated         <- arbitrary[LocalDateTime]
+    } yield models.submission.FileDetails(
+      _id,
+      subscriptionId,
+      messageRefId,
+      reportingEntityName,
+      reportType,
+      status,
+      name,
+      submitted,
+      lastUpdated
+    )
+  }
+
+  val arbitraryPendingFileDetails: Arbitrary[models.submission.FileDetails] = Arbitrary {
+    for {
+      _id                 <- arbitrary[ConversationId]
+      subscriptionId      <- arbitrary[String]
+      messageRefId        <- arbitrary[String]
+      reportingEntityName <- arbitrary[String]
+      reportType          <- arbitrary[ReportType]
+      name                <- arbitrary[String]
+      submitted           <- arbitrary[LocalDateTime]
+      lastUpdated         <- arbitrary[LocalDateTime]
+    } yield models.submission.FileDetails(
+      _id,
+      subscriptionId,
+      messageRefId,
+      reportingEntityName,
+      reportType,
+      Pending,
+      name,
+      submitted,
+      lastUpdated
+    )
+  }
+
+  val arbitraryNonPendingFileDetails: Arbitrary[models.submission.FileDetails] = Arbitrary {
+    for {
+      _id                 <- arbitrary[ConversationId]
+      subscriptionId      <- arbitrary[String]
+      messageRefId        <- arbitrary[String]
+      reportingEntityName <- arbitrary[String]
+      reportType          <- arbitrary[ReportType]
+      status              <- arbitrary[FileStatus].suchThat(_ != Pending)
+      name                <- arbitrary[String]
+      submitted           <- arbitrary[LocalDateTime]
+      lastUpdated         <- arbitrary[LocalDateTime]
+    } yield models.submission.FileDetails(
+      _id,
+      subscriptionId,
+      messageRefId,
+      reportingEntityName,
+      reportType,
+      status,
+      name,
+      submitted,
+      lastUpdated
+    )
+  }
+
   implicit val arbitraryAudit: Arbitrary[Audit] = Arbitrary {
     arbitrary[String].map(Audit.apply)
   }
@@ -341,5 +423,55 @@ trait ModelGenerators {
 
   implicit val arbitraryConversationId: Arbitrary[ConversationId] = Arbitrary {
     Gen.uuid.map(uuid => ConversationId.fromUploadId(UploadId.apply(uuid.toString)))
+  }
+
+  implicit val arbitraryNotification: Arbitrary[NotificationType] = Arbitrary {
+    Gen.oneOf(NotificationType.values)
+  }
+
+  private val minEpochSecond = ZonedDateTime.of(1900, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC).toEpochSecond
+  private val maxEpochSecond = ZonedDateTime.of(9999, 12, 31, 23, 59, 59, 999999999, ZoneOffset.UTC).toEpochSecond
+  implicit val zonedDateTime: Arbitrary[ZonedDateTime] = Arbitrary {
+    for {
+      epochSecond <- Gen.choose(minEpochSecond, maxEpochSecond)
+      zoneOffset  <- Gen.const(ZoneOffset.UTC)
+    } yield ZonedDateTime.ofInstant(Instant.ofEpochSecond(epochSecond), zoneOffset)
+  }
+
+  implicit val arbitrarySdesCallback: Arbitrary[SdesCallback] = Arbitrary {
+    for {
+      notification  <- arbitrary[NotificationType]
+      filename      <- arbitrary[String]
+      algorithm     <- arbitrary[Algorithm]
+      checksum      <- arbitrary[String]
+      correlationID <- arbitrary[ConversationId]
+      dateTime      <- Gen.option(zonedDateTime.arbitrary)
+      failureReason <- Gen.option(arbitrary[String])
+    } yield SdesCallback(notification, filename, algorithm, checksum, correlationID, dateTime, failureReason)
+  }
+
+  val arbitraryFailureSdesCallback: Arbitrary[SdesCallback] = Arbitrary {
+    for {
+      notification  <- Gen.const(FileProcessingFailure)
+      filename      <- arbitrary[String]
+      virus         <- Gen.const("virus")
+      otherFailure  <- arbitrary[String]
+      algorithm     <- arbitrary[Algorithm]
+      checksum      <- arbitrary[String]
+      correlationID <- arbitrary[ConversationId]
+      dateTime      <- Gen.option(zonedDateTime.arbitrary)
+      failureReason <- Gen.oneOf(Some(virus), Some(otherFailure), None)
+    } yield SdesCallback(notification, filename, algorithm, checksum, correlationID, dateTime, failureReason)
+  }
+
+  val arbitrarySuccessSdesCallback: Arbitrary[SdesCallback] = Arbitrary {
+    for {
+      notification  <- Gen.oneOf(NotificationType.FileReady, NotificationType.FileReceived, NotificationType.FileProcessed)
+      filename      <- arbitrary[String]
+      algorithm     <- arbitrary[Algorithm]
+      checksum      <- arbitrary[String]
+      correlationID <- arbitrary[ConversationId]
+      dateTime      <- Gen.option(zonedDateTime.arbitrary)
+    } yield SdesCallback(notification, filename, algorithm, checksum, correlationID, dateTime)
   }
 }
