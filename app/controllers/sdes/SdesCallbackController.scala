@@ -20,7 +20,6 @@ import models.sdes.NotificationType.FileProcessingFailure
 import models.sdes.SdesCallback
 import models.submission.{Pending, RejectedSDES, RejectedSDESVirus}
 import play.api.Logging
-import play.api.i18n.MessagesApi
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, ControllerComponents}
 import repositories.submission.FileDetailsRepository
@@ -35,15 +34,16 @@ import scala.concurrent.{ExecutionContext, Future}
 class SdesCallbackController @Inject() (
   cc: ControllerComponents,
   fileDetailsRepository: FileDetailsRepository,
-  emailService: EmailService,
-  implicit override val messagesApi: MessagesApi
+  emailService: EmailService
 )(implicit val ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
 
   val callback: Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[SdesCallback] { sdesCallback: SdesCallback =>
-      logger.info(s"Received SDES callback: $sdesCallback")
+      logger.info(
+        s"SDESCallbackController: Received SDES ${sdesCallback.notification} callback for file: ${sdesCallback.filename} (${sdesCallback.correlationID})"
+      )
       sdesCallback match {
         case SdesCallback(FileProcessingFailure, _, _, _, correlationID, _, failureReason) =>
           fileDetailsRepository.findByConversationId(correlationID) flatMap {
@@ -66,12 +66,12 @@ class SdesCallbackController @Inject() (
               }
             case Some(fileDetails) if fileDetails.status != Pending =>
               logger.warn(s"File with conversationId: $correlationID is not in pending state")
-              Future(Ok)
+              Future.successful(Ok)
             case _ =>
               logger.warn(s"No record found for the conversationId: $correlationID")
-              Future(Ok)
+              Future.successful(Ok)
           }
-        case _ => Future(Ok)
+        case _ => Future.successful(Ok)
       }
     }
   }

@@ -294,9 +294,7 @@ trait ModelGenerators {
   }
 
   implicit val arbitraryFileStatus: Arbitrary[FileStatus] = Arbitrary {
-    for {
-      status <- Gen.oneOf(models.submission.Pending, models.submission.Accepted, models.submission.RejectedSDES, models.submission.RejectedSDESVirus)
-    } yield status
+    Gen.oneOf(FileStatus.values)
   }
 
   implicit val arbitraryFileDetails: Arbitrary[models.submission.FileDetails] = Arbitrary {

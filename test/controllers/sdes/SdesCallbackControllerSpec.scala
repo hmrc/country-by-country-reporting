@@ -20,7 +20,7 @@ import base.SpecBase
 import generators.Generators
 import models.agentSubscription.AgentContactDetails
 import models.submission._
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, eq => is}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
@@ -86,12 +86,12 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
 
         status(result) mustEqual OK
         verify(mockFileDetailsRepository).updateStatus(sdesCallback.correlationID.value, updatedStatus)
-        verify(mockEmailService, atLeast(1)).sendAndLogEmail(any[String],
+        verify(mockEmailService, atLeast(1)).sendAndLogEmail(is(fileDetails.subscriptionId),
                                                              any[String],
-                                                             any[String],
-                                                             any[Option[AgentContactDetails]],
-                                                             any[Boolean],
-                                                             any[ReportType]
+                                                             is(fileDetails.messageRefId),
+                                                             is(fileDetails.agentDetails),
+                                                             is(false),
+                                                             is(fileDetails.reportType)
         )(
           any[HeaderCarrier]
         )
