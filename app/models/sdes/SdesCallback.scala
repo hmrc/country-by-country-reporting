@@ -57,7 +57,7 @@ case class SdesCallback(notification: NotificationType,
 object SdesCallback {
 
   implicit val dateFormat: Format[ZonedDateTime] = new Format[ZonedDateTime] {
-    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX")
+    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX")
 
     override def reads(json: JsValue): JsResult[ZonedDateTime] =
       json.validate[String].map(ZonedDateTime.parse(_, formatter).withZoneSameInstant(ZoneOffset.UTC))
