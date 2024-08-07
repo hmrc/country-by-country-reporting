@@ -6,6 +6,7 @@ POST        /subscription/update-subscription                           controll
 POST        /validate-submission                                        controllers.validation.SubmissionValidationController.validateSubmission
 
 POST        /validation-result                                          controllers.EISResponseController.processEISResponse
+POST        /sdes/callback                                              controllers.sdes.SdesCallbackController.callback
 
 POST        /callback                                                   controllers.upscan.UploadCallbackController.callback
 GET         /upscan/details/:uploadId                                   controllers.upscan.UploadFormController.getDetails(uploadId: String)

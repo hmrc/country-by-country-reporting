@@ -31,5 +31,13 @@ case class Rejected(error: ValidationErrors) extends FileStatus {
 }
 
 object FileStatus {
+
+  val values: Seq[FileStatus] = Seq(
+    Pending,
+    Accepted,
+    RejectedSDES,
+    RejectedSDESVirus,
+    Rejected(ValidationErrors(None, None))
+  )
   implicit val format: OFormat[FileStatus] = derived.oformat()
 }
