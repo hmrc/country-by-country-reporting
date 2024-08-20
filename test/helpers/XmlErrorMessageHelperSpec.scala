@@ -23,10 +23,10 @@ import scala.collection.mutable.ListBuffer
 
 class XmlErrorMessageHelperSpec extends SpecBase {
 
-  val lineNumber = 20
-  val over400    = "s" * 401
-  val over200    = "s" * 201
-  val over4000   = "s" * 2000 + "\n" + "s" * 2001
+  val lineNumber       = 20
+  val over400: String  = "s" * 401
+  val over200: String  = "s" * 201
+  val over4000: String = "s" * 2000 + "\n" + "s" * 2001
 
   val helper = new XmlErrorMessageHelper
   "ErrorMessageHelper" - {
@@ -329,7 +329,23 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           result mustBe List(GenericError(lineNumber, Message("xml.empty.field", List("MessageRefId"))))
         }
 
-        "must return 'Add a line for' message for relevant missing tag values" in {
+        "must return '... is missing' message for Revenues and Summary" in {
+          val elements = List(
+            "Revenues",
+            "Summary"
+          )
+
+          elements.map { element =>
+            val error1 = SaxParseError(
+              lineNumber,
+              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'ABC'. One of '{\"urn:oecd:ties:cbc:v2\":$element}' is expected."""
+            )
+            val result = helper.generateErrorMessages(ListBuffer(error1))
+            result mustBe List(GenericError(lineNumber, Message("xml.add.line", Seq(element))))
+          }
+        }
+
+        "must return '... element is missing' message for relevant missing tag values" in {
           val elements = List(
             "Jurisdictions",
             "TransmittingCountry",
@@ -345,7 +361,6 @@ class XmlErrorMessageHelperSpec extends SpecBase {
             "DisclosureDate",
             "Type",
             "Narrative",
-            "Summary",
             "ResCountryCode",
             "TIN",
             "Name",
@@ -361,7 +376,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
               s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'cbc:ABC'. One of '{\"urn:oecd:ties:cbc:v2\":cbc:$element}' is expected."""
             )
             val result = helper.generateErrorMessages(ListBuffer(error1))
-            result mustBe List(GenericError(lineNumber, Message("xml.add.line", Seq(element))))
+            result mustBe List(GenericError(lineNumber, Message("xml.add.line.elem", Seq(element))))
           }
         }
 
@@ -728,7 +743,23 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           result mustBe List(GenericError(lineNumber, Message("xml.empty.field", List("MessageRefId"))))
         }
 
-        "must return 'Add a line for' message for relevant missing tag values" in {
+        "must return '... is missing' message for Revenues and Summary" in {
+          val elements = List(
+            "Revenues",
+            "Summary"
+          )
+
+          elements.map { element =>
+            val error1 = SaxParseError(
+              lineNumber,
+              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'ABC'. One of '{\"urn:oecd:ties:cbc:v2\":$element}' is expected."""
+            )
+            val result = helper.generateErrorMessages(ListBuffer(error1))
+            result mustBe List(GenericError(lineNumber, Message("xml.add.line", Seq(element))))
+          }
+        }
+
+        "must return '... element is missing' message for relevant missing tag values" in {
           val elements = List(
             "Jurisdictions",
             "TransmittingCountry",
@@ -744,7 +775,6 @@ class XmlErrorMessageHelperSpec extends SpecBase {
             "DisclosureDate",
             "Type",
             "Narrative",
-            "Summary",
             "ResCountryCode",
             "TIN",
             "Name",
@@ -760,7 +790,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
               s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'ABC'. One of '{\"urn:oecd:ties:cbc:v2\":$element}' is expected."""
             )
             val result = helper.generateErrorMessages(ListBuffer(error1))
-            result mustBe List(GenericError(lineNumber, Message("xml.add.line", Seq(element))))
+            result mustBe List(GenericError(lineNumber, Message("xml.add.line.elem", Seq(element))))
           }
         }
 
