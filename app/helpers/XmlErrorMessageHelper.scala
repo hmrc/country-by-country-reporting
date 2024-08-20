@@ -294,7 +294,8 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
       case "ReceivingCountry"                                                        => Some(Message("xml.add.receivingCountry"))
       case "MessageType"                                                             => Some(Message("xml.add.line.messageType", Seq(element)))
       case "ReportingPeriod"                                                         => Some(Message("xml.add.line.reportingPeriod", Seq(element)))
-      case _                                                                         => Some(Message("xml.add.line", Seq(element)))
+      case "Revenues" | "Summary"                                                    => Some(Message("xml.add.line", Seq(element)))
+      case _                                                                         => Some(Message("xml.add.line.elem", Seq(element)))
     }
 
   private def formattedError(errorMessage: String): String =
