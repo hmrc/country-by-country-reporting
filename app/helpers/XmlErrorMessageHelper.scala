@@ -279,10 +279,9 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
 
   def invalidCodeMessage(elementName: String, allowedValues: Option[String] = None): Option[Message] =
     (elementName, allowedValues) match {
-      case ("IncorpCountryCode" | "ResCountryCode" | "TransmittingCountry", _) => Some(Message("xml.not.ISO.code", Seq(elementName)))
-      case ("CountryCode", _)                                                  => Some(Message("xml.not.ISO.code.elem", Seq(elementName)))
-      case ("ReceivingCountry", _)                                             => Some(Message("xml.not.ISO.code.receivingCountry"))
-      case ("Language", _)                                                     => Some(Message("xml.not.ISO.language.code", Seq(elementName)))
+      case ("CountryCode" | "IncorpCountryCode" | "ResCountryCode" | "Language" | "TransmittingCountry", _) =>
+        Some(Message("xml.not.ISO.code.elem", Seq(elementName)))
+      case ("ReceivingCountry", _) => Some(Message("xml.not.ISO.code.receivingCountry"))
       case ("BizActivities" | "ReportingRole" | "MessageTypeIndic" | "Role" | "DocTypeIndic" | "SummaryRef", _) =>
         Some(Message("xml.not.allowed.value", Seq(elementName)))
       case _ => None
