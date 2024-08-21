@@ -279,9 +279,11 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
 
   def invalidCodeMessage(elementName: String, allowedValues: Option[String] = None): Option[Message] =
     (elementName, allowedValues) match {
-      case ("IncorpCountryCode" | "CountryCode" | "ResCountryCode" | "TransmittingCountry", _) => Some(Message("xml.not.ISO.code", Seq(elementName)))
-      case ("ReceivingCountry", _)                                                             => Some(Message("xml.not.ISO.code.receivingCountry"))
-      case ("Language", _)                                                                     => Some(Message("xml.not.ISO.language.code", Seq(elementName)))
+
+      case ("CountryCode" | "IncorpCountryCode" | "ResCountryCode" | "TransmittingCountry", _) =>
+        Some(Message("xml.not.ISO.code.elem", Seq(elementName)))
+      case ("ReceivingCountry", _) => Some(Message("xml.not.ISO.code.receivingCountry"))
+      case ("Language", _)         => Some(Message("xml.not.ISO.language.code.elem"))
       case ("BizActivities" | "ReportingRole" | "MessageTypeIndic" | "Role" | "DocTypeIndic" | "SummaryRef", _) =>
         Some(Message("xml.not.allowed.value", Seq(elementName)))
       case _ => None
@@ -294,7 +296,8 @@ class XmlErrorMessageHelper extends SaxParseErrorRegExConstants {
       case "ReceivingCountry"                                                        => Some(Message("xml.add.receivingCountry"))
       case "MessageType"                                                             => Some(Message("xml.add.line.messageType", Seq(element)))
       case "ReportingPeriod"                                                         => Some(Message("xml.add.line.reportingPeriod", Seq(element)))
-      case _                                                                         => Some(Message("xml.add.line", Seq(element)))
+      case "Revenues" | "Summary"                                                    => Some(Message("xml.add.line", Seq(element)))
+      case _                                                                         => Some(Message("xml.add.line.elem", Seq(element)))
     }
 
   private def formattedError(errorMessage: String): String =

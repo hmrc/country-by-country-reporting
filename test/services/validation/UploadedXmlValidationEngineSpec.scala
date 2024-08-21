@@ -197,7 +197,7 @@ class UploadedXmlValidationEngineSpec extends SpecBase {
       when(mockXmlValidationService.validate(any[String](), any[String]()))
         .thenReturn(Left(ListBuffer(countryCodeError1, countryCodeError2)))
 
-      val expectedErrors = Seq(GenericError(123, Message("xml.not.ISO.code", List("CountryCode"))))
+      val expectedErrors = Seq(GenericError(123, Message("xml.not.ISO.code.elem", List("CountryCode"))))
 
       Await.result(validationEngine.validateUploadSubmission(source), 10.seconds) mustBe SubmissionValidationFailure(ValidationErrors(expectedErrors))
     }
@@ -207,7 +207,7 @@ class UploadedXmlValidationEngineSpec extends SpecBase {
       when(mockXmlValidationService.validate(any[String](), any[String]()))
         .thenReturn(Left(ListBuffer(countryExemptionError1, countryExemptionError2)))
 
-      val expectedErrors = Seq(GenericError(133, Message("xml.not.ISO.code", List("ResCountryCode"))))
+      val expectedErrors = Seq(GenericError(133, Message("xml.not.ISO.code.elem", List("ResCountryCode"))))
 
       Await.result(validationEngine.validateUploadSubmission(source), 10.seconds) mustBe SubmissionValidationFailure(ValidationErrors(expectedErrors))
     }

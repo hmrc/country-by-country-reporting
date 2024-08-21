@@ -23,10 +23,10 @@ import scala.collection.mutable.ListBuffer
 
 class XmlErrorMessageHelperSpec extends SpecBase {
 
-  val lineNumber = 20
-  val over400    = "s" * 401
-  val over200    = "s" * 201
-  val over4000   = "s" * 2000 + "\n" + "s" * 2001
+  val lineNumber       = 20
+  val over400: String  = "s" * 401
+  val over200: String  = "s" * 201
+  val over4000: String = "s" * 2000 + "\n" + "s" * 2001
 
   val helper = new XmlErrorMessageHelper
   "ErrorMessageHelper" - {
@@ -236,7 +236,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           val invalidEnumError2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value 'Raneevev' of element 'cbc:ResCountryCode' is not valid.")
 
           val result = helper.generateErrorMessages(ListBuffer(invalidEnumError1, invalidEnumError2))
-          result mustBe List(GenericError(lineNumber, Message("xml.not.ISO.code", List("ResCountryCode"))))
+          result mustBe List(GenericError(lineNumber, Message("xml.not.ISO.code.elem", List("ResCountryCode"))))
         }
 
         "must return correct error when decimal is included on whole number field" in {
@@ -329,7 +329,23 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           result mustBe List(GenericError(lineNumber, Message("xml.empty.field", List("MessageRefId"))))
         }
 
-        "must return 'Add a line for' message for relevant missing tag values" in {
+        "must return '... is missing' message for Revenues and Summary" in {
+          val elements = List(
+            "Revenues",
+            "Summary"
+          )
+
+          elements.map { element =>
+            val error1 = SaxParseError(
+              lineNumber,
+              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'ABC'. One of '{\"urn:oecd:ties:cbc:v2\":$element}' is expected."""
+            )
+            val result = helper.generateErrorMessages(ListBuffer(error1))
+            result mustBe List(GenericError(lineNumber, Message("xml.add.line", Seq(element))))
+          }
+        }
+
+        "must return '... element is missing' message for relevant missing tag values" in {
           val elements = List(
             "Jurisdictions",
             "TransmittingCountry",
@@ -345,7 +361,6 @@ class XmlErrorMessageHelperSpec extends SpecBase {
             "DisclosureDate",
             "Type",
             "Narrative",
-            "Summary",
             "ResCountryCode",
             "TIN",
             "Name",
@@ -361,7 +376,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
               s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'cbc:ABC'. One of '{\"urn:oecd:ties:cbc:v2\":cbc:$element}' is expected."""
             )
             val result = helper.generateErrorMessages(ListBuffer(error1))
-            result mustBe List(GenericError(lineNumber, Message("xml.add.line", Seq(element))))
+            result mustBe List(GenericError(lineNumber, Message("xml.add.line.elem", Seq(element))))
           }
         }
 
@@ -635,7 +650,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           val invalidEnumError2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value 'Raneevev' of element 'IncorpCountryCode' is not valid.")
 
           val result = helper.generateErrorMessages(ListBuffer(invalidEnumError1, invalidEnumError2))
-          result mustBe List(GenericError(lineNumber, Message("xml.not.ISO.code", List("IncorpCountryCode"))))
+          result mustBe List(GenericError(lineNumber, Message("xml.not.ISO.code.elem", List("IncorpCountryCode"))))
         }
 
         "must return correct error when decimal is included on whole number field" in {
@@ -728,7 +743,23 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           result mustBe List(GenericError(lineNumber, Message("xml.empty.field", List("MessageRefId"))))
         }
 
-        "must return 'Add a line for' message for relevant missing tag values" in {
+        "must return '... is missing' message for Revenues and Summary" in {
+          val elements = List(
+            "Revenues",
+            "Summary"
+          )
+
+          elements.map { element =>
+            val error1 = SaxParseError(
+              lineNumber,
+              s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'ABC'. One of '{\"urn:oecd:ties:cbc:v2\":$element}' is expected."""
+            )
+            val result = helper.generateErrorMessages(ListBuffer(error1))
+            result mustBe List(GenericError(lineNumber, Message("xml.add.line", Seq(element))))
+          }
+        }
+
+        "must return '... element is missing' message for relevant missing tag values" in {
           val elements = List(
             "Jurisdictions",
             "TransmittingCountry",
@@ -744,7 +775,6 @@ class XmlErrorMessageHelperSpec extends SpecBase {
             "DisclosureDate",
             "Type",
             "Narrative",
-            "Summary",
             "ResCountryCode",
             "TIN",
             "Name",
@@ -760,7 +790,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
               s"""cvc-complex-type.2.4.a: Invalid content was found starting with element 'ABC'. One of '{\"urn:oecd:ties:cbc:v2\":$element}' is expected."""
             )
             val result = helper.generateErrorMessages(ListBuffer(error1))
-            result mustBe List(GenericError(lineNumber, Message("xml.add.line", Seq(element))))
+            result mustBe List(GenericError(lineNumber, Message("xml.add.line.elem", Seq(element))))
           }
         }
 
@@ -831,22 +861,22 @@ class XmlErrorMessageHelperSpec extends SpecBase {
 
       "must return correct message for 'IncorpCountryCode'" in {
         val result = helper.invalidCodeMessage("IncorpCountryCode")
-        result mustBe Some(Message("xml.not.ISO.code", List("IncorpCountryCode")))
+        result mustBe Some(Message("xml.not.ISO.code.elem", List("IncorpCountryCode")))
       }
 
       "must return correct message for 'CountryCode'" in {
         val result = helper.invalidCodeMessage("CountryCode")
-        result mustBe Some(Message("xml.not.ISO.code", List("CountryCode")))
+        result mustBe Some(Message("xml.not.ISO.code.elem", List("CountryCode")))
       }
 
       "must return correct message for 'ResCountryCode'" in {
         val result = helper.invalidCodeMessage("ResCountryCode")
-        result mustBe Some(Message("xml.not.ISO.code", List("ResCountryCode")))
+        result mustBe Some(Message("xml.not.ISO.code.elem", List("ResCountryCode")))
       }
 
       "must return correct message for 'TransmittingCountry'" in {
         val result = helper.invalidCodeMessage("TransmittingCountry")
-        result mustBe Some(Message("xml.not.ISO.code", List("TransmittingCountry")))
+        result mustBe Some(Message("xml.not.ISO.code.elem", List("TransmittingCountry")))
       }
 
       "must return correct message for 'BizActivities'" in {
@@ -881,7 +911,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
 
       "must return correct message for 'Language'" in {
         val result = helper.invalidCodeMessage("Language")
-        result mustBe Some(Message("xml.not.ISO.language.code", List("Language")))
+        result mustBe Some(Message("xml.not.ISO.language.code.elem"))
       }
 
       "must return correct message for 'ReceivingCountry'" in {
