@@ -911,7 +911,7 @@ class XmlErrorMessageHelperSpec extends SpecBase {
 
       "must return correct message for 'Language'" in {
         val result = helper.invalidCodeMessage("Language")
-        result mustBe Some(Message("xml.not.ISO.code.elem", List("Language")))
+        result mustBe Some(Message("xml.not.ISO.language.code.elem"))
       }
 
       "must return correct message for 'ReceivingCountry'" in {
