@@ -41,7 +41,11 @@ class DataExtraction()() {
     if (allDocTypeIndicators.exists(indic => testDataIndicators.contains(indic))) {
       TestData
     } else if (messageTypeIndicator == CBC401) {
-      NewInformation
+      if (reportingEntityDocTypeIndicators.contains("OECD1")) {
+        NewInformation
+      } else {
+        NewInformationForExistingReport
+      }
     } else if (reportingEntityDocTypeIndicators.contains("OECD3")) {
       DeletionOfAllInformation
     } else if (cbcReportAndAdditionalInfoSections.nonEmpty) {
@@ -49,7 +53,6 @@ class DataExtraction()() {
       val uniqueDocTypes             = docTypeIndicators.map(node => node.text).distinct
 
       (uniqueDocTypes.length, uniqueDocTypes.headOption) match {
-        case (1, Some("OECD1"))                                                       => NewInformationForExistingReport
         case (1, Some("OECD2"))                                                       => CorrectionForExistingReport
         case (1, Some("OECD3")) if reportingEntityDocTypeIndicators.contains("OECD0") => DeletionForExistingReport
         case _                                                                        => CorrectionAndDeletionForExistingReport
