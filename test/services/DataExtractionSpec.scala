@@ -97,7 +97,7 @@ class DataExtractionSpec extends SpecBase {
   "messageSpecData" - {
 
     "must return Some(MessageSpecData) when given valid xml" in {
-      val xml = generateValidXml()
+      val xml = generateValidXml(reportingEntityDocTypeIndic = List(Some("OECD1")))
 
       dataExtraction.messageSpecData(xml) mustBe Some(MessageSpecData("MessageRefId", CBC401, "Name", NewInformation))
     }
@@ -152,10 +152,16 @@ class DataExtractionSpec extends SpecBase {
       }
     }
 
-    "must return NewInformationReportType if the MessageTypeIndic is CBC401" in {
-      val xml = generateValidXml()
+    "must return NewInformationReportType if the MessageTypeIndic is CBC401 and any ReportingEntity DocTypeIndic is OECD1" in {
+      val xml = generateValidXml(reportingEntityDocTypeIndic = List(Some("OECD1")))
 
       dataExtraction.getReportType(CBC401, xml) mustBe NewInformation
+    }
+
+    "must return NewInformationForExistingReport if the MessageTypeIndic is CBC401 and none of ReportingEntity DocTypeIndic is OECD1" in {
+      val xml = generateValidXml(reportingEntityDocTypeIndic = List(Some("OECD2")))
+
+      dataExtraction.getReportType(CBC401, xml) mustBe NewInformationForExistingReport
     }
 
     "must return DeletionOfAllPreviousInformationReportType if any ReportingEntity DocTypeIndic is OECD3" in {
@@ -180,15 +186,6 @@ class DataExtractionSpec extends SpecBase {
       )
 
       dataExtraction.getReportType(CBC402, xml) mustBe CorrectionAndDeletionForExistingReport
-    }
-
-    "must return NewInformationForExistingReport if all the DocTypeIndic values in CbcReports or AdditionalInfo are OECD1" in {
-      val xml = generateValidXml(
-        cbcReportDocTypeIndic = List(Some("OECD1"), None),
-        additionalInfoDocTypeIndic = List(Some("OECD1"))
-      )
-
-      dataExtraction.getReportType(CBC402, xml) mustBe NewInformationForExistingReport
     }
 
     "must return CorrectionsForExistingReportType if all the DocTypeIndic values in CbcReports or AdditionalInfo are OECD2" in {
