@@ -32,7 +32,7 @@ import repositories.submission.FileDetailsRepository
 import services.validation.XMLValidationService
 import services.{AgentSubscriptionService, DataExtraction, SubscriptionService, TransformService}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.HttpReads.is2xx
+import uk.gov.hmrc.http.HttpErrorFunctions.is2xx
 
 import java.time.{Clock, LocalDateTime}
 import javax.inject.Inject
