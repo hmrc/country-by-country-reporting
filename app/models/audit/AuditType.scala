@@ -17,5 +17,6 @@
 package models.audit
 
 object AuditType {
-  val eisResponse = "CountryByCountryReportingEISResponse"
+  val eisResponse    = "CountryByCountryReportingEISResponse"
+  val fileSubmission = "CountryByCountryReportingSDESResponse"
 }

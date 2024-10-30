@@ -27,20 +27,22 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
 import play.api.http.Status.{ACCEPTED, OK}
 import play.api.inject.bind
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{defaultAwaitTimeout, route, status}
 import repositories.submission.FileDetailsRepository
 import services.EmailService
+import services.audit.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.HttpVerbs.POST
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with ScalaCheckPropertyChecks with Generators {
 
   val mockFileDetailsRepository: FileDetailsRepository = mock[FileDetailsRepository]
   val mockEmailService: EmailService                   = mock[EmailService]
+  val mockAuditService: AuditService                   = mock[AuditService]
 
   override def beforeEach(): Unit = {
     reset(mockFileDetailsRepository, mockEmailService)
@@ -50,7 +52,8 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
   val application: Application = applicationBuilder()
     .overrides(
       bind[FileDetailsRepository].toInstance(mockFileDetailsRepository),
-      bind[EmailService].toInstance(mockEmailService)
+      bind[EmailService].toInstance(mockEmailService),
+      bind[AuditService].toInstance(mockAuditService)
     )
     .build()
 
@@ -58,17 +61,20 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
     "must return Ok for success file notification" in {
 
       forAll(arbitrarySuccessSdesCallback.arbitrary, arbitrary[FileDetails]) { (sdesCallback, fileDetails) =>
+        reset(mockAuditService)
         when(mockFileDetailsRepository.findByConversationId(sdesCallback.correlationID)).thenReturn(Future.successful(Some(fileDetails)))
 
         val request = FakeRequest(POST, routes.SdesCallbackController.callback.url).withBody(Json.toJson(sdesCallback))
         val result  = route(application, request).value
         status(result) mustEqual OK
+        verify(mockAuditService, times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
 
       }
     }
 
     "must return Ok for failure notification and update status and send email" in {
       forAll(arbitraryFailureSdesCallback.arbitrary, arbitraryPendingFileDetails.arbitrary) { (sdesCallback, fileDetails) =>
+        reset(mockAuditService)
         val updatedStatus = sdesCallback.failureReason match {
           case Some(reason) if reason.toLowerCase.contains("virus") => RejectedSDESVirus
           case _                                                    => RejectedSDES
@@ -85,6 +91,7 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
         val result  = route(application, request).value
 
         status(result) mustEqual OK
+        verify(mockAuditService, times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
         verify(mockFileDetailsRepository).updateStatus(sdesCallback.correlationID.value, updatedStatus)
         verify(mockEmailService, atLeast(1)).sendAndLogEmail(is(fileDetails.subscriptionId),
                                                              any[String],
@@ -101,12 +108,14 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
 
     "must return Ok for failure notification but do not update status and neither send email if file status not pending" in {
       forAll(arbitraryFailureSdesCallback.arbitrary, arbitraryNonPendingFileDetails.arbitrary) { (sdesCallback, fileDetails) =>
+        reset(mockAuditService)
         when(mockFileDetailsRepository.findByConversationId(sdesCallback.correlationID)).thenReturn(Future.successful(Some(fileDetails)))
 
         val request = FakeRequest(POST, routes.SdesCallbackController.callback.url).withBody(Json.toJson(sdesCallback))
         val result  = route(application, request).value
 
         status(result) mustEqual OK
+        verify(mockAuditService, times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
         verify(mockFileDetailsRepository, times(0)).updateStatus(any[String], any[FileStatus])
         verify(mockEmailService, times(0)).sendAndLogEmail(any[String],
                                                            any[String],

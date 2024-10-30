@@ -16,14 +16,16 @@
 
 package controllers.sdes
 
+import models.audit.AuditType.fileSubmission
 import models.sdes.NotificationType.FileProcessingFailure
 import models.sdes.SdesCallback
 import models.submission.{Pending, RejectedSDES, RejectedSDESVirus}
 import play.api.Logging
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents}
 import repositories.submission.FileDetailsRepository
 import services.EmailService
+import services.audit.AuditService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import utils.DateTimeFormatUtil
 
@@ -34,7 +36,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class SdesCallbackController @Inject() (
   cc: ControllerComponents,
   fileDetailsRepository: FileDetailsRepository,
-  emailService: EmailService
+  emailService: EmailService,
+  auditService: AuditService
 )(implicit val ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
@@ -44,6 +47,7 @@ class SdesCallbackController @Inject() (
       logger.info(
         s"SDESCallbackController: Received SDES ${sdesCallback.notification} callback for file: ${sdesCallback.filename} (${sdesCallback.correlationID})"
       )
+      auditService.sendAuditEvent(fileSubmission, Json.toJson(sdesCallback))
       sdesCallback match {
         case SdesCallback(FileProcessingFailure, _, _, _, correlationID, _, failureReason) =>
           fileDetailsRepository.findByConversationId(correlationID) flatMap {
