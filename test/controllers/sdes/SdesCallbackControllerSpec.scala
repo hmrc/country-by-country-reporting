@@ -100,6 +100,7 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
         )(
           any[HeaderCarrier]
         )
+        verify(mockAuditService, times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
 
       }
     }
@@ -124,6 +125,7 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
         )(
           any[HeaderCarrier]
         )
+        verify(mockAuditService, times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
 
       }
     }
