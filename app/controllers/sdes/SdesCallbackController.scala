@@ -76,7 +76,15 @@ class SdesCallbackController @Inject() (
               logger.warn(s"No record found for the conversationId: $correlationID")
               Future.successful(Ok)
           }
-        case _ => Future.successful(Ok)
+        case _ =>
+          fileDetailsRepository.findByConversationId(sdesCallback.correlationID) flatMap {
+            case Some(fileDetails) =>
+              auditService.sendAuditEvent(fileSubmission, Json.toJson((sdesCallback, fileDetails.isLargeFile)))
+              Future.successful(Ok)
+            case None =>
+              logger.warn(s"No record found for the correlationId: ${sdesCallback.correlationID}")
+              Future.successful(Ok)
+          }
       }
     }
   }

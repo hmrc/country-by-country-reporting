@@ -63,7 +63,6 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
       forAll(arbitrarySuccessSdesCallback.arbitrary, arbitrary[FileDetails]) { (sdesCallback, fileDetails) =>
         reset(mockAuditService)
         when(mockFileDetailsRepository.findByConversationId(sdesCallback.correlationID)).thenReturn(Future.successful(Some(fileDetails)))
-        println(fileDetails)
         val request = FakeRequest(POST, routes.SdesCallbackController.callback.url).withBody(Json.toJson(sdesCallback))
         val result  = route(application, request).value
         status(result) mustEqual OK
