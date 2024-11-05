@@ -167,6 +167,7 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
                             "file1.xml",
                             _,
                             _,
+                            _,
                             _
                 )
               ) =>
@@ -190,6 +191,7 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
                             TestData,
                             Accepted,
                             "file1.xml",
+                            _,
                             _,
                             _,
                             _
@@ -220,7 +222,8 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
                             "file1.xml",
                             _,
                             _,
-                            None
+                            None,
+                            _
                 )
               ) =>
         }

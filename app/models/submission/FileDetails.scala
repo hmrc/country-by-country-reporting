@@ -32,7 +32,8 @@ case class FileDetails(_id: ConversationId,
                        name: String,
                        submitted: LocalDateTime,
                        lastUpdated: LocalDateTime,
-                       agentDetails: Option[AgentContactDetails] = None
+                       agentDetails: Option[AgentContactDetails] = None,
+                       isLargeFile: Boolean = false
 )
 object FileDetails {
   final val localDateTimeReads: Reads[LocalDateTime] =

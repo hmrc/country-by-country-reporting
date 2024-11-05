@@ -64,7 +64,7 @@ class SubmissionService @Inject() (
       maybeAgentContactDetails <- EitherT(getAgentContactDetails())
       _                        <- EitherT(sdesService.sendFileNotification(submissionDetails, orgContactDetails, conversationId))
       reportType  = submissionDetails.messageSpecData.reportType
-      fileDetails = createFilePendingDetails(conversationId, submissionDetails, dateTimeNow, reportType, maybeAgentContactDetails)
+      fileDetails = createFilePendingDetails(conversationId, submissionDetails, dateTimeNow, reportType, maybeAgentContactDetails, true)
       _ <- EitherT(persistFileDetails(fileDetails))
     } yield conversationId).value
   }
@@ -152,7 +152,8 @@ class SubmissionService @Inject() (
     submissionDetails: SubmissionDetails,
     submissionTime: LocalDateTime,
     reportType: ReportType,
-    maybeAgentDetails: Option[AgentContactDetails]
+    maybeAgentDetails: Option[AgentContactDetails],
+    isLargeFile: Boolean = false
   ) =
     FileDetails(
       conversationId,
@@ -164,7 +165,8 @@ class SubmissionService @Inject() (
       submissionDetails.fileName,
       submissionTime,
       submissionTime,
-      maybeAgentDetails
+      maybeAgentDetails,
+      isLargeFile
     )
 
   private def persistFileDetails(fileDetails: FileDetails): Future[Either[BackendError, Boolean]] =

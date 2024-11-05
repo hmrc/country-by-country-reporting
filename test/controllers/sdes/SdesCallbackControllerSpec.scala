@@ -63,7 +63,6 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
       forAll(arbitrarySuccessSdesCallback.arbitrary, arbitrary[FileDetails]) { (sdesCallback, fileDetails) =>
         reset(mockAuditService)
         when(mockFileDetailsRepository.findByConversationId(sdesCallback.correlationID)).thenReturn(Future.successful(Some(fileDetails)))
-
         val request = FakeRequest(POST, routes.SdesCallbackController.callback.url).withBody(Json.toJson(sdesCallback))
         val result  = route(application, request).value
         status(result) mustEqual OK
@@ -91,7 +90,6 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
         val result  = route(application, request).value
 
         status(result) mustEqual OK
-        verify(mockAuditService, times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
         verify(mockFileDetailsRepository).updateStatus(sdesCallback.correlationID.value, updatedStatus)
         verify(mockEmailService, atLeast(1)).sendAndLogEmail(is(fileDetails.subscriptionId),
                                                              any[String],
@@ -102,6 +100,7 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
         )(
           any[HeaderCarrier]
         )
+        verify(mockAuditService, times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
 
       }
     }
@@ -126,6 +125,7 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
         )(
           any[HeaderCarrier]
         )
+        verify(mockAuditService, times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
 
       }
     }
