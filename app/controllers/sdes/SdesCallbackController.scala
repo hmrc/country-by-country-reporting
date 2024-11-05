@@ -47,11 +47,11 @@ class SdesCallbackController @Inject() (
       logger.info(
         s"SDESCallbackController: Received SDES ${sdesCallback.notification} callback for file: ${sdesCallback.filename} (${sdesCallback.correlationID})"
       )
-      auditService.sendAuditEvent(fileSubmission, Json.toJson(sdesCallback))
       sdesCallback match {
         case SdesCallback(FileProcessingFailure, _, _, _, correlationID, _, failureReason) =>
           fileDetailsRepository.findByConversationId(correlationID) flatMap {
             case Some(fileDetails) if fileDetails.status == Pending =>
+              auditService.sendAuditEvent(fileSubmission, Json.toJson((sdesCallback, fileDetails.isLargeFile)))
               val updatedStatus = failureReason match {
                 case Some(reason) if reason.toLowerCase.contains("virus") => RejectedSDESVirus
                 case _                                                    => RejectedSDES
@@ -70,6 +70,7 @@ class SdesCallbackController @Inject() (
               }
             case Some(fileDetails) if fileDetails.status != Pending =>
               logger.warn(s"File with conversationId: $correlationID is not in pending state")
+              auditService.sendAuditEvent(fileSubmission, Json.toJson((sdesCallback, fileDetails.isLargeFile)))
               Future.successful(Ok)
             case _ =>
               logger.warn(s"No record found for the conversationId: $correlationID")
