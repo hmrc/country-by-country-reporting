@@ -16,7 +16,21 @@
 
 package models.audit
 
+import play.api.libs.json.{Json, OWrites}
+import uk.gov.hmrc.auth.core.AffinityGroup
+
 object AuditType {
   val eisResponse    = "CountryByCountryReportingEISResponse"
   val fileSubmission = "CountryByCountryReportingSDESResponse"
+}
+
+final case class AuditWithUserType[T](details: T, userType: Option[AffinityGroup] = None)
+
+object AuditWithUserType {
+
+  implicit def writes[T: OWrites]: OWrites[AuditWithUserType[T]] = (auditWithUserType: AuditWithUserType[T]) => {
+    val detailsJson  = Json.toJsObject(auditWithUserType.details)
+    val userTypeJson = auditWithUserType.userType.map(userType => Json.obj("userType" -> userType)).getOrElse(Json.obj())
+    detailsJson ++ userTypeJson
+  }
 }

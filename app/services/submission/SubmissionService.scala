@@ -31,6 +31,7 @@ import play.api.libs.json.JsValue
 import repositories.submission.FileDetailsRepository
 import services.validation.XMLValidationService
 import services.{AgentSubscriptionService, DataExtraction, SubscriptionService, TransformService}
+import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.HttpErrorFunctions.is2xx
 
@@ -64,7 +65,7 @@ class SubmissionService @Inject() (
       maybeAgentContactDetails <- EitherT(getAgentContactDetails())
       _                        <- EitherT(sdesService.sendFileNotification(submissionDetails, orgContactDetails, conversationId))
       reportType  = submissionDetails.messageSpecData.reportType
-      fileDetails = createFilePendingDetails(conversationId, submissionDetails, dateTimeNow, reportType, maybeAgentContactDetails)
+      fileDetails = createFilePendingDetails(conversationId, submissionDetails, dateTimeNow, reportType, maybeAgentContactDetails, request.affinityGroup)
       _ <- EitherT(persistFileDetails(fileDetails))
     } yield conversationId).value
   }
@@ -86,7 +87,13 @@ class SubmissionService @Inject() (
               orgContactDetails        <- EitherT(subscriptionService.getContactInformation(submissionDetails.enrolmentId))
               maybeAgentContactDetails <- EitherT(getAgentContactDetails())
               submissionMetaData = SubmissionMetaData.build(submissionTime, conversationId, submissionDetails.fileName)
-              fileDetails        = createFilePendingDetails(conversationId, submissionDetails, submissionTime, reportType, maybeAgentContactDetails)
+              fileDetails = createFilePendingDetails(conversationId,
+                                                     submissionDetails,
+                                                     submissionTime,
+                                                     reportType,
+                                                     maybeAgentContactDetails,
+                                                     request.affinityGroup
+              )
               _ <- EitherT(addSubscriptionDetailsToXml(xml, submissionMetaData, orgContactDetails, fileDetails))
               _ <- EitherT(persistFileDetails(fileDetails))
             } yield conversationId
@@ -152,7 +159,8 @@ class SubmissionService @Inject() (
     submissionDetails: SubmissionDetails,
     submissionTime: LocalDateTime,
     reportType: ReportType,
-    maybeAgentDetails: Option[AgentContactDetails]
+    maybeAgentDetails: Option[AgentContactDetails],
+    affinityGroup: AffinityGroup
   ) =
     FileDetails(
       conversationId,
@@ -164,7 +172,8 @@ class SubmissionService @Inject() (
       submissionDetails.fileName,
       submissionTime,
       submissionTime,
-      maybeAgentDetails
+      maybeAgentDetails,
+      Option(affinityGroup)
     )
 
   private def persistFileDetails(fileDetails: FileDetails): Future[Either[BackendError, Boolean]] =

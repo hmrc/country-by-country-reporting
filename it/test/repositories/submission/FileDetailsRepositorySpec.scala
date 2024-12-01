@@ -23,6 +23,7 @@ import models.submission._
 import models.subscription.{ContactInformation, OrganisationDetails}
 import models.xml.{FileErrorCode, FileErrors, ValidationErrors}
 import services.metrics.MetricsService
+import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import java.time.LocalDateTime
@@ -48,7 +49,8 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
       Pending,
       "file1.xml",
       dateTimeNow,
-      dateTimeNow
+      dateTimeNow,
+      userType = Some(AffinityGroup.Organisation)
     )
 
   val agentPrimaryContact: ContactInformation = ContactInformation(
@@ -77,7 +79,8 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
     "file1.xml",
     dateTimeNow,
     dateTimeNow,
-    Some(agentDetails)
+    Some(agentDetails),
+    Some(AffinityGroup.Agent)
   )
 
   "Insert" - {
@@ -167,6 +170,7 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
                             "file1.xml",
                             _,
                             _,
+                            _,
                             _
                 )
               ) =>
@@ -192,7 +196,8 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
                             "file1.xml",
                             _,
                             _,
-                            _
+                            _,
+                            Some(AffinityGroup.Agent)
                 )
               ) =>
         }
@@ -220,7 +225,8 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
                             "file1.xml",
                             _,
                             _,
-                            None
+                            None,
+                            Some(AffinityGroup.Organisation)
                 )
               ) =>
         }

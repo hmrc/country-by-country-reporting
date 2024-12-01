@@ -102,6 +102,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
           LocalDateTime.now()
         )
 
+      when(mockFileDetailsRepository.findByConversationId(any[ConversationId])).thenReturn(Future.successful(Some(fileDetails)))
       when(mockFileDetailsRepository.updateStatus(any[String], any[FileStatus])).thenReturn(Future.successful(Some(fileDetails)))
       when(
         mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean], any[ReportType])(
@@ -152,6 +153,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
           LocalDateTime.now(),
           LocalDateTime.now()
         )
+      when(mockFileDetailsRepository.findByConversationId(any[ConversationId])).thenReturn(Future.successful(Some(fileDetails)))
       when(mockAuditService.sendAuditEvent(any[String], any[JsValue])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(Success))
       when(mockFileDetailsRepository.updateStatus(any[String], any[FileStatus])).thenReturn(Future.successful(Some(fileDetails)))
       when(
@@ -191,6 +193,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
           LocalDateTime.now(),
           LocalDateTime.now()
         )
+      when(mockFileDetailsRepository.findByConversationId(any[ConversationId])).thenReturn(Future.successful(Some(fileDetails)))
       when(mockAuditService.sendAuditEvent(any[String], any[JsValue])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(Success))
       when(mockFileDetailsRepository.updateStatus(any[String], any[FileStatus])).thenReturn(Future.successful(Some(fileDetails)))
       when(
@@ -230,6 +233,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
           LocalDateTime.now().minusSeconds(11),
           LocalDateTime.now()
         )
+      when(mockFileDetailsRepository.findByConversationId(any[ConversationId])).thenReturn(Future.successful(Some(fileDetails)))
       when(mockAuditService.sendAuditEvent(any[String], any[JsValue])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(Success))
       when(mockFileDetailsRepository.updateStatus(any[String], any[FileStatus])).thenReturn(Future.successful(Some(fileDetails)))
       when(
@@ -269,6 +273,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
           LocalDateTime.now().minusSeconds(11),
           LocalDateTime.now()
         )
+      when(mockFileDetailsRepository.findByConversationId(any[ConversationId])).thenReturn(Future.successful(Some(fileDetails)))
       when(mockAuditService.sendAuditEvent(any[String], any[JsValue])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(Success))
       when(mockFileDetailsRepository.updateStatus(any[String], any[FileStatus])).thenReturn(Future.successful(Some(fileDetails)))
       when(
@@ -310,6 +315,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
     }
 
     "must return InternalServerError on failing to update the status" in {
+      when(mockFileDetailsRepository.findByConversationId(any[ConversationId])).thenReturn(Future.failed(new RuntimeException("Failed to get file details")))
       when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(Success))
       when(mockFileDetailsRepository.updateStatus(any[String](), any[FileStatus]())).thenReturn(Future.successful(None))
 

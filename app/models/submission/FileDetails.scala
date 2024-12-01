@@ -18,6 +18,7 @@ package models.submission
 
 import models.agentSubscription.AgentContactDetails
 import play.api.libs.json._
+import uk.gov.hmrc.auth.core.AffinityGroup
 
 import java.time.{Instant, LocalDateTime, ZoneOffset}
 import javax.inject.Singleton
@@ -32,7 +33,8 @@ case class FileDetails(_id: ConversationId,
                        name: String,
                        submitted: LocalDateTime,
                        lastUpdated: LocalDateTime,
-                       agentDetails: Option[AgentContactDetails] = None
+                       agentDetails: Option[AgentContactDetails] = None,
+                       userType: Option[AffinityGroup] = None
 )
 object FileDetails {
   final val localDateTimeReads: Reads[LocalDateTime] =
