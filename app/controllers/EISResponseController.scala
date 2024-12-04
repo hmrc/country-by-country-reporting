@@ -19,8 +19,8 @@ package controllers
 import config.AppConfig
 import controllers.actions.EISResponsePreConditionCheckActionRefiner
 import controllers.auth.ValidateAuthTokenAction
-import models.audit.AuditType
-import models.submission.{Accepted => FileStatusAccepted, FileStatus, Rejected}
+import models.audit.{AuditType, AuditWithUserType}
+import models.submission.{Accepted => FileStatusAccepted, ConversationId, FileStatus, Rejected}
 import models.xml.{BREResponse, ValidationStatus}
 import play.api.Logging
 import play.api.libs.json.Json
@@ -56,7 +56,19 @@ class EISResponseController @Inject() (cc: ControllerComponents,
     }
 
   def processEISResponse(): Action[NodeSeq] = (Action(parse.xml) andThen validateAuth andThen actionRefiner).async { implicit request =>
-    auditService.sendAuditEvent(AuditType.eisResponse, Json.toJson(request.BREResponse))
+    fileDetailsRepository
+      .findByConversationId(ConversationId(request.BREResponse.conversationID))
+      .flatMap {
+        case Some(fileDetails) =>
+          val audit = AuditWithUserType(request.BREResponse, fileDetails.userType)
+          auditService.sendAuditEvent(AuditType.eisResponse, Json.toJson(audit))
+        case _ =>
+          auditService.sendAuditEvent(AuditType.eisResponse, Json.toJson(request.BREResponse))
+      }
+      .recoverWith { case e: Exception =>
+        logger.error(s"Failed to get fileDetails: ${e.getMessage}")
+        auditService.sendAuditEvent(AuditType.eisResponse, Json.toJson(request.BREResponse))
+      }
     val conversationId = request.BREResponse.conversationID
     val fileStatus     = convertToFileStatus(request.BREResponse)
 

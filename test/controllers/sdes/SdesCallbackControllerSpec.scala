@@ -35,6 +35,7 @@ import services.EmailService
 import services.audit.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.HttpVerbs.POST
+import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -62,6 +63,7 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
 
       forAll(arbitrarySuccessSdesCallback.arbitrary, arbitrary[FileDetails]) { (sdesCallback, fileDetails) =>
         reset(mockAuditService)
+        when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(Success))
         when(mockFileDetailsRepository.findByConversationId(sdesCallback.correlationID)).thenReturn(Future.successful(Some(fileDetails)))
 
         val request = FakeRequest(POST, routes.SdesCallbackController.callback.url).withBody(Json.toJson(sdesCallback))
@@ -75,6 +77,7 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
     "must return Ok for failure notification and update status and send email" in {
       forAll(arbitraryFailureSdesCallback.arbitrary, arbitraryPendingFileDetails.arbitrary) { (sdesCallback, fileDetails) =>
         reset(mockAuditService)
+        when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(Success))
         val updatedStatus = sdesCallback.failureReason match {
           case Some(reason) if reason.toLowerCase.contains("virus") => RejectedSDESVirus
           case _                                                    => RejectedSDES
@@ -109,6 +112,7 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
     "must return Ok for failure notification but do not update status and neither send email if file status not pending" in {
       forAll(arbitraryFailureSdesCallback.arbitrary, arbitraryNonPendingFileDetails.arbitrary) { (sdesCallback, fileDetails) =>
         reset(mockAuditService)
+        when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(Success))
         when(mockFileDetailsRepository.findByConversationId(sdesCallback.correlationID)).thenReturn(Future.successful(Some(fileDetails)))
 
         val request = FakeRequest(POST, routes.SdesCallbackController.callback.url).withBody(Json.toJson(sdesCallback))
