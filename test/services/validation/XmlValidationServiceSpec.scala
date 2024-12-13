@@ -59,5 +59,25 @@ class XmlValidationServiceSpec extends SpecBase {
 
       result.isLeft mustBe false
     }
+
+    "must correctly validate a submission with whitespace" in {
+      val service = app.injector.instanceOf[XMLValidationService]
+
+      val validSubmission = XML.loadFile("test/resources/cbc/fileUpload/validcbc_whitespace.xml")
+
+      val result = service.validate(validSubmission, xsdPath)
+
+      result.isLeft mustBe false
+    }
+
+    "must correctly validate a submission with empty value" in {
+      val service = app.injector.instanceOf[XMLValidationService]
+
+      val validSubmission = XML.loadFile("test/resources/cbc/fileUpload/validcbc_empty.xml")
+
+      val result = service.validate(validSubmission, xsdPath)
+
+      result.isLeft mustBe true
+    }
   }
 }

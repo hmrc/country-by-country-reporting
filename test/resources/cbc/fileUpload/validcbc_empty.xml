@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CBC_OECD xmlns="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5">
+    <MessageSpec>
+        <!--Optional:-->
+        <SendingEntityIN />
+        <TransmittingCountry>XK</TransmittingCountry>
+        <!--1 or more repetitions:-->
+        <ReceivingCountry>PY</ReceivingCountry>
+        <MessageType>CBC</MessageType>
+        <!--Optional:-->
+        <Language>KR</Language>
+        <!--Optional:-->
+        <Warning>string</Warning>
+        <!--Optional:-->
+        <Contact>string</Contact>
+        <MessageRefId>GBXACBC1234567</MessageRefId>
+        <MessageTypeIndic>CBC401</MessageTypeIndic>
+        <!--Zero or more repetitions:-->
+        <CorrMessageRefId>string</CorrMessageRefId>
+        <ReportingPeriod>2014-06-09+01:00</ReportingPeriod>
+        <Timestamp>2008-11-15T16:52:58</Timestamp>
+    </MessageSpec>
+    <!--1 or more repetitions:-->
+    <CbcBody>
+        <ReportingEntity>
+            <Entity>
+                <!--1 or more repetitions:-->
+                <ResCountryCode>DJ</ResCountryCode>
+                <TIN issuedBy="MD">string</TIN>
+                <!--Zero or more repetitions:-->
+                <IN issuedBy="VI" INType="string">string</IN>
+                <!--1 or more repetitions:-->
+                <Name>string</Name>
+                <!--Zero or more repetitions:-->
+                <Address legalAddressType="OECD303">
+                    <CountryCode>YT</CountryCode>
+                    <AddressFix>
+                        <!--Optional:-->
+                        <Street>string</Street>
+                        <!--Optional:-->
+                        <BuildingIdentifier>string</BuildingIdentifier>
+                        <!--Optional:-->
+                        <SuiteIdentifier>string</SuiteIdentifier>
+                        <!--Optional:-->
+                        <FloorIdentifier>string</FloorIdentifier>
+                        <!--Optional:-->
+                        <DistrictName>string</DistrictName>
+                        <!--Optional:-->
+                        <POB>string</POB>
+                        <!--Optional:-->
+                        <PostCode>string</PostCode>
+                        <City>string</City>
+                        <!--Optional:-->
+                        <CountrySubentity>string</CountrySubentity>
+                    </AddressFix>
+                </Address>
+            </Entity>
+            <!--Optional:-->
+            <NameMNEGroup>string</NameMNEGroup>
+            <ReportingRole>CBC704</ReportingRole>
+            <ReportingPeriod>
+                <StartDate>2016-01-01</StartDate>
+                <EndDate>2012-01-07</EndDate>
+            </ReportingPeriod>
+            <DocSpec>
+                <stf:DocTypeIndic>OECD1</stf:DocTypeIndic>
+                <stf:DocRefId>string</stf:DocRefId>
+                <!--Optional:-->
+                <stf:CorrMessageRefId>string</stf:CorrMessageRefId>
+                <!--Optional:-->
+                <stf:CorrDocRefId>string</stf:CorrDocRefId>
+            </DocSpec>
+        </ReportingEntity>
+        <!--Zero or more repetitions:-->
+        <CbcReports>
+            <DocSpec>
+                <stf:DocTypeIndic>OECD2</stf:DocTypeIndic>
+                <stf:DocRefId>string</stf:DocRefId>
+                <!--Optional:-->
+                <stf:CorrMessageRefId>string</stf:CorrMessageRefId>
+                <!--Optional:-->
+                <stf:CorrDocRefId>string</stf:CorrDocRefId>
+            </DocSpec>
+            <ResCountryCode>IM</ResCountryCode>
+            <Summary>
+                <Revenues>
+                    <Unrelated currCode="XAG">100</Unrelated>
+                    <Related currCode="MMK">100</Related>
+                    <Total currCode="XPF">100</Total>
+                </Revenues>
+                <ProfitOrLoss currCode="FJD">100</ProfitOrLoss>
+                <TaxPaid currCode="MXN">100</TaxPaid>
+                <TaxAccrued currCode="PKR">100</TaxAccrued>
+                <Capital currCode="MNT">100</Capital>
+                <Earnings currCode="EGP">100</Earnings>
+                <NbEmployees>100</NbEmployees>
+                <Assets currCode="MMK">100</Assets>
+            </Summary>
+            <!--1 or more repetitions:-->
+            <ConstEntities>
+                <ConstEntity>
+                    <!--1 or more repetitions:-->
+                    <ResCountryCode>GD</ResCountryCode>
+                    <TIN issuedBy="CN">string</TIN>
+                    <!--Zero or more repetitions:-->
+                    <IN issuedBy="MG" INType="string">string</IN>
+                    <!--1 or more repetitions:-->
+                    <Name>string</Name>
+                    <!--Zero or more repetitions:-->
+                    <Address legalAddressType="OECD301">
+                        <CountryCode>HN</CountryCode>
+                        <AddressFix>
+                            <!--Optional:-->
+                            <Street>string</Street>
+                            <!--Optional:-->
+                            <BuildingIdentifier>string</BuildingIdentifier>
+                            <!--Optional:-->
+                            <SuiteIdentifier>string</SuiteIdentifier>
+                            <!--Optional:-->
+                            <FloorIdentifier>string</FloorIdentifier>
+                            <!--Optional:-->
+                            <DistrictName>string</DistrictName>
+                            <!--Optional:-->
+                            <POB>string</POB>
+                            <!--Optional:-->
+                            <PostCode>string</PostCode>
+                            <City>string</City>
+                            <!--Optional:-->
+                            <CountrySubentity>string</CountrySubentity>
+                        </AddressFix>
+                        <!--Optional:-->
+                        <AddressFree>string</AddressFree>
+                    </Address>
+                </ConstEntity>
+                <!--Optional:-->
+                <Role>CBC802</Role>
+                <!--Optional:-->
+                <IncorpCountryCode>IR</IncorpCountryCode>
+                <!--1 or more repetitions:-->
+                <BizActivities>CBC505</BizActivities>
+                <!--Optional:-->
+                <OtherEntityInfo>string</OtherEntityInfo>
+            </ConstEntities>
+        </CbcReports>
+        <!--Zero or more repetitions:-->
+        <AdditionalInfo>
+            <DocSpec>
+                <stf:DocTypeIndic>OECD0</stf:DocTypeIndic>
+                <stf:DocRefId>string</stf:DocRefId>
+                <!--Optional:-->
+                <stf:CorrMessageRefId>string</stf:CorrMessageRefId>
+                <!--Optional:-->
+                <stf:CorrDocRefId>string</stf:CorrDocRefId>
+            </DocSpec>
+            <!--1 or more repetitions:-->
+            <OtherInfo language="HZ">string</OtherInfo>
+            <!--Zero or more repetitions:-->
+            <ResCountryCode>SM</ResCountryCode>
+            <!--Zero or more repetitions:-->
+            <SummaryRef>CBC607</SummaryRef>
+        </AdditionalInfo>
+    </CbcBody>
+</CBC_OECD>

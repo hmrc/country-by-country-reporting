@@ -118,8 +118,7 @@ class SubmissionService @Inject() (
     val conversationId = fileDetails._id
     val submissionXml = transformService
       .addSubscriptionDetailsToSubmission(uploadedXml, organisationDetails, submissionMetaData, fileDetails.agentDetails)
-    val sanitisedXml      = scala.xml.Utility.trimProper(scala.xml.XML.loadString(submissionXml.mkString))
-    val validatedResponse = xmlValidationService.validate(xml = sanitisedXml, filePath = appConfig.submissionXSDFilePath)
+    val validatedResponse = xmlValidationService.validate(xml = submissionXml, filePath = appConfig.submissionXSDFilePath)
 
     validatedResponse match {
       case Left(parseErrors) =>

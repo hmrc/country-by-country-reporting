@@ -106,8 +106,8 @@ class TransformServiceSpec extends SpecBase {
     val result = <subscriptionDetails>
       {service.transformSubscriptionDetails(contactInformation, None)}
     </subscriptionDetails>
-    val x1 = pretty.format(scala.xml.Utility.trim(result))
-    val x2 = pretty.format(scala.xml.Utility.trim(expected))
+    val x1 = pretty.format(result)
+    val x2 = pretty.format(expected)
     x1 mustBe x2
 
   }
@@ -208,8 +208,8 @@ class TransformServiceSpec extends SpecBase {
     val result = <subscriptionDetails>
       {service.transformSubscriptionDetails(contactInformation, None, Some(agentDetails))}
     </subscriptionDetails>
-    val x1 = pretty.format(scala.xml.Utility.trim(result))
-    val x2 = pretty.format(scala.xml.Utility.trim(expected))
+    val x1 = pretty.format(result)
+    val x2 = pretty.format(expected)
     x1 mustBe x2
   }
 
