@@ -14,21 +14,25 @@
  * limitations under the License.
  */
 
-package models.error
+package models.submission
 
 import julienrf.json.derived
 import play.api.libs.json.OFormat
 
-trait BackendError {
-  def detail: String
-}
+sealed trait FileType
 
-final case class SdesSubmissionError(status: Int) extends BackendError {
-  override def detail: String = s"SDES submission failed with status $status"
-}
-final case class RepositoryError(detail: String) extends BackendError
-final case class SubmissionServiceError(detail: String) extends BackendError
+case object NormalFile extends FileType
+case object LargeFile extends FileType
 
-object SubmissionServiceError {
-  implicit val format: OFormat[SubmissionServiceError] = derived.oformat()
+object FileType {
+
+  val values: Seq[FileType] = Seq(NormalFile, LargeFile)
+
+  def fromString(fileType: String): FileType = fileType.toUpperCase match {
+    case "NORMAL" => NormalFile
+    case "LARGE"  => LargeFile
+    case _        => throw new NoSuchElementException
+  }
+
+  implicit val format: OFormat[FileType] = derived.oformat[FileType]()
 }

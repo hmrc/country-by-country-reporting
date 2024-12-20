@@ -34,7 +34,8 @@ case class FileDetails(_id: ConversationId,
                        submitted: LocalDateTime,
                        lastUpdated: LocalDateTime,
                        agentDetails: Option[AgentContactDetails] = None,
-                       userType: Option[AffinityGroup] = None
+                       userType: Option[AffinityGroup] = None,
+                       fileType: Option[FileType] = None
 )
 object FileDetails {
   final val localDateTimeReads: Reads[LocalDateTime] =

@@ -22,13 +22,15 @@ import connectors.SubmissionConnector
 import controllers.auth.IdentifierRequest
 import controllers.dateTimeNow
 import models.agentSubscription.AgentContactDetails
+import models.audit.AuditType
 import models.error.{BackendError, ReadSubscriptionError, RepositoryError, SubmissionServiceError}
 import models.submission._
 import models.subscription.ResponseDetail
 import models.xml.XmlHandler
 import play.api.Logging
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import repositories.submission.FileDetailsRepository
+import services.audit.AuditService
 import services.validation.XMLValidationService
 import services.{AgentSubscriptionService, DataExtraction, SubscriptionService, TransformService}
 import uk.gov.hmrc.auth.core.AffinityGroup
@@ -51,7 +53,8 @@ class SubmissionService @Inject() (
   subscriptionService: SubscriptionService,
   sdesService: SDESService,
   submissionConnector: SubmissionConnector,
-  fileDetailsRepository: FileDetailsRepository
+  fileDetailsRepository: FileDetailsRepository,
+  auditService: AuditService
 )(implicit ec: ExecutionContext, clock: Clock)
     extends Logging {
 
@@ -64,8 +67,16 @@ class SubmissionService @Inject() (
       orgContactDetails        <- EitherT(subscriptionService.getContactInformation(submissionDetails.enrolmentId))
       maybeAgentContactDetails <- EitherT(getAgentContactDetails())
       _                        <- EitherT(sdesService.sendFileNotification(submissionDetails, orgContactDetails, conversationId))
-      reportType  = submissionDetails.messageSpecData.reportType
-      fileDetails = createFilePendingDetails(conversationId, submissionDetails, dateTimeNow, reportType, maybeAgentContactDetails, request.affinityGroup)
+      reportType = submissionDetails.messageSpecData.reportType
+      fileDetails = createFilePendingDetails(conversationId,
+                                             submissionDetails,
+                                             dateTimeNow,
+                                             reportType,
+                                             maybeAgentContactDetails,
+                                             request.affinityGroup,
+                                             Some(LargeFile)
+      )
+      _ = auditService.sendAuditEvent(AuditType.fileSubmission, Json.toJson(fileDetails))
       _ <- EitherT(persistFileDetails(fileDetails))
     } yield conversationId).value
   }
@@ -92,17 +103,21 @@ class SubmissionService @Inject() (
                                                      submissionTime,
                                                      reportType,
                                                      maybeAgentContactDetails,
-                                                     request.affinityGroup
+                                                     request.affinityGroup,
+                                                     Some(NormalFile)
               )
+              _ = auditService.sendAuditEvent(AuditType.fileSubmission, Json.toJson(fileDetails))
               _ <- EitherT(addSubscriptionDetailsToXml(xml, submissionMetaData, orgContactDetails, fileDetails))
               _ <- EitherT(persistFileDetails(fileDetails))
             } yield conversationId
           case None =>
             val error = SubmissionServiceError(s"Xml file with conversation Id [${conversationId.value}] is empty")
+            auditService.sendAuditEvent(AuditType.fileSubmission, Json.toJson(error))
             EitherT.left(Future.successful(error))
         }
       case Failure(_) =>
         val error = SubmissionServiceError(s"Failed to load xml file [$documentUrl] with conversation Id [${conversationId.value}]")
+        auditService.sendAuditEvent(AuditType.fileSubmission, Json.toJson(error))
         EitherT.left(Future.successful(error))
     }
 
@@ -159,7 +174,8 @@ class SubmissionService @Inject() (
     submissionTime: LocalDateTime,
     reportType: ReportType,
     maybeAgentDetails: Option[AgentContactDetails],
-    affinityGroup: AffinityGroup
+    affinityGroup: AffinityGroup,
+    fileType: Option[FileType]
   ) =
     FileDetails(
       conversationId,
@@ -172,7 +188,8 @@ class SubmissionService @Inject() (
       submissionTime,
       submissionTime,
       maybeAgentDetails,
-      Option(affinityGroup)
+      Option(affinityGroup),
+      fileType
     )
 
   private def persistFileDetails(fileDetails: FileDetails): Future[Either[BackendError, Boolean]] =
