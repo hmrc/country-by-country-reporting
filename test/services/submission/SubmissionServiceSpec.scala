@@ -23,6 +23,7 @@ import controllers.auth.{FakeIdentifierAuthAction, IdentifierAuthAction, Identif
 import controllers.dateTimeNow
 import generators.Generators
 import models.agentSubscription.{AgentContactDetails, AgentResponseDetail}
+import models.audit.AuditType
 import models.error.{ReadSubscriptionError, RepositoryError, SdesSubmissionError, SubmissionServiceError}
 import models.submission._
 import models.subscription.ResponseDetail
@@ -37,6 +38,7 @@ import play.api.inject.bind
 import play.api.libs.json.JsValue
 import play.api.mvc.Request
 import repositories.submission.FileDetailsRepository
+import services.audit.AuditService
 import services.validation.XMLValidationService
 import services.{AgentSubscriptionService, DataExtraction, SubscriptionService, TransformService}
 import uk.gov.hmrc.auth.core.AffinityGroup
@@ -61,6 +63,7 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
   private val mockSubmissionConnector      = mock[SubmissionConnector]
   private val mockFileDetailsRepository    = mock[FileDetailsRepository]
   private val mockRequest                  = mock[Request[JsValue]]
+  private val mockAuditService             = mock[AuditService]
 
   private val fileDetailsArgCaptor: ArgumentCaptor[FileDetails] = ArgumentCaptor.forClass(classOf[FileDetails])
 
@@ -76,7 +79,8 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
       mockSdesService,
       mockSubmissionConnector,
       mockFileDetailsRepository,
-      mockRequest
+      mockRequest,
+      mockAuditService
     )
 
   override lazy val app: Application = applicationBuilder()
@@ -92,7 +96,8 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
       bind[SubmissionConnector].toInstance(mockSubmissionConnector),
       bind[FileDetailsRepository].toInstance(mockFileDetailsRepository),
       bind[IdentifierAuthAction].to[FakeIdentifierAuthAction],
-      bind(classOf[Clock]).toInstance(fixedClock)
+      bind(classOf[Clock]).toInstance(fixedClock),
+      bind[AuditService].toInstance(mockAuditService)
     )
     .build()
 
@@ -115,6 +120,7 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
 
           result.futureValue.value mustBe conversationId
           assertOnFileDetails(agentRefNo, submissionDetails, agentDetails, conversationId)
+          verify(mockAuditService, atLeastOnce).sendAuditEvent(mEq(AuditType.fileSubmission), any[JsValue])(any(), any())
         }
       }
 
@@ -178,6 +184,7 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
           val result = submissionService.submitLargeFile(submissionDetails)
 
           result.futureValue.left.value mustBe a[RepositoryError]
+          verify(mockAuditService, atLeastOnce).sendAuditEvent(mEq(AuditType.fileSubmission), any[JsValue])(any(), any())
         }
       }
     }
@@ -212,6 +219,7 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
 
           result.futureValue.value mustBe conversationId
           assertOnFileDetails(agentRefNo, submissionDetails, agentDetails, conversationId)
+          verify(mockAuditService, atLeastOnce).sendAuditEvent(mEq(AuditType.fileSubmission), any[JsValue])(any(), any())
         }
       }
 
@@ -245,6 +253,7 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
             val result = submissionService.submitNormalFile(submissionDetails)
 
             result.futureValue.left.value mustBe a[SubmissionServiceError]
+            verify(mockAuditService, atLeastOnce).sendAuditEvent(mEq(AuditType.fileSubmission), any[JsValue])(any(), any())
         }
       }
 

@@ -171,6 +171,7 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
                             _,
                             _,
                             _,
+                            _,
                             _
                 )
               ) =>
@@ -197,7 +198,8 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
                             _,
                             _,
                             _,
-                            Some(AffinityGroup.Agent)
+                            Some(AffinityGroup.Agent),
+                            _
                 )
               ) =>
         }
@@ -226,7 +228,8 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
                             _,
                             _,
                             None,
-                            Some(AffinityGroup.Organisation)
+                            Some(AffinityGroup.Organisation),
+                            _
                 )
               ) =>
         }

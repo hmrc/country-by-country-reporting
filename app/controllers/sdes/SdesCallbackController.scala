@@ -16,7 +16,7 @@
 
 package controllers.sdes
 
-import models.audit.AuditType.fileSubmission
+import models.audit.AuditType.sdesResponse
 import models.audit.AuditWithUserType
 import models.sdes.NotificationType.FileProcessingFailure
 import models.sdes.SdesCallback
@@ -53,12 +53,12 @@ class SdesCallbackController @Inject() (
         .flatMap {
           case Some(fileDetails) =>
             val audit = AuditWithUserType(sdesCallback, fileDetails.userType)
-            auditService.sendAuditEvent(fileSubmission, Json.toJson(audit))
-          case _ => auditService.sendAuditEvent(fileSubmission, Json.toJson(sdesCallback))
+            auditService.sendAuditEvent(sdesResponse, Json.toJson(audit))
+          case _ => auditService.sendAuditEvent(sdesResponse, Json.toJson(sdesCallback))
         }
         .recoverWith { case e: Exception =>
           logger.error(s"Failed to get fileDetails: ${e.getMessage}")
-          auditService.sendAuditEvent(fileSubmission, Json.toJson(sdesCallback))
+          auditService.sendAuditEvent(sdesResponse, Json.toJson(sdesCallback))
         }
       sdesCallback match {
         case SdesCallback(FileProcessingFailure, _, _, _, correlationID, _, failureReason) =>

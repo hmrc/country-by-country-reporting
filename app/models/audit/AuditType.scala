@@ -21,7 +21,8 @@ import uk.gov.hmrc.auth.core.AffinityGroup
 
 object AuditType {
   val eisResponse    = "CountryByCountryReportingEISResponse"
-  val fileSubmission = "CountryByCountryReportingSDESResponse"
+  val sdesResponse   = "CountryByCountryReportingSDESResponse"
+  val fileSubmission = "CountryByCountryReportingFileSubmission"
 }
 
 final case class AuditWithUserType[T](details: T, userType: Option[AffinityGroup] = None)
