@@ -49,5 +49,11 @@ object FileDetails {
       .contramap(_.toInstant(ZoneOffset.UTC).toEpochMilli.toString)
 
   implicit val mongoDateTime: Format[LocalDateTime] = Format(localDateTimeReads, localDateTimeWrites)
-  implicit val format: OFormat[FileDetails]         = Json.format[FileDetails]
+  final val reads: Reads[FileDetails]               = Json.reads[FileDetails]
+  final val writes: Writes[FileDetails] = (fileDetails: FileDetails) =>
+    Json.writes[FileDetails].writes(fileDetails) match {
+      case obj: JsObject => obj + ("conversationId" -> Json.toJson(fileDetails._id))
+      case other         => other
+    }
+  implicit val format: Format[FileDetails] = Format(reads, writes)
 }
