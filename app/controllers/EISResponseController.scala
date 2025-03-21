@@ -19,7 +19,7 @@ package controllers
 import config.AppConfig
 import controllers.actions.EISResponsePreConditionCheckActionRefiner
 import controllers.auth.ValidateAuthTokenAction
-import models.audit.{AuditType, AuditWithUserType}
+import models.audit.{Audit, AuditType}
 import models.submission.{Accepted => FileStatusAccepted, ConversationId, FileStatus, Rejected}
 import models.xml.{BREResponse, ValidationStatus}
 import play.api.Logging
@@ -35,14 +35,15 @@ import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 import scala.xml.NodeSeq
 
-class EISResponseController @Inject() (cc: ControllerComponents,
-                                       validateAuth: ValidateAuthTokenAction,
-                                       actionRefiner: EISResponsePreConditionCheckActionRefiner,
-                                       fileDetailsRepository: FileDetailsRepository,
-                                       emailService: EmailService,
-                                       appConfig: AppConfig,
-                                       customAlertUtil: CustomAlertUtil,
-                                       auditService: AuditService
+class EISResponseController @Inject() (
+  cc: ControllerComponents,
+  validateAuth: ValidateAuthTokenAction,
+  actionRefiner: EISResponsePreConditionCheckActionRefiner,
+  fileDetailsRepository: FileDetailsRepository,
+  emailService: EmailService,
+  appConfig: AppConfig,
+  customAlertUtil: CustomAlertUtil,
+  auditService: AuditService
 )(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
@@ -60,14 +61,16 @@ class EISResponseController @Inject() (cc: ControllerComponents,
       .findByConversationId(ConversationId(request.BREResponse.conversationID))
       .flatMap {
         case Some(fileDetails) =>
-          val audit = AuditWithUserType(request.BREResponse, fileDetails.userType)
+          val audit = Audit(request.BREResponse, userType = fileDetails.userType)
           auditService.sendAuditEvent(AuditType.eisResponse, Json.toJson(audit))
         case _ =>
-          auditService.sendAuditEvent(AuditType.eisResponse, Json.toJson(request.BREResponse))
+          auditService.sendAuditEvent(AuditType.eisResponseError, Json.toJson(Audit(request.BREResponse, error = Some("File details not found"))))
       }
       .recoverWith { case e: Exception =>
         logger.error(s"Failed to get fileDetails: ${e.getMessage}")
-        auditService.sendAuditEvent(AuditType.eisResponse, Json.toJson(request.BREResponse))
+        auditService.sendAuditEvent(AuditType.eisResponseError,
+                                    Json.toJson(Audit(request.BREResponse, error = Some(s"Failed to get file details: ${e.getMessage}")))
+        )
       }
     val conversationId = request.BREResponse.conversationID
     val fileStatus     = convertToFileStatus(request.BREResponse)
@@ -92,6 +95,9 @@ class EISResponseController @Inject() (cc: ControllerComponents,
         NoContent
       case _ =>
         logger.warn("Failed to update the status:mongo error")
+        auditService.sendAuditEvent(AuditType.eisResponseError,
+                                    Json.toJson(Audit(request.BREResponse, error = Some("Failed to update the status: mongo error")))
+        )
         InternalServerError
     }
   }

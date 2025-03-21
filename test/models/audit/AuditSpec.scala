@@ -22,9 +22,9 @@ import models.submission.ConversationId
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.auth.core.AffinityGroup
 
-class AuditWithUserTypeSpec extends SpecBase {
+class AuditSpec extends SpecBase {
 
-  private val auditWithUserType = AuditWithUserType(
+  private val audit = Audit(
     details = SdesCallback(
       notification = NotificationType.FileReady,
       filename = "filename",
@@ -34,7 +34,8 @@ class AuditWithUserTypeSpec extends SpecBase {
       dateTime = None,
       failureReason = None
     ),
-    userType = Some(AffinityGroup.Organisation)
+    userType = Some(AffinityGroup.Organisation),
+    error = Some("error")
   )
 
   private val json =
@@ -45,13 +46,14 @@ class AuditWithUserTypeSpec extends SpecBase {
       |"checksumAlgorithm": "SHA-256",
       |"checksum": "checksum",
       |"correlationID": "correlationID",
-      |"userType": "Organisation"
+      |"userType": "Organisation",
+      |"error": "error"
       |}
       |""".stripMargin
 
   "AuditWithUserType" - {
     "marshal" in {
-      val jsonObj = AuditWithUserType.writes[SdesCallback].writes(auditWithUserType)
+      val jsonObj = Audit.writes[SdesCallback].writes(audit)
       jsonObj mustBe Json.parse(json).as[JsObject]
     }
   }

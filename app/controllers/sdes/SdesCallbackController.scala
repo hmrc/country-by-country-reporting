@@ -16,8 +16,8 @@
 
 package controllers.sdes
 
-import models.audit.AuditType.sdesResponse
-import models.audit.AuditWithUserType
+import models.audit.Audit
+import models.audit.AuditType.{sdesResponse, sdesResponseError}
 import models.sdes.NotificationType.FileProcessingFailure
 import models.sdes.SdesCallback
 import models.submission.{Pending, RejectedSDES, RejectedSDESVirus}
@@ -52,13 +52,13 @@ class SdesCallbackController @Inject() (
         .findByConversationId(sdesCallback.correlationID)
         .flatMap {
           case Some(fileDetails) =>
-            val audit = AuditWithUserType(sdesCallback, fileDetails.userType)
+            val audit = Audit(sdesCallback, userType = fileDetails.userType)
             auditService.sendAuditEvent(sdesResponse, Json.toJson(audit))
-          case _ => auditService.sendAuditEvent(sdesResponse, Json.toJson(sdesCallback))
+          case _ => auditService.sendAuditEvent(sdesResponse, Json.toJson(Audit(sdesCallback, error = Some("No file details found"))))
         }
         .recoverWith { case e: Exception =>
           logger.error(s"Failed to get fileDetails: ${e.getMessage}")
-          auditService.sendAuditEvent(sdesResponse, Json.toJson(sdesCallback))
+          auditService.sendAuditEvent(sdesResponse, Json.toJson(Audit(sdesCallback, error = Some(e.getMessage))))
         }
       sdesCallback match {
         case SdesCallback(FileProcessingFailure, _, _, _, correlationID, _, failureReason) =>
@@ -78,16 +78,23 @@ class SdesCallbackController @Inject() (
                   fileDetails.reportType
                 )
                 logger.info(s"Updated status for conversationId: $correlationID to $updatedStatus")
+                auditService.sendAuditEvent(sdesResponse, Json.toJson(Audit(sdesCallback, fileDetails.userType)))
                 Ok
               }
             case Some(fileDetails) if fileDetails.status != Pending =>
               logger.warn(s"File with conversationId: $correlationID is not in pending state")
+              auditService.sendAuditEvent(sdesResponseError, Json.toJson(Audit(sdesCallback, error = Some("File is not in pending state"))))
               Future.successful(Ok)
             case _ =>
-              logger.warn(s"No record found for the conversationId: $correlationID")
+              logger.error(s"No record found for the conversationId: $correlationID")
+              auditService.sendAuditEvent(sdesResponseError,
+                                          Json.toJson(Audit(sdesCallback, error = Some(s"No file details found for the conversationId: $correlationID")))
+              )
               Future.successful(Ok)
           }
-        case _ => Future.successful(Ok)
+        case _ =>
+          auditService.sendAuditEvent(sdesResponseError, Json.toJson(Audit(sdesCallback, error = Some("Unsupported notification type"))))
+          Future.successful(Ok)
       }
     }
   }
