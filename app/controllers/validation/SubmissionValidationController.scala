@@ -44,18 +44,18 @@ class SubmissionValidationController @Inject() (
       case JsSuccess(upscanURL, _) =>
         validationEngine.validateUploadSubmission(upscanURL.url) map {
           case SubmissionValidationSuccess(msd) =>
-            auditService.sendAuditEvent(AuditType.fileSubmission, Json.toJson(msd))
+            auditService.sendAuditEvent(AuditType.fileValidation, Json.toJson(msd))
             Ok(Json.toJsObject(SubmissionValidationSuccess(msd)))
 
           case SubmissionValidationFailure(errors) =>
             val audit = Audit(SubmissionValidationFailure(errors), userType = Some(request.affinityGroup), error = Some("Failed to validate xml submission"))
-            auditService.sendAuditEvent(AuditType.fileSubmissionError, Json.toJson(audit))
+            auditService.sendAuditEvent(AuditType.fileValidationError, Json.toJson(audit))
             logger.warn("Failed to validate xml submission")
             Ok(Json.toJson(SubmissionValidationFailure(errors)))
 
           case InvalidXmlError(saxException) =>
             val audit = Audit(InvalidXmlError(saxException), userType = Some(request.affinityGroup), error = Some("Invalid XML"))
-            auditService.sendAuditEvent(AuditType.fileSubmissionError, Json.toJson(audit))
+            auditService.sendAuditEvent(AuditType.fileValidationError, Json.toJson(audit))
             logger.warn("InvalidXmlError: Failed to validate xml submission")
             BadRequest(InvalidXmlError(saxException).toString)
 
@@ -65,14 +65,14 @@ class SubmissionValidationController @Inject() (
               userType = Some(request.affinityGroup),
               error = Some("Failed to validate xml submission")
             )
-            auditService.sendAuditEvent(AuditType.fileSubmissionError, Json.toJson(audit))
+            auditService.sendAuditEvent(AuditType.fileValidationError, Json.toJson(audit))
             logger.warn("Failed to validate xml submission")
             InternalServerError("failed to validateSubmission")
         }
       case JsError(errors) =>
         logger.warn(s"Missing upscan URL: $errors")
         val audit = Audit(InvalidXmlError(s"Missing upscan URL: $errors"), userType = Some(request.affinityGroup), error = Some("Missing upscan URL"))
-        auditService.sendAuditEvent(AuditType.fileSubmissionError, Json.toJson(audit))
+        auditService.sendAuditEvent(AuditType.fileValidationError, Json.toJson(audit))
         logger.warn("Missing upscan URL")
         Future.successful(InternalServerError("Missing upscan URL"))
     }

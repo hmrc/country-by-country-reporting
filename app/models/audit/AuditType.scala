@@ -26,6 +26,8 @@ object AuditType {
   val sdesResponseError   = "CountryByCountryReportingSDESResponseError"
   val fileSubmission      = "CountryByCountryReportingFileSubmission"
   val fileSubmissionError = "CountryByCountryReportingFileSubmissionError"
+  val fileValidation      = "CountryByCountryReportingFileValidation"
+  val fileValidationError = "CountryByCountryReportingFileValidationError"
 }
 
 final case class Audit[T](details: T, userType: Option[AffinityGroup] = None, correlationId: Option[String] = None, error: Option[String] = None)
