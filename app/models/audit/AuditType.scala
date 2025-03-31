@@ -20,18 +20,25 @@ import play.api.libs.json.{Json, OWrites}
 import uk.gov.hmrc.auth.core.AffinityGroup
 
 object AuditType {
-  val eisResponse    = "CountryByCountryReportingEISResponse"
-  val sdesResponse   = "CountryByCountryReportingSDESResponse"
-  val fileSubmission = "CountryByCountryReportingFileSubmission"
+  val eisResponse         = "CountryByCountryReportingEISResponse"
+  val eisResponseError    = "CountryByCountryReportingEISResponseError"
+  val sdesResponse        = "CountryByCountryReportingSDESResponse"
+  val sdesResponseError   = "CountryByCountryReportingSDESResponseError"
+  val fileSubmission      = "CountryByCountryReportingFileSubmission"
+  val fileSubmissionError = "CountryByCountryReportingFileSubmissionError"
+  val fileValidation      = "CountryByCountryReportingFileValidation"
+  val fileValidationError = "CountryByCountryReportingFileValidationError"
 }
 
-final case class AuditWithUserType[T](details: T, userType: Option[AffinityGroup] = None)
+final case class Audit[T](details: T, userType: Option[AffinityGroup] = None, correlationId: Option[String] = None, error: Option[String] = None)
 
-object AuditWithUserType {
+object Audit {
 
-  implicit def writes[T: OWrites]: OWrites[AuditWithUserType[T]] = (auditWithUserType: AuditWithUserType[T]) => {
-    val detailsJson  = Json.toJsObject(auditWithUserType.details)
-    val userTypeJson = auditWithUserType.userType.map(userType => Json.obj("userType" -> userType)).getOrElse(Json.obj())
-    detailsJson ++ userTypeJson
+  implicit def writes[T: OWrites]: OWrites[Audit[T]] = (audit: Audit[T]) => {
+    val detailsJson       = Json.toJsObject(audit.details)
+    val userTypeJson      = audit.userType.map(userType => Json.obj("userType" -> userType)).getOrElse(Json.obj())
+    val correlationIdJson = audit.correlationId.map(correlationId => Json.obj("correlationId" -> correlationId)).getOrElse(Json.obj())
+    val errorJson         = audit.error.map(error => Json.obj("error" -> error)).getOrElse(Json.obj())
+    detailsJson ++ userTypeJson ++ correlationIdJson ++ errorJson
   }
 }
