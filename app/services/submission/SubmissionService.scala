@@ -112,13 +112,13 @@ class SubmissionService @Inject() (
             } yield conversationId
           case None =>
             val error = SubmissionServiceError(s"Xml file with conversation Id [${conversationId.value}] is empty", Some(request.affinityGroup))
-            auditService.sendAuditEvent(AuditType.fileSubmission, Json.toJson(error))
+            auditService.sendAuditEvent(AuditType.fileSubmissionError, Json.toJson(error))
             EitherT.left(Future.successful(error))
         }
       case Failure(_) =>
         val error =
           SubmissionServiceError(s"Failed to load xml file [$documentUrl] with conversation Id [${conversationId.value}]", Some(request.affinityGroup))
-        auditService.sendAuditEvent(AuditType.fileSubmission, Json.toJson(error))
+        auditService.sendAuditEvent(AuditType.fileSubmissionError, Json.toJson(error))
         EitherT.left(Future.successful(error))
     }
 
