@@ -18,9 +18,11 @@ package services.upscan
 
 import base.SpecBase
 import models.upscan._
+import org.mockito.ArgumentMatchers.any
 import play.api.Application
 import play.api.inject.bind
 import services.audit.AuditService
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -75,6 +77,7 @@ class UpScanCallbackDispatcherSpec extends SpecBase {
       when(
         mockUploadProgressTracker.registerUploadResult(reference, uploadStatus)
       ).thenReturn(Future.successful(true))
+      when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(AuditResult.Success))
 
       val uploadCallbackDispatcher =
         new UpScanCallbackDispatcher(mockUploadProgressTracker, mockAuditService)
@@ -96,7 +99,7 @@ class UpScanCallbackDispatcherSpec extends SpecBase {
       when(
         mockUploadProgressTracker.registerUploadResult(reference, uploadStatus)
       ).thenReturn(Future.successful(true))
-//      when(mockAuditService.sendAuditEvent(any(), any())).thenReturn(Future.successful(Success))
+      when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(AuditResult.Success))
 
       val uploadCallbackDispatcher =
         new UpScanCallbackDispatcher(mockUploadProgressTracker, mockAuditService)
@@ -118,6 +121,7 @@ class UpScanCallbackDispatcherSpec extends SpecBase {
       when(
         mockUploadProgressTracker.registerUploadResult(reference, uploadStatus)
       ).thenReturn(Future.successful(true))
+      when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(AuditResult.Success))
 
       val uploadCallbackDispatcher =
         new UpScanCallbackDispatcher(mockUploadProgressTracker, mockAuditService)
@@ -139,6 +143,7 @@ class UpScanCallbackDispatcherSpec extends SpecBase {
       when(
         mockUploadProgressTracker.registerUploadResult(reference, uploadStatus)
       ).thenReturn(Future.successful(true))
+      when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(AuditResult.Success))
 
       val uploadCallbackDispatcher =
         new UpScanCallbackDispatcher(mockUploadProgressTracker, mockAuditService)
