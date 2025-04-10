@@ -124,3 +124,16 @@ case class FailedCallbackBody(
   reference: Reference,
   failureDetails: ErrorDetails
 ) extends CallbackBody
+
+object FailedCallbackBody {
+  implicit val writes: OWrites[FailedCallbackBody] = OWrites { failedCallbackBody =>
+    Json.obj(
+      "reference" -> Json.toJsFieldJsValueWrapper(
+        failedCallbackBody.reference
+      ),
+      "failureDetails" -> Json.toJsFieldJsValueWrapper(
+        failedCallbackBody.failureDetails
+      )
+    )
+  }
+}

@@ -16,31 +16,43 @@
 
 package controllers.upscan
 
+import models.audit.Audit
+import models.audit.AuditType.sdesResponseError
 import models.upscan.CallbackBody
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.JsValue
-import play.api.mvc.{Action, BaseController, MessagesControllerComponents}
+import play.api.i18n.MessagesApi
+import play.api.libs.json.{JsValue, Json, Writes}
+import play.api.mvc.{Action, ControllerComponents}
+import services.audit.AuditService
 import services.upscan.UpScanCallbackDispatcher
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
-import uk.gov.hmrc.play.bootstrap.controller.WithJsonBody
+import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
 
-@Singleton
 class UploadCallbackController @Inject() (
-  val controllerComponents: MessagesControllerComponents,
   val upscanCallbackDispatcher: UpScanCallbackDispatcher,
+  val auditService: AuditService,
+  cc: ControllerComponents,
   implicit override val messagesApi: MessagesApi
-)(implicit val ec: ExecutionContext)
-    extends BaseController
-    with WithJsonBody
-    with I18nSupport {
+)(implicit ec: ExecutionContext)
+    extends BackendController(cc) {
+
+  implicit val writes: Writes[Audit[JsValue]] = (audit: Audit[JsValue]) =>
+    Json.obj(
+      "details" -> audit.details
+    )
 
   val callback: Action[JsValue] = Action.async(parse.json) { implicit request =>
-    withJsonBody[CallbackBody] { feedback: CallbackBody =>
-      upscanCallbackDispatcher
-        .handleCallback(feedback)
-        .map(_ => Ok)
-    }
+    val callback = request.body.validate[CallbackBody]
+    callback.fold(
+      _ => {
+        auditService.sendAuditEvent(sdesResponseError, Json.toJson(Audit(request.body)))
+        Future.successful(BadRequest("Invalid callback body"))
+      },
+      validCallback =>
+        upscanCallbackDispatcher
+          .handleCallback(validCallback)
+          .map(_ => Ok)
+    )
   }
 }

@@ -17,22 +17,26 @@
 package services.upscan
 
 import base.SpecBase
-import models.upscan.{ErrorDetails, FailedCallbackBody, Quarantined, ReadyCallbackBody, Reference, UploadDetails, UploadRejected, UploadedSuccessfully}
+import models.upscan._
 import play.api.Application
 import play.api.inject.bind
-import models.upscan.Failed
+import services.audit.AuditService
+
 import java.time.Instant
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class UpScanCallbackDispatcherSpec extends SpecBase {
 
   val mockUploadProgressTracker: UploadProgressTracker =
     mock[UploadProgressTracker]
+  val mockAuditService: AuditService = mock[AuditService]
 
   val application: Application =
     applicationBuilder()
       .overrides(
-        bind[UploadProgressTracker].toInstance(mockUploadProgressTracker)
+        bind[UploadProgressTracker].toInstance(mockUploadProgressTracker),
+        bind[AuditService].toInstance(mockAuditService)
       )
       .build()
 
@@ -73,7 +77,7 @@ class UpScanCallbackDispatcherSpec extends SpecBase {
       ).thenReturn(Future.successful(true))
 
       val uploadCallbackDispatcher =
-        new UpScanCallbackDispatcher(mockUploadProgressTracker)
+        new UpScanCallbackDispatcher(mockUploadProgressTracker, mockAuditService)
 
       val result: Future[Boolean] =
         uploadCallbackDispatcher.handleCallback(readyCallbackBody)
@@ -92,9 +96,10 @@ class UpScanCallbackDispatcherSpec extends SpecBase {
       when(
         mockUploadProgressTracker.registerUploadResult(reference, uploadStatus)
       ).thenReturn(Future.successful(true))
+//      when(mockAuditService.sendAuditEvent(any(), any())).thenReturn(Future.successful(Success))
 
       val uploadCallbackDispatcher =
-        new UpScanCallbackDispatcher(mockUploadProgressTracker)
+        new UpScanCallbackDispatcher(mockUploadProgressTracker, mockAuditService)
 
       val result: Future[Boolean] =
         uploadCallbackDispatcher.handleCallback(readyCallbackBody)
@@ -115,7 +120,7 @@ class UpScanCallbackDispatcherSpec extends SpecBase {
       ).thenReturn(Future.successful(true))
 
       val uploadCallbackDispatcher =
-        new UpScanCallbackDispatcher(mockUploadProgressTracker)
+        new UpScanCallbackDispatcher(mockUploadProgressTracker, mockAuditService)
 
       val result: Future[Boolean] =
         uploadCallbackDispatcher.handleCallback(readyCallbackBody)
@@ -136,7 +141,7 @@ class UpScanCallbackDispatcherSpec extends SpecBase {
       ).thenReturn(Future.successful(true))
 
       val uploadCallbackDispatcher =
-        new UpScanCallbackDispatcher(mockUploadProgressTracker)
+        new UpScanCallbackDispatcher(mockUploadProgressTracker, mockAuditService)
 
       val result: Future[Boolean] =
         uploadCallbackDispatcher.handleCallback(readyCallbackBody)
