@@ -21,7 +21,9 @@ import config.AppConfig
 import models.sdes._
 import play.api.Logging
 import play.api.http.Status.NO_CONTENT
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import play.api.libs.json.Json
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 
 import javax.inject.Singleton
 import scala.concurrent.{ExecutionContext, Future}
@@ -29,7 +31,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class SDESConnector @Inject() (
   val config: AppConfig,
-  val http: HttpClient
+  val http: HttpClientV2
 ) extends Logging {
 
   private val clientIdHeader: Seq[(String, String)] = Seq("x-client-id" -> config.sdesClientId)
@@ -38,7 +40,10 @@ class SDESConnector @Inject() (
     request: FileTransferNotification
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[Int, Int]] =
     http
-      .POST[FileTransferNotification, HttpResponse](config.sdesUrl, request, clientIdHeader)
+      .post(url"${config.sdesUrl}") //, request, clientIdHeader)
+      .setHeader(clientIdHeader: _*)
+      .withBody(Json.toJson(request))
+      .execute[HttpResponse]
       .map { response =>
         response.status match {
           case NO_CONTENT => Right(response.status)
