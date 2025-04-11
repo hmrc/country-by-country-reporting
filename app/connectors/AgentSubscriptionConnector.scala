@@ -19,57 +19,45 @@ package connectors
 import com.google.inject.Inject
 import config.AppConfig
 import models.agentSubscription.AgentSubscriptionEtmpRequest
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import play.api.libs.json.Json
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class AgentSubscriptionConnector @Inject() (
   val config: AppConfig,
-  val http: HttpClient
+  val http: HttpClientV2
 ) {
 
   def createSubscription(agentSubscription: AgentSubscriptionEtmpRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
     val serviceName = "create-agent-subscription"
 
-    http.POST[AgentSubscriptionEtmpRequest, HttpResponse](
-      config.serviceUrl(serviceName),
-      agentSubscription,
-      headers = extraHeaders(serviceName)
-    )(
-      wts = AgentSubscriptionEtmpRequest.format,
-      rds = httpReads,
-      hc = hc,
-      ec = ec
-    )
+    http
+      .post(url"${config.serviceUrl(serviceName)}")
+      .setHeader(extraHeaders(serviceName): _*)
+      .withBody(Json.toJson(agentSubscription))
+      .execute[HttpResponse]
   }
 
   def readSubscription(agentRefNo: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
     val serviceName = "read-agent-subscription"
 
-    http.GET[HttpResponse](
-      s"${config.serviceUrl(serviceName)}/ARN/$agentRefNo",
-      headers = extraHeaders(serviceName)
-    )(
-      rds = httpReads,
-      hc = hc,
-      ec = ec
-    )
+    http
+      .get(url"${config.serviceUrl(serviceName)}/ARN/$agentRefNo")
+      .setHeader(extraHeaders(serviceName): _*)
+      .execute[HttpResponse]
   }
 
   def updateSubscription(agentSubscription: AgentSubscriptionEtmpRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
 
     val serviceName = "update-agent-subscription"
 
-    http.PUT[AgentSubscriptionEtmpRequest, HttpResponse](
-      config.serviceUrl(serviceName),
-      agentSubscription,
-      extraHeaders(serviceName)
-    )(
-      wts = AgentSubscriptionEtmpRequest.format,
-      rds = httpReads,
-      hc = hc,
-      ec = ec
-    )
+    http
+      .put(url"${config.serviceUrl(serviceName)}")
+      .setHeader(extraHeaders(serviceName): _*)
+      .withBody(Json.toJson(agentSubscription))
+      .execute[HttpResponse]
   }
 
   private def extraHeaders(serviceName: String)(implicit hc: HeaderCarrier): Seq[(String, String)] = Seq()

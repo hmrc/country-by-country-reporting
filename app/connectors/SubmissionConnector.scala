@@ -18,7 +18,8 @@ package connectors
 
 import config.AppConfig
 import models.submission.ConversationId
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -26,7 +27,7 @@ import scala.xml.NodeSeq
 
 class SubmissionConnector @Inject() (
   val config: AppConfig,
-  http: HttpClient
+  http: HttpClientV2
 )(implicit ec: ExecutionContext) {
 
   def submitDisclosure(submission: NodeSeq, conversationId: ConversationId)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
@@ -41,7 +42,11 @@ class SubmissionConnector @Inject() (
       .withAccept(Some("application/xml"))
       .withEnvironment(Some(config.environment(serviceName)))
 
-    http.POSTString[HttpResponse](config.serviceUrl(serviceName), submission.mkString, extraHeaders)(implicitly, hc, ec)
+    http
+      .post(url"${config.serviceUrl(serviceName)}")
+      .setHeader(extraHeaders: _*)
+      .withBody(submission.mkString)
+      .execute[HttpResponse]
   }
 
 }
