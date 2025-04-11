@@ -16,17 +16,26 @@
 
 package services.upscan
 
+import models.audit.Audit
+import models.audit.AuditType.{sdesResponse, sdesResponseError}
+
 import javax.inject.Inject
 import models.upscan._
 import play.api.Logging
+import play.api.libs.json.Json
+import services.audit.AuditService
+import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class UpScanCallbackDispatcher @Inject() (sessionStorage: UploadProgressTracker) extends Logging {
+class UpScanCallbackDispatcher @Inject() (sessionStorage: UploadProgressTracker, auditService: AuditService)(implicit
+  val ec: ExecutionContext
+) extends Logging {
 
-  def handleCallback(callback: CallbackBody): Future[Boolean] = {
+  def handleCallback(callback: CallbackBody)(implicit hc: HeaderCarrier): Future[Boolean] = {
     val uploadStatus = callback match {
       case s: ReadyCallbackBody =>
+        auditService.sendAuditEvent(sdesResponse, Json.toJson(Audit(s)))
         UploadedSuccessfully(
           s.uploadDetails.fileName,
           s.uploadDetails.fileMimeType,
@@ -36,12 +45,15 @@ class UpScanCallbackDispatcher @Inject() (sessionStorage: UploadProgressTracker)
         )
       case s: FailedCallbackBody if s.failureDetails.failureReason == "QUARANTINE" =>
         logger.warn(s"FailedCallbackBody, QUARANTINE: $s")
+        auditService.sendAuditEvent(sdesResponseError, Json.toJson(Audit(s)))
         Quarantined
       case s: FailedCallbackBody if s.failureDetails.failureReason == "REJECTED" =>
         logger.warn(s"FailedCallbackBody, REJECTED: $s")
+        auditService.sendAuditEvent(sdesResponseError, Json.toJson(Audit(s)))
         UploadRejected(s.failureDetails)
       case f: FailedCallbackBody =>
         logger.warn(s"FailedCallbackBody: $f")
+        auditService.sendAuditEvent(sdesResponse, Json.toJson(Audit(f)))
         Failed
     }
     sessionStorage.registerUploadResult(callback.reference, uploadStatus)
