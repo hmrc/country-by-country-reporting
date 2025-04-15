@@ -46,12 +46,12 @@ trait Generators extends ModelGenerators {
       case ((n, _), m) =>
         m + n
     }
-  }
+  }.suchThat(_.nonEmpty)
 
   def intsInRangeWithCommas(min: Int, max: Int): Gen[String] = {
     val numberGen = choose[Int](min, max)
     genIntersperseString(numberGen.toString, ",")
-  }
+  } suchThat (_.nonEmpty)
 
   def intsLargerThanMaxValue: Gen[BigInt] =
     arbitrary[BigInt] suchThat (x => x > Int.MaxValue)
@@ -67,6 +67,7 @@ trait Generators extends ModelGenerators {
       .suchThat(_.abs < Int.MaxValue)
       .suchThat(!_.isValidInt)
       .map("%f".format(_))
+      .suchThat(_.nonEmpty)
 
   def intsBelowValue(value: Int): Gen[Int] =
     arbitrary[Int] suchThat (_ < value)
@@ -99,7 +100,7 @@ trait Generators extends ModelGenerators {
   } yield chars.mkString
 
   def stringsExceptSpecificValues(excluded: Seq[String]): Gen[String] =
-    nonEmptyString suchThat (!excluded.contains(_))
+    nonEmptyString suchThat (!excluded.contains(_)) suchThat (_.nonEmpty)
 
   def oneOf[T](xs: Seq[Gen[T]]): Gen[T] =
     if (xs.isEmpty) {

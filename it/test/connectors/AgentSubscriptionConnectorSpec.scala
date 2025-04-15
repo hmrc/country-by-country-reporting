@@ -91,7 +91,7 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockHelper with I
       val agentReadSubscriptionEndpoint = "/dac6/dct51c/v1"
 
       "must return status as OK for read Subscription" in {
-        forAll { agentRefNo: String =>
+        forAll(nonEmptyString) { agentRefNo: String =>
           stubResponse(s"$agentReadSubscriptionEndpoint/ARN/$agentRefNo", OK, RequestMethod.GET)
 
           val result = connector.readSubscription(agentRefNo)

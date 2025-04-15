@@ -39,8 +39,6 @@ trait ModelGenerators {
     datesBetween(LocalDate.of(1900, 1, 1), LocalDate.of(2100, 1, 1))
   }
 
-  implicit val arbitraryNonEmptyString: Arbitrary[String] = Arbitrary(nonEmptyString)
-
   implicit val arbitraryShort: Arbitrary[Short] = Arbitrary(Gen.chooseNum(0, Short.MaxValue))
 
   implicit val arbitraryAlgorithm: Arbitrary[Algorithm] = Arbitrary(Gen.oneOf(Algorithm.values))
@@ -48,7 +46,7 @@ trait ModelGenerators {
   implicit val arbitraryRequestCommonForSubscription: Arbitrary[RequestCommonForSubscription] =
     Arbitrary {
       for {
-        receiptDate        <- arbitrary[String]
+        receiptDate        <- nonEmptyString
         acknowledgementRef <- stringsWithMaxLength(32)
       } yield RequestCommonForSubscription(
         regime = Regime,
@@ -62,7 +60,7 @@ trait ModelGenerators {
   implicit val arbitraryAgentRequestCommonForSubscription: Arbitrary[AgentRequestCommonForSubscription] =
     Arbitrary {
       for {
-        receiptDate        <- arbitrary[String]
+        receiptDate        <- nonEmptyString
         acknowledgementRef <- stringsWithMaxLength(32)
       } yield AgentRequestCommonForSubscription(
         regime = Regime,
@@ -75,8 +73,8 @@ trait ModelGenerators {
 
   implicit val arbitraryReadSubscriptionRequestDetail: Arbitrary[ReadSubscriptionRequestDetail] = Arbitrary {
     for {
-      idType   <- arbitrary[String]
-      idNumber <- arbitrary[String]
+      idType   <- nonEmptyString
+      idNumber <- nonEmptyString
     } yield ReadSubscriptionRequestDetail(
       IDType = idType,
       IDNumber = idNumber
@@ -99,12 +97,12 @@ trait ModelGenerators {
 
   implicit val arbitraryOrganisationDetails: Arbitrary[OrganisationDetails] = Arbitrary {
     for {
-      orgName <- arbitrary[String]
+      orgName <- nonEmptyString
     } yield OrganisationDetails(orgName)
   }
 
   implicit val arbitraryAgentDetails: Arbitrary[AgentDetails] = Arbitrary {
-    arbitrary[String].map(AgentDetails.apply)
+    nonEmptyString.map(AgentDetails.apply)
   }
 
   implicit val arbitraryContactInformation: Arbitrary[ContactInformation] = Arbitrary {
@@ -127,9 +125,9 @@ trait ModelGenerators {
 
   implicit val arbitraryRequestDetail: Arbitrary[RequestDetailForUpdate] = Arbitrary {
     for {
-      idType           <- arbitrary[String]
-      idNumber         <- arbitrary[String]
-      tradingName      <- Gen.option(arbitrary[String])
+      idType           <- nonEmptyString
+      idNumber         <- nonEmptyString
+      tradingName      <- Gen.option(nonEmptyString)
       isGBUser         <- arbitrary[Boolean]
       primaryContact   <- arbitrary[ContactInformation]
       secondaryContact <- Gen.option(arbitrary[ContactInformation])
@@ -138,8 +136,8 @@ trait ModelGenerators {
 
   implicit val arbitraryAgentRequestDetailForUpdate: Arbitrary[AgentRequestDetailForUpdate] = Arbitrary {
     for {
-      idNumber         <- arbitrary[String]
-      tradingName      <- Gen.option(arbitrary[String])
+      idNumber         <- nonEmptyString
+      tradingName      <- Gen.option(nonEmptyString)
       isGBUser         <- arbitrary[Boolean]
       primaryContact   <- arbitrary[AgentContactInformation]
       secondaryContact <- Gen.option(arbitrary[AgentContactInformation])
@@ -149,7 +147,7 @@ trait ModelGenerators {
   implicit val arbitraryRequestCommonForUpdateSubscription: Arbitrary[RequestCommonForUpdate] =
     Arbitrary {
       for {
-        receiptDate        <- arbitrary[String]
+        receiptDate        <- nonEmptyString
         acknowledgementRef <- stringsWithMaxLength(32)
       } yield RequestCommonForUpdate(
         regime = Regime,
@@ -163,7 +161,7 @@ trait ModelGenerators {
   implicit val arbitraryAgentRequestCommonForUpdate: Arbitrary[AgentRequestCommonForUpdate] =
     Arbitrary {
       for {
-        receiptDate        <- arbitrary[String]
+        receiptDate        <- nonEmptyString
         acknowledgementRef <- stringsWithMaxLength(32)
       } yield AgentRequestCommonForUpdate(
         regime = Regime,
@@ -214,8 +212,8 @@ trait ModelGenerators {
 
   implicit val arbitraryAgentRequestDetail: Arbitrary[AgentRequestDetail] = Arbitrary {
     for {
-      idNumber         <- arbitrary[String]
-      tradingName      <- Gen.option(arbitrary[String])
+      idNumber         <- nonEmptyString
+      tradingName      <- Gen.option(nonEmptyString)
       isGBUser         <- arbitrary[Boolean]
       primaryContact   <- arbitrary[AgentContactInformation]
       secondaryContact <- Gen.option(arbitrary[AgentContactInformation])
@@ -225,7 +223,7 @@ trait ModelGenerators {
   implicit val arbitraryEmailRequest: Arbitrary[EmailRequest] = Arbitrary {
     for {
       to     <- Gen.listOf(validEmailAddress)
-      id     <- arbitrary[String]
+      id     <- nonEmptyString
       params <- arbitrary[Map[String, String]]
     } yield EmailRequest(to, id, params)
   }
@@ -233,14 +231,18 @@ trait ModelGenerators {
   implicit val arbitraryIndividualContact: Arbitrary[Individual] =
     Arbitrary {
       for {
-        firstName  <- arbitrary[String]
-        lastName   <- arbitrary[String]
-        middleName <- Gen.option(arbitrary[String])
+        firstName  <- nonEmptyString
+        lastName   <- nonEmptyString
+        middleName <- Gen.option(nonEmptyString)
       } yield Individual(firstName, lastName, middleName)
     }
 
   implicit val arbitraryOrganisationContact: Arbitrary[Organisation] =
-    Arbitrary(arbitrary[String].map(Organisation(_)))
+    Arbitrary {
+      for {
+        name <- nonEmptyString
+      } yield Organisation(name)
+    }
 
   implicit val arbitraryContact: Arbitrary[Contact] =
     Arbitrary {
@@ -256,8 +258,8 @@ trait ModelGenerators {
   implicit val arbitraryCreateAgentSubscriptionEtmpRequest: Arbitrary[AgentSubscriptionEtmpRequest] =
     Arbitrary {
       for {
-        idNumber         <- arbitrary[String]
-        tradingName      <- Gen.option(arbitrary[String])
+        idNumber         <- nonEmptyString
+        tradingName      <- Gen.option(nonEmptyString)
         isGBUser         <- arbitrary[Boolean]
         primaryContact   <- arbitrary[Contact]
         secondaryContact <- Gen.option(arbitrary[Contact])
@@ -266,22 +268,22 @@ trait ModelGenerators {
 
   implicit val arbitraryProperty: Arbitrary[Property] = Arbitrary {
     for {
-      name  <- arbitrary[String]
-      value <- arbitrary[String]
+      name  <- nonEmptyString
+      value <- nonEmptyString
     } yield Property(name, value)
   }
 
   implicit val arbitraryCheckSum: Arbitrary[Checksum] = Arbitrary {
     for {
       algorithm <- arbitrary[Algorithm]
-      value     <- arbitrary[String]
+      value     <- nonEmptyString
     } yield Checksum(algorithm, value)
   }
 
   implicit val arbitraryFile: Arbitrary[models.sdes.File] = Arbitrary {
     for {
       recipientOrSender <- arbitrary[Option[String]]
-      name              <- arbitrary[String]
+      name              <- nonEmptyString
       location          <- arbitrary[Option[String]]
       checksum          <- arbitrary[Checksum]
       size              <- arbitrary[Int]
@@ -300,12 +302,12 @@ trait ModelGenerators {
   implicit val arbitraryFileDetails: Arbitrary[models.submission.FileDetails] = Arbitrary {
     for {
       _id                 <- arbitrary[ConversationId]
-      subscriptionId      <- arbitrary[String]
-      messageRefId        <- arbitrary[String]
-      reportingEntityName <- arbitrary[String]
+      subscriptionId      <- nonEmptyString
+      messageRefId        <- nonEmptyString
+      reportingEntityName <- nonEmptyString
       reportType          <- arbitrary[ReportType]
       status              <- arbitrary[FileStatus]
-      name                <- arbitrary[String]
+      name                <- nonEmptyString
       submitted           <- arbitrary[LocalDateTime]
       lastUpdated         <- arbitrary[LocalDateTime]
     } yield models.submission.FileDetails(
@@ -324,11 +326,11 @@ trait ModelGenerators {
   val arbitraryPendingFileDetails: Arbitrary[models.submission.FileDetails] = Arbitrary {
     for {
       _id                 <- arbitrary[ConversationId]
-      subscriptionId      <- arbitrary[String]
-      messageRefId        <- arbitrary[String]
-      reportingEntityName <- arbitrary[String]
+      subscriptionId      <- nonEmptyString
+      messageRefId        <- nonEmptyString
+      reportingEntityName <- nonEmptyString
       reportType          <- arbitrary[ReportType]
-      name                <- arbitrary[String]
+      name                <- nonEmptyString
       submitted           <- arbitrary[LocalDateTime]
       lastUpdated         <- arbitrary[LocalDateTime]
     } yield models.submission.FileDetails(
@@ -347,12 +349,12 @@ trait ModelGenerators {
   val arbitraryNonPendingFileDetails: Arbitrary[models.submission.FileDetails] = Arbitrary {
     for {
       _id                 <- arbitrary[ConversationId]
-      subscriptionId      <- arbitrary[String]
-      messageRefId        <- arbitrary[String]
-      reportingEntityName <- arbitrary[String]
+      subscriptionId      <- nonEmptyString
+      messageRefId        <- nonEmptyString
+      reportingEntityName <- nonEmptyString
       reportType          <- arbitrary[ReportType]
       status              <- arbitrary[FileStatus].suchThat(_ != Pending)
-      name                <- arbitrary[String]
+      name                <- nonEmptyString
       submitted           <- arbitrary[LocalDateTime]
       lastUpdated         <- arbitrary[LocalDateTime]
     } yield models.submission.FileDetails(
@@ -369,12 +371,12 @@ trait ModelGenerators {
   }
 
   implicit val arbitraryAudit: Arbitrary[Audit] = Arbitrary {
-    arbitrary[String].map(Audit.apply)
+    nonEmptyString.map(Audit.apply)
   }
 
   implicit val arbitraryFileTransferNotification: Arbitrary[FileTransferNotification] = Arbitrary {
     for {
-      informationType <- arbitrary[String]
+      informationType <- nonEmptyString
       file            <- arbitrary[models.sdes.File]
       audit           <- arbitrary[Audit]
     } yield FileTransferNotification(informationType, file, audit)
@@ -383,7 +385,7 @@ trait ModelGenerators {
   implicit val arbitraryResponseDetail: Arbitrary[ResponseDetail] = Arbitrary {
     for {
       subscriptionId   <- validSubscriptionID
-      tradingName      <- Gen.option(arbitrary[String])
+      tradingName      <- Gen.option(nonEmptyString)
       isGBUser         <- arbitrary[Boolean]
       primaryContact   <- arbitrary[ContactInformation]
       secondaryContact <- Gen.option(arbitrary[ContactInformation])
@@ -392,9 +394,9 @@ trait ModelGenerators {
 
   implicit val arbitraryMessageSpecData: Arbitrary[MessageSpecData] = Arbitrary {
     for {
-      messageRefId        <- arbitrary[String]
+      messageRefId        <- nonEmptyString
       messageTypeIndic    <- Gen.oneOf(MessageTypeIndic.values)
-      reportingEntityName <- arbitrary[String]
+      reportingEntityName <- nonEmptyString
       reporterType        <- Gen.oneOf(ReportType.values)
     } yield MessageSpecData(messageRefId, messageTypeIndic, reportingEntityName, reporterType)
   }
@@ -402,9 +404,9 @@ trait ModelGenerators {
   implicit val arbitrarySubmissionDetails: Arbitrary[SubmissionDetails] = Arbitrary {
     for {
       file            <- arbitrary[models.sdes.File]
-      uploadId        <- arbitrary[String]
-      enrolmentId     <- arbitrary[String]
-      documentUrl     <- arbitrary[String]
+      uploadId        <- nonEmptyString
+      enrolmentId     <- nonEmptyString
+      documentUrl     <- nonEmptyString
       messageSpecData <- arbitrary[MessageSpecData]
     } yield SubmissionDetails(file.name, UploadId(uploadId), enrolmentId, file.size, documentUrl, file.checksum.value, messageSpecData)
   }
@@ -412,7 +414,7 @@ trait ModelGenerators {
   implicit val arbitraryAgentResponseDetail: Arbitrary[AgentResponseDetail] = Arbitrary {
     for {
       subscriptionId   <- validSubscriptionID
-      tradingName      <- Gen.option(arbitrary[String])
+      tradingName      <- Gen.option(nonEmptyString)
       isGbUser         <- arbitrary[Boolean]
       primaryContact   <- arbitrary[ContactInformation]
       secondaryContact <- Gen.option(arbitrary[ContactInformation])
@@ -439,23 +441,23 @@ trait ModelGenerators {
   implicit val arbitrarySdesCallback: Arbitrary[SdesCallback] = Arbitrary {
     for {
       notification  <- arbitrary[NotificationType]
-      filename      <- arbitrary[String]
+      filename      <- nonEmptyString
       algorithm     <- arbitrary[Algorithm]
-      checksum      <- arbitrary[String]
+      checksum      <- nonEmptyString
       correlationID <- arbitrary[ConversationId]
       dateTime      <- Gen.option(zonedDateTime.arbitrary)
-      failureReason <- Gen.option(arbitrary[String])
+      failureReason <- Gen.option(nonEmptyString)
     } yield SdesCallback(notification, filename, algorithm, checksum, correlationID, dateTime, failureReason)
   }
 
   val arbitraryFailureSdesCallback: Arbitrary[SdesCallback] = Arbitrary {
     for {
       notification  <- Gen.const(FileProcessingFailure)
-      filename      <- arbitrary[String]
+      filename      <- nonEmptyString
       virus         <- Gen.const("virus")
-      otherFailure  <- arbitrary[String]
+      otherFailure  <- nonEmptyString
       algorithm     <- arbitrary[Algorithm]
-      checksum      <- arbitrary[String]
+      checksum      <- nonEmptyString
       correlationID <- arbitrary[ConversationId]
       dateTime      <- Gen.option(zonedDateTime.arbitrary)
       failureReason <- Gen.oneOf(Some(virus), Some(otherFailure), None)
@@ -465,9 +467,9 @@ trait ModelGenerators {
   val arbitrarySuccessSdesCallback: Arbitrary[SdesCallback] = Arbitrary {
     for {
       notification  <- Gen.oneOf(NotificationType.FileReady, NotificationType.FileReceived, NotificationType.FileProcessed)
-      filename      <- arbitrary[String]
+      filename      <- nonEmptyString
       algorithm     <- arbitrary[Algorithm]
-      checksum      <- arbitrary[String]
+      checksum      <- nonEmptyString
       correlationID <- arbitrary[ConversationId]
       dateTime      <- Gen.option(zonedDateTime.arbitrary)
     } yield SdesCallback(notification, filename, algorithm, checksum, correlationID, dateTime)
