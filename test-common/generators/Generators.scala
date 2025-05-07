@@ -79,13 +79,12 @@ trait Generators extends ModelGenerators {
     arbitrary[Int] suchThat (x => x < min || x > max)
 
   def nonBooleans: Gen[String] =
-    arbitrary[String]
-      .suchThat(_.nonEmpty)
+    nonEmptyString
       .suchThat(_ != "true")
       .suchThat(_ != "false")
 
   def nonEmptyString: Gen[String] =
-    Gen.alphaNumStr suchThat (_.nonEmpty)
+    Gen.nonEmptyListOf(Gen.alphaChar).map(_.mkString)
 
   def stringsWithMaxLength(maxLength: Int): Gen[String] =
     for {
