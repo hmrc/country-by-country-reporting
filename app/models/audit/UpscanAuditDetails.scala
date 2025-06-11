@@ -18,7 +18,7 @@
 package models.audit
 
 import models.upscan.{FailedCallbackBody, ReadyCallbackBody}
-import play.api.libs.json.{JsObject, Json, OFormat}
+import play.api.libs.json.{Json, OFormat}
 
 case class UpscanAuditDetails(
   reference: String,
