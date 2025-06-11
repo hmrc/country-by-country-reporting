@@ -17,7 +17,7 @@
 package controllers.upscan
 
 import models.audit.Audit
-import models.audit.AuditType.fileValidationError // <-- CHANGE THIS IMPORT
+import models.audit.AuditType.fileValidationError
 import models.upscan.CallbackBody
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsValue, Json, Writes}
