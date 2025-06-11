@@ -16,8 +16,8 @@
 
 package services.upscan
 
-import models.audit.Audit
-import models.audit.AuditType.{sdesResponse, sdesResponseError}
+import models.audit.{Audit, UpscanAuditDetails}
+import models.audit.AuditType.{fileValidation, fileValidationError}
 
 import javax.inject.Inject
 import models.upscan._
@@ -33,29 +33,40 @@ class UpScanCallbackDispatcher @Inject() (sessionStorage: UploadProgressTracker,
 ) extends Logging {
 
   def handleCallback(callback: CallbackBody)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    val uploadStatus = callback match {
+    val (auditEvent, auditDetails, uploadStatus) = callback match {
       case s: ReadyCallbackBody =>
-        auditService.sendAuditEvent(sdesResponse, Json.toJson(Audit(s)))
-        UploadedSuccessfully(
-          s.uploadDetails.fileName,
-          s.uploadDetails.fileMimeType,
-          s.downloadUrl,
-          Option(s.uploadDetails.size),
-          Option(s.uploadDetails.checksum)
+        val details = UpscanAuditDetails(s)
+        (fileValidation,
+         details,
+         UploadedSuccessfully(
+           s.uploadDetails.fileName,
+           s.uploadDetails.fileMimeType,
+           s.downloadUrl,
+           Option(s.uploadDetails.size),
+           Option(s.uploadDetails.checksum)
+         )
         )
+
       case s: FailedCallbackBody if s.failureDetails.failureReason == "QUARANTINE" =>
-        logger.warn(s"FailedCallbackBody, QUARANTINE: $s")
-        auditService.sendAuditEvent(sdesResponseError, Json.toJson(Audit(s)))
-        Quarantined
+        logger.warn(s"FailedCallbackBody, QUARANTINE: ${s.reference.value}")
+        val details =
+          UpscanAuditDetails(s).copy(fileStatus = "QUARANTINED", fileError = Some(s.failureDetails.failureReason), error = Some(s.failureDetails.message))
+        (fileValidationError, details, Quarantined)
+
       case s: FailedCallbackBody if s.failureDetails.failureReason == "REJECTED" =>
-        logger.warn(s"FailedCallbackBody, REJECTED: $s")
-        auditService.sendAuditEvent(sdesResponseError, Json.toJson(Audit(s)))
-        UploadRejected(s.failureDetails)
+        logger.warn(s"FailedCallbackBody, REJECTED: ${s.reference.value}")
+        val details =
+          UpscanAuditDetails(s).copy(fileStatus = "REJECTED", fileError = Some(s.failureDetails.failureReason), error = Some(s.failureDetails.message))
+        (fileValidationError, details, UploadRejected(s.failureDetails))
+
       case f: FailedCallbackBody =>
-        logger.warn(s"FailedCallbackBody: $f")
-        auditService.sendAuditEvent(sdesResponse, Json.toJson(Audit(f)))
-        Failed
+        logger.warn(s"FailedCallbackBody: ${f.reference.value}")
+        val details =
+          UpscanAuditDetails(f).copy(fileStatus = "FAILED", fileError = Some(f.failureDetails.failureReason), error = Some(f.failureDetails.message))
+        (fileValidationError, details, Failed)
     }
+    auditService.sendAuditEvent(auditEvent, Json.toJson(Audit(auditDetails)))
+
     sessionStorage.registerUploadResult(callback.reference, uploadStatus)
   }
 
