@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-// models/upscan/UpscanAuditDetails.scala
 package models.audit
 
 import models.upscan.{FailedCallbackBody, ReadyCallbackBody}
