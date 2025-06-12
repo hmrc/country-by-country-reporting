@@ -18,14 +18,18 @@ package services
 
 import base.SpecBase
 import connectors.SubscriptionConnector
+import models.audit.AuditType.updateContactDetails
+import models.audit.{Audit, AuditDetailForUpdateOrgSubscriptionRequest}
 import models.error.{ReadSubscriptionError, UpdateSubscriptionError}
 import models.subscription.{DisplaySubscriptionForCBCRequest, RequestDetailForUpdate, UpdateSubscriptionForCBCRequest}
+import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.Status._
 import play.api.inject.bind
 import play.api.libs.json.Json
 import services.audit.AuditService
+import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Failure, Success}
 
@@ -138,6 +142,22 @@ class SubscriptionServiceSpec extends SpecBase with BeforeAndAfterEach {
     }
 
     "must  return UpdateSubscription with OK status when connector & audit service response with ok status" in {
+      val auditDetail = Json.parse("""
+                                     |{
+                                     |      "subscriptionId": "IDNumber",
+                                     |      "reportingEntityName": "Trading Name",
+                                     |      "firstContactName": "orgName1",
+                                     |      "firstContactEmail": "test@email.com",
+                                     |      "firstContactPhoneNumber": "+4411223344",
+                                     |      "hasSecondContact": true,
+                                     |      "secondContactName": "orgName2",
+                                     |      "secondContactEmail": "test@email.com",
+                                     |      "secondContactPhoneNumber": "+4411223344"
+                                     |}
+                                     |""".stripMargin)
+      val auditDetailRequest   = auditDetail.as[AuditDetailForUpdateOrgSubscriptionRequest]
+      val expectedAuditRequest = Json.toJson(Audit(auditDetailRequest, Some(AffinityGroup.Organisation)))
+
       val service = application.injector.instanceOf[SubscriptionService]
 
       when(mockSubscriptionConnector.updateSubscription(any[UpdateSubscriptionForCBCRequest]())(any[HeaderCarrier](), any[ExecutionContext]()))
@@ -148,7 +168,7 @@ class SubscriptionServiceSpec extends SpecBase with BeforeAndAfterEach {
 
       whenReady(result) { sub =>
         verify(mockSubscriptionConnector, times(1)).updateSubscription(any[UpdateSubscriptionForCBCRequest]())(any[HeaderCarrier](), any[ExecutionContext]())
-        verify(mockAuditService, times(1)).sendAuditEvent(any(), any())(any(), any())
+        verify(mockAuditService, times(1)).sendAuditEvent(ArgumentMatchers.eq(updateContactDetails), ArgumentMatchers.eq(expectedAuditRequest))(any(), any())
         sub mustBe Right(())
       }
     }

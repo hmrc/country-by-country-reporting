@@ -37,6 +37,12 @@ object AuditDetailForUpdateOrgSubscriptionRequest {
     val primaryContact: ContactInformation           = requestDetailForUpdate.primaryContact
     val secondaryContact: Option[ContactInformation] = requestDetailForUpdate.secondaryContact
 
+    val (maybeSecondContactName, maybeSecondContactEmail, maybeSecondContactPhone) = (
+      for (contact <- secondaryContact) yield contact.organisationDetails.organisationName,
+      for (contact <- secondaryContact) yield contact.email,
+      for (contact <- secondaryContact) yield contact.phone.get
+    )
+
     new AuditDetailForUpdateOrgSubscriptionRequest(
       subscriptionId = requestDetailForUpdate.IDNumber,
       reportingEntityName = requestDetailForUpdate.tradingName.getOrElse(""),
@@ -44,9 +50,9 @@ object AuditDetailForUpdateOrgSubscriptionRequest {
       firstContactEmail = primaryContact.email,
       firstContactPhoneNumber = primaryContact.phone,
       hasSecondContact = secondaryContact.isDefined,
-      secondContactName = if (secondaryContact.isDefined) Some(secondaryContact.get.organisationDetails.organisationName) else None,
-      secondContactEmail = if (secondaryContact.isDefined) Some(secondaryContact.get.email) else None,
-      secondContactPhoneNumber = if (secondaryContact.isDefined) secondaryContact.get.phone else None
+      secondContactName = maybeSecondContactName,
+      secondContactEmail = maybeSecondContactEmail,
+      secondContactPhoneNumber = maybeSecondContactPhone
     )
   }
 
