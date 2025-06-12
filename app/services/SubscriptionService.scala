@@ -17,25 +17,21 @@
 package services
 
 import connectors.SubscriptionConnector
+import models.audit.{Audit, AuditDetailForUpdateOrgSubscriptionRequest}
+import models.audit.AuditType.updateContactDetails
 import models.error.{BackendError, ReadSubscriptionError, UpdateSubscriptionError}
-import models.subscription.{
-  DisplaySubscriptionDetails,
-  DisplaySubscriptionForCBCRequest,
-  DisplaySubscriptionForCBCResponse,
-  ReadSubscriptionRequestDetail,
-  RequestCommonForSubscription,
-  RequestDetailForUpdate,
-  ResponseDetail,
-  UpdateSubscriptionForCBCRequest
-}
+import models.subscription._
 import play.api.Logging
 import play.api.http.Status.OK
+import play.api.libs.json.Json
+import services.audit.AuditService
+import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.http.HeaderCarrier
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class SubscriptionService @Inject() (subscriptionConnector: SubscriptionConnector) extends Logging {
+class SubscriptionService @Inject() (subscriptionConnector: SubscriptionConnector, auditService: AuditService) extends Logging {
 
   def getContactInformation(enrolmentId: String)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Either[BackendError, ResponseDetail]] = {
 
@@ -64,7 +60,10 @@ class SubscriptionService @Inject() (subscriptionConnector: SubscriptionConnecto
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Either[UpdateSubscriptionError, Unit]] =
     subscriptionConnector.updateSubscription(UpdateSubscriptionForCBCRequest(requestDetailForUpdate)).map { res =>
       res.status match {
-        case OK => Right(())
+        case OK =>
+          val audit = Audit(AuditDetailForUpdateOrgSubscriptionRequest(requestDetailForUpdate), Some(AffinityGroup.Organisation))
+          auditService.sendAuditEvent(updateContactDetails, Json.toJson(audit))
+          Right(())
         case status =>
           logger.warn(s"Update Subscription Got Status $status")
           Left(UpdateSubscriptionError(status))

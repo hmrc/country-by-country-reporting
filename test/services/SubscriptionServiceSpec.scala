@@ -25,48 +25,52 @@ import org.scalatest.BeforeAndAfterEach
 import play.api.http.Status._
 import play.api.inject.bind
 import play.api.libs.json.Json
+import services.audit.AuditService
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Failure, Success}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 class SubscriptionServiceSpec extends SpecBase with BeforeAndAfterEach {
 
-  override def beforeEach(): Unit = reset(mockSubscriptionConnector)
-
   val mockSubscriptionConnector = mock[SubscriptionConnector]
+
+  val mockAuditService            = mock[AuditService]
+  override def beforeEach(): Unit = reset(mockSubscriptionConnector, mockAuditService)
 
   "SubscriptionService" - {
     val application = applicationBuilder()
       .overrides(
-        bind[SubscriptionConnector].toInstance(mockSubscriptionConnector)
+        bind[SubscriptionConnector].toInstance(mockSubscriptionConnector),
+        bind[AuditService].toInstance(mockAuditService)
       )
       .build()
 
     val requestDetailJson = Json.parse("""
-                                         |{
-                                         |      "IDType": "SAFE",
-                                         |      "IDNumber": "IDNumber",
-                                         |      "tradingName": "Trading Name",
-                                         |      "isGBUser": true,
-                                         |      "primaryContact":
-                                         |        {
-                                         |          "organisation": {
-                                         |            "organisationName": "orgName1"
-                                         |          },
-                                         |          "email": "test@email.com",
-                                         |          "phone": "+4411223344"
-                                         |        },
-                                         |      "secondaryContact":
-                                         |        {
-                                         |          "organisation": {
-                                         |            "organisationName": "orgName2"
-                                         |          },
-                                         |          "email": "test@email.com",
-                                         |          "phone": "+4411223344"
-                                         |        }
-                                         |}
-                                         |""".stripMargin)
+        |{
+        |      "IDType": "SAFE",
+        |      "IDNumber": "IDNumber",
+        |      "tradingName": "Trading Name",
+        |      "isGBUser": true,
+        |      "primaryContact":
+        |        {
+        |          "organisation": {
+        |            "organisationName": "orgName1"
+        |          },
+        |          "email": "test@email.com",
+        |          "phone": "+4411223344"
+        |        },
+        |      "secondaryContact":
+        |        {
+        |          "organisation": {
+        |            "organisationName": "orgName2"
+        |          },
+        |          "email": "test@email.com",
+        |          "phone": "+4411223344"
+        |        }
+        |}
+        |""".stripMargin)
     val requestDetailForUpdate = requestDetailJson.as[RequestDetailForUpdate]
 
     "must correctly retrieve subscription from connector" in {
@@ -133,16 +137,34 @@ class SubscriptionServiceSpec extends SpecBase with BeforeAndAfterEach {
       }
     }
 
-    "must  return UpdateSubscription with OK status when connector response with ok status" in {
+    "must  return UpdateSubscription with OK status when connector & audit service response with ok status" in {
       val service = application.injector.instanceOf[SubscriptionService]
 
       when(mockSubscriptionConnector.updateSubscription(any[UpdateSubscriptionForCBCRequest]())(any[HeaderCarrier](), any[ExecutionContext]()))
         .thenReturn(Future.successful(HttpResponse(OK, "Good Response")))
+      when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(Success))
 
       val result = service.updateSubscription(requestDetailForUpdate)
 
       whenReady(result) { sub =>
         verify(mockSubscriptionConnector, times(1)).updateSubscription(any[UpdateSubscriptionForCBCRequest]())(any[HeaderCarrier](), any[ExecutionContext]())
+        verify(mockAuditService, times(1)).sendAuditEvent(any(), any())(any(), any())
+        sub mustBe Right(())
+      }
+    }
+
+    "must  return UpdateSubscription with OK status when connector response with ok and audit service returns failure" in {
+      val service = application.injector.instanceOf[SubscriptionService]
+
+      when(mockSubscriptionConnector.updateSubscription(any[UpdateSubscriptionForCBCRequest]())(any[HeaderCarrier](), any[ExecutionContext]()))
+        .thenReturn(Future.successful(HttpResponse(OK, "Good Response")))
+      when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(Failure("Failed")))
+
+      val result = service.updateSubscription(requestDetailForUpdate)
+
+      whenReady(result) { sub =>
+        verify(mockSubscriptionConnector, times(1)).updateSubscription(any[UpdateSubscriptionForCBCRequest]())(any[HeaderCarrier](), any[ExecutionContext]())
+        verify(mockAuditService, times(1)).sendAuditEvent(any(), any())(any(), any())
         sub mustBe Right(())
       }
     }
