@@ -38,6 +38,7 @@ import uk.gov.hmrc.http.HttpVerbs.POST
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 
 import scala.concurrent.{ExecutionContext, Future}
+import models.audit.AuditType
 
 class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with ScalaCheckPropertyChecks with Generators {
 
@@ -46,7 +47,7 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
   val mockAuditService: AuditService                   = mock[AuditService]
 
   override def beforeEach(): Unit = {
-    reset(mockFileDetailsRepository, mockEmailService)
+    reset(mockFileDetailsRepository, mockEmailService, mockAuditService)
     super.beforeEach()
   }
 
@@ -61,56 +62,102 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
   "SdesCallbackController" - {
     "must return Ok for success file notification" in {
 
-      forAll(arbitrarySuccessSdesCallback.arbitrary, arbitrary[FileDetails]) { (sdesCallback, fileDetails) =>
+      forAll(arbitrarySuccessSdesCallback.arbitrary, arbitraryPendingFileDetails.arbitrary) { (sdesCallback, fileDetails) =>
         reset(mockAuditService)
         when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(Success))
         when(mockFileDetailsRepository.findByConversationId(sdesCallback.correlationID)).thenReturn(Future.successful(Some(fileDetails)))
+        when(mockFileDetailsRepository.updateStatus(sdesCallback.correlationID.value, Accepted)).thenReturn(Future.successful(Some(fileDetails)))
+        when(mockEmailService.sendAndLogEmail(any(), any(), any(), any(), any(), any())(any())).thenReturn(Future.successful(Seq(ACCEPTED)))
 
         val request = FakeRequest(POST, routes.SdesCallbackController.callback.url).withBody(Json.toJson(sdesCallback))
         val result  = route(application, request).value
         status(result) mustEqual OK
-        verify(mockAuditService, times(2)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
 
+        verify(mockAuditService, times(1)).sendAuditEvent(is(AuditType.sdesResponse), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
+        verify(mockFileDetailsRepository).updateStatus(sdesCallback.correlationID.value, Accepted)
+        verify(mockEmailService, atLeast(1)).sendAndLogEmail(
+          is(fileDetails.subscriptionId),
+          any[String],
+          is(fileDetails.messageRefId),
+          is(fileDetails.agentDetails),
+          is(true),
+          is(fileDetails.reportType)
+        )(any[HeaderCarrier])
       }
     }
 
-    "must return Ok for failure notification and update status and send email" in {
-      forAll(arbitraryFailureSdesCallback.arbitrary, arbitraryPendingFileDetails.arbitrary) { (sdesCallback, fileDetails) =>
-        reset(mockAuditService)
-        when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(Success))
-        val updatedStatus = sdesCallback.failureReason match {
-          case Some(reason) if reason.toLowerCase.contains("virus") => RejectedSDESVirus
-          case _                                                    => RejectedSDES
-        }
-        when(mockFileDetailsRepository.findByConversationId(sdesCallback.correlationID)).thenReturn(Future.successful(Some(fileDetails)))
-        when(mockFileDetailsRepository.updateStatus(sdesCallback.correlationID.value, updatedStatus)).thenReturn(Future.successful(Some(fileDetails)))
-        when(
-          mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean], any[ReportType])(
+    "must return Ok for non-virus failure notification and update status and send email" in {
+      forAll(arbitraryFailureSdesCallback.arbitrary.suchThat(_.failureReason.forall(!_.toLowerCase.contains("virus"))), arbitraryPendingFileDetails.arbitrary) {
+        (sdesCallback, fileDetails) =>
+          reset(mockAuditService)
+          when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(Success))
+          val updatedStatus = RejectedSDES
+          when(mockFileDetailsRepository.findByConversationId(sdesCallback.correlationID)).thenReturn(Future.successful(Some(fileDetails)))
+          when(mockFileDetailsRepository.updateStatus(sdesCallback.correlationID.value, updatedStatus)).thenReturn(Future.successful(Some(fileDetails)))
+          when(
+            mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean], any[ReportType])(
+              any[HeaderCarrier]
+            )
+          )
+            .thenReturn(Future.successful(Seq(ACCEPTED)))
+
+          val request = FakeRequest(POST, routes.SdesCallbackController.callback.url).withBody(Json.toJson(sdesCallback))
+          val result  = route(application, request).value
+
+          status(result) mustEqual OK
+          verify(mockAuditService, times(1)).sendAuditEvent(is(AuditType.sdesResponse), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
+          verify(mockFileDetailsRepository).updateStatus(sdesCallback.correlationID.value, updatedStatus)
+          verify(mockEmailService, atLeast(1)).sendAndLogEmail(is(fileDetails.subscriptionId),
+                                                               any[String],
+                                                               is(fileDetails.messageRefId),
+                                                               is(fileDetails.agentDetails),
+                                                               is(false),
+                                                               is(fileDetails.reportType)
+          )(
             any[HeaderCarrier]
           )
-        )
-          .thenReturn(Future.successful(Seq(ACCEPTED)))
-        val request = FakeRequest(POST, routes.SdesCallbackController.callback.url).withBody(Json.toJson(sdesCallback))
-        val result  = route(application, request).value
-
-        status(result) mustEqual OK
-        verify(mockAuditService, times(2)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
-        verify(mockFileDetailsRepository).updateStatus(sdesCallback.correlationID.value, updatedStatus)
-        verify(mockEmailService, atLeast(1)).sendAndLogEmail(is(fileDetails.subscriptionId),
-                                                             any[String],
-                                                             is(fileDetails.messageRefId),
-                                                             is(fileDetails.agentDetails),
-                                                             is(false),
-                                                             is(fileDetails.reportType)
-        )(
-          any[HeaderCarrier]
-        )
-
       }
     }
 
-    "must return Ok for failure notification but do not update status and neither send email if file status not pending" in {
-      forAll(arbitraryFailureSdesCallback.arbitrary, arbitraryNonPendingFileDetails.arbitrary) { (sdesCallback, fileDetails) =>
+    "must return Ok for virus failure notification and update status and send email, auditing fileValidationError" in {
+      forAll(arbitraryFailureSdesCallback.arbitrary.suchThat(_.failureReason.exists(_.toLowerCase.contains("virus"))), arbitraryPendingFileDetails.arbitrary) {
+        (sdesCallback, fileDetails) =>
+          reset(mockAuditService)
+          when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(Success))
+          val updatedStatus = RejectedSDESVirus
+          when(mockFileDetailsRepository.findByConversationId(sdesCallback.correlationID)).thenReturn(Future.successful(Some(fileDetails)))
+          when(mockFileDetailsRepository.updateStatus(sdesCallback.correlationID.value, updatedStatus)).thenReturn(Future.successful(Some(fileDetails)))
+          when(
+            mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean], any[ReportType])(
+              any[HeaderCarrier]
+            )
+          )
+            .thenReturn(Future.successful(Seq(ACCEPTED)))
+
+          val request = FakeRequest(POST, routes.SdesCallbackController.callback.url).withBody(Json.toJson(sdesCallback))
+          val result  = route(application, request).value
+
+          status(result) mustEqual OK
+          verify(mockAuditService, times(1)).sendAuditEvent(is(AuditType.sdesResponse), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
+          verify(mockAuditService, times(1)).sendAuditEvent(is(AuditType.fileValidationError), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
+          verify(mockAuditService, times(2)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
+          verify(mockFileDetailsRepository).updateStatus(sdesCallback.correlationID.value, updatedStatus)
+          verify(mockEmailService, atLeast(1)).sendAndLogEmail(is(fileDetails.subscriptionId),
+                                                               any[String],
+                                                               is(fileDetails.messageRefId),
+                                                               is(fileDetails.agentDetails),
+                                                               is(false),
+                                                               is(fileDetails.reportType)
+          )(
+            any[HeaderCarrier]
+          )
+      }
+    }
+
+    "must return Ok for non-virus failure notification but do not update status if file not pending" in {
+      forAll(arbitraryFailureSdesCallback.arbitrary.suchThat(_.failureReason.forall(!_.toLowerCase.contains("virus"))),
+             arbitraryNonPendingFileDetails.arbitrary
+      ) { (sdesCallback, fileDetails) =>
         reset(mockAuditService)
         when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(Success))
         when(mockFileDetailsRepository.findByConversationId(sdesCallback.correlationID)).thenReturn(Future.successful(Some(fileDetails)))
@@ -119,7 +166,7 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
         val result  = route(application, request).value
 
         status(result) mustEqual OK
-        verify(mockAuditService, times(2)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
+        verify(mockAuditService, times(1)).sendAuditEvent(is(AuditType.sdesResponse), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
         verify(mockFileDetailsRepository, times(0)).updateStatus(any[String], any[FileStatus])
         verify(mockEmailService, times(0)).sendAndLogEmail(any[String],
                                                            any[String],
@@ -127,10 +174,33 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
                                                            any[Option[AgentContactDetails]],
                                                            any[Boolean],
                                                            any[ReportType]
-        )(
-          any[HeaderCarrier]
-        )
+        )(any[HeaderCarrier])
+      }
+    }
 
+    "must return Ok for virus failure notification and do not update status if file not pending, auditing fileValidationError" in {
+      forAll(arbitraryFailureSdesCallback.arbitrary.suchThat(_.failureReason.exists(_.toLowerCase.contains("virus"))),
+             arbitraryNonPendingFileDetails.arbitrary
+      ) { (sdesCallback, fileDetails) =>
+        reset(mockAuditService)
+        when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(Success))
+        when(mockFileDetailsRepository.findByConversationId(sdesCallback.correlationID)).thenReturn(Future.successful(Some(fileDetails)))
+
+        val request = FakeRequest(POST, routes.SdesCallbackController.callback.url).withBody(Json.toJson(sdesCallback))
+        val result  = route(application, request).value
+
+        status(result) mustEqual OK
+        verify(mockAuditService, times(1)).sendAuditEvent(is(AuditType.sdesResponse), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
+        verify(mockAuditService, times(1)).sendAuditEvent(is(AuditType.fileValidationError), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
+        verify(mockAuditService, times(2)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext]) // Total count
+        verify(mockFileDetailsRepository, times(0)).updateStatus(any[String], any[FileStatus])
+        verify(mockEmailService, times(0)).sendAndLogEmail(any[String],
+                                                           any[String],
+                                                           any[String],
+                                                           any[Option[AgentContactDetails]],
+                                                           any[Boolean],
+                                                           any[ReportType]
+        )(any[HeaderCarrier])
       }
     }
   }

@@ -466,7 +466,7 @@ trait ModelGenerators {
 
   val arbitrarySuccessSdesCallback: Arbitrary[SdesCallback] = Arbitrary {
     for {
-      notification  <- Gen.oneOf(NotificationType.FileReady, NotificationType.FileReceived, NotificationType.FileProcessed)
+      notification  <- Gen.const(NotificationType.FileProcessed)
       filename      <- nonEmptyString
       algorithm     <- arbitrary[Algorithm]
       checksum      <- nonEmptyString

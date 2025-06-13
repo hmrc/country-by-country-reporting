@@ -20,14 +20,13 @@ import play.api.libs.json.{Json, OWrites}
 import uk.gov.hmrc.auth.core.AffinityGroup
 
 object AuditType {
-  val eisResponse          = "CountryByCountryReportingEISResponse"
-  val eisResponseError     = "CountryByCountryReportingEISResponseError"
-  val sdesResponse         = "CountryByCountryReportingSDESResponse"
-  val sdesResponseError    = "CountryByCountryReportingSDESResponseError"
-  val fileSubmission       = "CountryByCountryReportingFileSubmission"
-  val fileSubmissionError  = "CountryByCountryReportingFileSubmissionError"
-  val fileValidation       = "CountryByCountryReportingFileValidation"
-  val fileValidationError  = "CountryByCountryReportingFileValidationError"
+  val eisResponse         = "CountryByCountryReportingEISResponse"
+  val eisResponseError    = "CountryByCountryReportingEISResponseError"
+  val sdesResponse        = "SDESResponse"
+  val fileSubmission      = "CountryByCountryReportingFileSubmission"
+  val fileSubmissionError = "CountryByCountryReportingFileSubmissionError"
+  val fileValidation      = "CountryByCountryReportingFileValidation"
+  val fileValidationError = "CountryByCountryReportingFileValidationError"
   val updateContactDetails = "UpdateContactDetails"
 }
 

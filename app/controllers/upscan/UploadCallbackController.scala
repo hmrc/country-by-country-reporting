@@ -17,7 +17,7 @@
 package controllers.upscan
 
 import models.audit.Audit
-import models.audit.AuditType.sdesResponseError
+import models.audit.AuditType.fileValidationError
 import models.upscan.CallbackBody
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsValue, Json, Writes}
@@ -46,7 +46,7 @@ class UploadCallbackController @Inject() (
     val callback = request.body.validate[CallbackBody]
     callback.fold(
       _ => {
-        auditService.sendAuditEvent(sdesResponseError, Json.toJson(Audit(request.body)))
+        auditService.sendAuditEvent(fileValidationError, Json.toJson(Audit(request.body, error = Some("Invalid Upscan callback body received"))))
         Future.successful(BadRequest("Invalid callback body"))
       },
       validCallback =>
