@@ -17,6 +17,7 @@
 package models.audit
 
 import models.sdes.SdesCallback
+import models.submission.FileDetails
 import play.api.libs.json.{Json, OFormat}
 
 import java.time.ZonedDateTime
@@ -28,9 +29,9 @@ case class SDESAuditResponse(
   checkSumAlgorithm: String,
   checksum: String,
   dateTime: Option[ZonedDateTime],
-  conversationId: Option[String],
-  subscriptionId: Option[String],
-  messageRefId: Option[String],
+  conversationId: String,
+  subscriptionId: String,
+  messageRefId: String,
   errorMessage: Option[String],
   fileError: Boolean
 )
@@ -38,24 +39,18 @@ case class SDESAuditResponse(
 object SDESAuditResponse {
   implicit val format: OFormat[SDESAuditResponse] = Json.format[SDESAuditResponse]
 
-  def apply(sdesCallback: SdesCallback,
-            conversationId: Option[String] = None,
-            subscriptionId: Option[String] = None,
-            messageRefId: Option[String] = None,
-            error: Option[String] = None,
-            fileError: Boolean
-  ): SDESAuditResponse =
+  def apply(sdesCallback: SdesCallback, fileDetails: FileDetails): SDESAuditResponse =
     new SDESAuditResponse(
       notification = sdesCallback.notification.toString,
-      conversationId = conversationId,
-      subscriptionId = subscriptionId,
-      messageRefId = messageRefId,
+      conversationId = sdesCallback.correlationID.value,
+      subscriptionId = fileDetails.subscriptionId,
+      messageRefId = fileDetails.messageRefId,
       fileName = sdesCallback.filename,
       correlationId = sdesCallback.correlationID.value,
       checkSumAlgorithm = sdesCallback.checksumAlgorithm.toString,
       checksum = sdesCallback.checksum,
       dateTime = sdesCallback.dateTime,
-      errorMessage = error,
-      fileError = fileError
+      errorMessage = sdesCallback.failureReason,
+      fileError = sdesCallback.failureReason.isDefined
     )
 }

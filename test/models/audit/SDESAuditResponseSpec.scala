@@ -18,79 +18,101 @@ package models.audit
 
 import base.SpecBase
 import models.sdes.SdesCallback
-import models.subscription.RequestDetailForUpdate
+import models.submission.{Accepted, ConversationId, FileDetails, NewInformation}
 import play.api.libs.json.Json
+
+import java.time.LocalDateTime
 
 class SDESAuditResponseSpec extends SpecBase {
 
   "SDESAuditResponse" - {
-    "marshal with all values" in {
-      val detailJson = Json.parse("""
+    "marshal with mandatory values" in {
+      val sdesCallbackAsJson = Json.parse("""
                                     |{
                                     |  "notification": "FileProcessed",
-                                    |  "filename": "conv-789",
-                                    |  "checksumAlgorithm": "sub-123",
+                                    |  "filename": "test file.xml",
+                                    |  "checksumAlgorithm": "SHA-256",
                                     |  "checksum": "1222374536363abef3633",
-                                    |  "correlationID": "2024-08-07T10:13:09.429Z",
-                                    |  "dateTime": "2025-06-17T16:45:45Z[Europe/London]",
+                                    |  "correlationID": "7e67633b-596b-454d-b7b1-c85fe3fdf994",
+                                    |  "dateTime": "2024-08-07T10:13:09.429Z",
                                     |  "failureReason": null
                                     |}
                                     |""".stripMargin)
-      val fileDetails = detailJson.as[SdesCallback]
+      val sdesCallBack = sdesCallbackAsJson.as[SdesCallback]
       val auditDetail = Json.parse("""
                                      |{
                                      |    "notification" : "FileProcessed",
-                                     |    "conversationId" : "conv-789",
+                                     |    "conversationId" : "7e67633b-596b-454d-b7b1-c85fe3fdf994",
                                      |    "subscriptionId" : "sub-123",
                                      |    "messageRefId" : "msg-456",
                                      |    "fileName" : "test file.xml",
                                      |    "correlationId" : "7e67633b-596b-454d-b7b1-c85fe3fdf994",
-                                     |    "checksumAlgorithm" : "SHA-256",
+                                     |    "checkSumAlgorithm" : "SHA256",
                                      |    "checksum" : "1222374536363abef3633",
                                      |    "dateTime" : "2024-08-07T10:13:09.429Z",
-                                     |    "fileError" : true,
-                                     |    "errorMessage" : "Virus Found"
+                                     |    "fileError" : false
                                      |}
                                      |""".stripMargin)
       val auditDetailRequest = auditDetail.as[SDESAuditResponse]
-      val jsonObj = SDESAuditResponse(fileDetails)
+      val fileDetails = FileDetails(
+        ConversationId("7e67633b-596b-454d-b7b1-c85fe3fdf994"),
+        "sub-123",
+        "msg-456",
+        "",
+        NewInformation,
+        Accepted,
+        "",
+        LocalDateTime.now(),
+        LocalDateTime.now(),
+        None,
+        None
+      )
+      val jsonObj = SDESAuditResponse(sdesCallBack, fileDetails)
       auditDetailRequest mustBe jsonObj
     }
 
-    "marshal without optional values" in {
-
-      val requestDetailJson = Json.parse("""
-          |{
-          |      "IDType": "SAFE",
-          |      "IDNumber": "IDNumber",
-          |      "tradingName": "Trading Name",
-          |      "isGBUser": true,
-          |      "primaryContact":
-          |        {
-          |          "organisation": {
-          |            "organisationName": "orgName1"
-          |          },
-          |          "email": "test@email.com",
-          |          "phone": "+4411223344"
-          |        }
-          |}
-          |""".stripMargin)
-      val requestDetailForUpdate = requestDetailJson.as[RequestDetailForUpdate]
-
+    "marshal with all values" in {
+      val sdesCallbackAsJson = Json.parse("""
+                                    |{
+                                    |  "notification": "FileProcessed",
+                                    |  "filename": "test file.xml",
+                                    |  "checksumAlgorithm": "SHA-256",
+                                    |  "checksum": "1222374536363abef3633",
+                                    |  "correlationID": "7e67633b-596b-454d-b7b1-c85fe3fdf994",
+                                    |  "failureReason": "virus found"
+                                    |}
+                                    |""".stripMargin)
+      val sdesCallBack = sdesCallbackAsJson.as[SdesCallback]
       val auditDetail = Json.parse("""
-          |{
-          |      "subscriptionId": "IDNumber",
-          |      "reportingEntityName": "Trading Name",
-          |      "firstContactName": "orgName1",
-          |      "firstContactEmail": "test@email.com",
-          |      "firstContactPhoneNumber": "+4411223344",
-          |      "hasSecondContact": false
-          |}
-          |""".stripMargin)
-      val auditDetailRequest = auditDetail.as[AuditDetailForUpdateOrgSubscriptionRequest]
-
-      val jsonObj = AuditDetailForUpdateOrgSubscriptionRequest(requestDetailForUpdate)
-      jsonObj mustBe auditDetailRequest
+                                     |{
+                                     |    "notification" : "FileProcessed",
+                                     |    "conversationId" : "7e67633b-596b-454d-b7b1-c85fe3fdf994",
+                                     |    "subscriptionId" : "sub-123",
+                                     |    "messageRefId" : "msg-456",
+                                     |    "fileName" : "test file.xml",
+                                     |    "correlationId" : "7e67633b-596b-454d-b7b1-c85fe3fdf994",
+                                     |    "checkSumAlgorithm" : "SHA256",
+                                     |    "checksum" : "1222374536363abef3633",
+                                     |    "fileError" : true,
+                                     |    "errorMessage" : "virus found"
+                                     |}
+                                     |""".stripMargin)
+      val auditDetailRequest = auditDetail.as[SDESAuditResponse]
+      val fileDetails = FileDetails(
+        ConversationId("7e67633b-596b-454d-b7b1-c85fe3fdf994"),
+        "sub-123",
+        "msg-456",
+        "",
+        NewInformation,
+        Accepted,
+        "",
+        LocalDateTime.now(),
+        LocalDateTime.now(),
+        None,
+        None
+      )
+      val jsonObj = SDESAuditResponse(sdesCallBack, fileDetails)
+      auditDetailRequest mustBe jsonObj
     }
   }
 }

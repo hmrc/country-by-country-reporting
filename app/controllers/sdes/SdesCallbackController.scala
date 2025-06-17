@@ -53,11 +53,7 @@ class SdesCallbackController @Inject() (
         .flatMap { case Some(fileDetails) =>
           val auditDetails = SDESAuditResponse(
             sdesCallback,
-            conversationId = Some(sdesCallback.correlationID.value),
-            subscriptionId = Some(fileDetails.subscriptionId),
-            messageRefId = Some(fileDetails.messageRefId),
-            error = sdesCallback.failureReason,
-            fileError = sdesCallback.failureReason.isDefined
+            fileDetails
           )
           auditService
             .sendAuditEvent(sdesResponse, Json.toJson(Audit(auditDetails, userType = fileDetails.userType)))
