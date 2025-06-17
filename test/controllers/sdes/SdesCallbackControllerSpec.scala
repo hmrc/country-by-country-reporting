@@ -119,7 +119,7 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
       }
     }
 
-    "must return Ok for virus failure notification and update status and send email, auditing fileValidationError" in {
+    "must return Ok for virus failure notification and update status and send email, auditing sdesResponse" in {
       forAll(arbitraryFailureSdesCallback.arbitrary.suchThat(_.failureReason.exists(_.toLowerCase.contains("virus"))), arbitraryPendingFileDetails.arbitrary) {
         (sdesCallback, fileDetails) =>
           reset(mockAuditService)
@@ -138,8 +138,7 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
           val result  = route(application, request).value
 
           status(result) mustEqual OK
-          verify(mockAuditService, times(1)).sendAuditEvent(is(AuditType.sdesResponse), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
-          verify(mockAuditService, times(1)).sendAuditEvent(is(AuditType.fileValidationError), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
+          verify(mockAuditService, times(2)).sendAuditEvent(is(AuditType.sdesResponse), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
           verify(mockAuditService, times(2)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
           verify(mockFileDetailsRepository).updateStatus(sdesCallback.correlationID.value, updatedStatus)
           verify(mockEmailService, atLeast(1)).sendAndLogEmail(is(fileDetails.subscriptionId),
@@ -178,7 +177,7 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
       }
     }
 
-    "must return Ok for virus failure notification and do not update status if file not pending, auditing fileValidationError" in {
+    "must return Ok for virus failure notification and do not update status if file not pending, auditing sdesResponse" in {
       forAll(arbitraryFailureSdesCallback.arbitrary.suchThat(_.failureReason.exists(_.toLowerCase.contains("virus"))),
              arbitraryNonPendingFileDetails.arbitrary
       ) { (sdesCallback, fileDetails) =>
@@ -190,8 +189,7 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
         val result  = route(application, request).value
 
         status(result) mustEqual OK
-        verify(mockAuditService, times(1)).sendAuditEvent(is(AuditType.sdesResponse), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
-        verify(mockAuditService, times(1)).sendAuditEvent(is(AuditType.fileValidationError), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
+        verify(mockAuditService, times(2)).sendAuditEvent(is(AuditType.sdesResponse), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
         verify(mockAuditService, times(2)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext]) // Total count
         verify(mockFileDetailsRepository, times(0)).updateStatus(any[String], any[FileStatus])
         verify(mockEmailService, times(0)).sendAndLogEmail(any[String],

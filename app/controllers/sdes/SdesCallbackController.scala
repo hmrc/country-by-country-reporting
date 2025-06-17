@@ -16,7 +16,7 @@
 
 package controllers.sdes
 
-import models.audit.AuditType.{fileValidationError, sdesResponse}
+import models.audit.AuditType.sdesResponse
 import models.audit.{Audit, SDESAuditResponse}
 import models.sdes.NotificationType.{FileProcessed, FileProcessingFailure}
 import models.sdes.SdesCallback
@@ -68,7 +68,7 @@ class SdesCallbackController @Inject() (
                 val updatedStatus = sdesCallback.failureReason match {
                   case Some(reason) if reason.toLowerCase.contains("virus") =>
                     auditService.sendAuditEvent(
-                      fileValidationError,
+                      sdesResponse,
                       Json.toJson(
                         Audit(
                           SDESAuditResponse(

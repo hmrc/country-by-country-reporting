@@ -21,14 +21,13 @@ import play.api.libs.json.{Json, OFormat}
 
 case class SDESAuditResponse(
   correlationId: String,
-  filename: String,
-  notificationType: String,
+  fileName: String,
+  notification: String,
   checksum: String,
-  outcome: String,
   conversationId: Option[String],
   subscriptionId: Option[String],
   messageRefId: Option[String],
-  error: Option[String],
+  errorMessage: Option[String],
   fileError: Option[String]
 )
 
@@ -43,15 +42,14 @@ object SDESAuditResponse {
             fileError: Option[String] = None
   ): SDESAuditResponse =
     new SDESAuditResponse(
-      correlationId = sdesCallback.correlationID.value,
-      filename = sdesCallback.filename,
-      notificationType = sdesCallback.notification.toString,
-      checksum = sdesCallback.checksum,
-      outcome = sdesCallback.notification.toString,
+      notification = sdesCallback.notification.toString,
       conversationId = conversationId,
       subscriptionId = subscriptionId,
       messageRefId = messageRefId,
-      error = error,
+      fileName = sdesCallback.filename,
+      correlationId = sdesCallback.correlationID.value,
+      checksum = sdesCallback.checksum,
+      errorMessage = error,
       fileError = fileError
     )
 }
