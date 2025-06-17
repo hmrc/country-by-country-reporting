@@ -19,16 +19,20 @@ package models.audit
 import models.sdes.SdesCallback
 import play.api.libs.json.{Json, OFormat}
 
+import java.time.ZonedDateTime
+
 case class SDESAuditResponse(
   correlationId: String,
   fileName: String,
   notification: String,
+  checkSumAlgorithm: String,
   checksum: String,
+  dateTime: Option[ZonedDateTime],
   conversationId: Option[String],
   subscriptionId: Option[String],
   messageRefId: Option[String],
   errorMessage: Option[String],
-  fileError: Option[String]
+  fileError: Boolean
 )
 
 object SDESAuditResponse {
@@ -39,7 +43,7 @@ object SDESAuditResponse {
             subscriptionId: Option[String] = None,
             messageRefId: Option[String] = None,
             error: Option[String] = None,
-            fileError: Option[String] = None
+            fileError: Boolean
   ): SDESAuditResponse =
     new SDESAuditResponse(
       notification = sdesCallback.notification.toString,
@@ -48,7 +52,9 @@ object SDESAuditResponse {
       messageRefId = messageRefId,
       fileName = sdesCallback.filename,
       correlationId = sdesCallback.correlationID.value,
+      checkSumAlgorithm = sdesCallback.checksumAlgorithm.toString,
       checksum = sdesCallback.checksum,
+      dateTime = sdesCallback.dateTime,
       errorMessage = error,
       fileError = fileError
     )
