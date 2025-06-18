@@ -114,5 +114,34 @@ class SDESAuditResponseSpec extends SpecBase {
       val jsonObj = SDESAuditResponse(sdesCallBack, Some(fileDetails))
       auditDetailRequest mustBe jsonObj
     }
+    "marshal without file detail values values" in {
+      val sdesCallbackAsJson = Json.parse("""
+                                            |{
+                                            |  "notification": "FileProcessed",
+                                            |  "filename": "test file.xml",
+                                            |  "checksumAlgorithm": "SHA-256",
+                                            |  "checksum": "1222374536363abef3633",
+                                            |  "correlationID": "7e67633b-596b-454d-b7b1-c85fe3fdf994",
+                                            |  "dateTime": "2024-08-07T10:13:09.429Z",
+                                            |  "failureReason": null
+                                            |}
+                                            |""".stripMargin)
+      val sdesCallBack = sdesCallbackAsJson.as[SdesCallback]
+      val auditDetail = Json.parse("""
+                                     |{
+                                     |    "notification" : "FileProcessed",
+                                     |    "conversationId" : "7e67633b-596b-454d-b7b1-c85fe3fdf994",
+                                     |    "fileName" : "test file.xml",
+                                     |    "correlationId" : "7e67633b-596b-454d-b7b1-c85fe3fdf994",
+                                     |    "checkSumAlgorithm" : "SHA256",
+                                     |    "checksum" : "1222374536363abef3633",
+                                     |    "dateTime" : "2024-08-07T10:13:09.429Z",
+                                     |    "fileError" : false
+                                     |}
+                                     |""".stripMargin)
+      val auditDetailRequest = auditDetail.as[SDESAuditResponse]
+      val jsonObj            = SDESAuditResponse(sdesCallBack, None)
+      auditDetailRequest mustBe jsonObj
+    }
   }
 }

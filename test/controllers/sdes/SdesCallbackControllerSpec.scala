@@ -69,7 +69,7 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
         val request = FakeRequest(POST, routes.SdesCallbackController.callback.url).withBody(Json.toJson(sdesCallback))
         val result  = route(application, request).value
         status(result) mustEqual OK
-        verify(mockAuditService, times(2)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
+        verify(mockAuditService, times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
 
       }
     }
