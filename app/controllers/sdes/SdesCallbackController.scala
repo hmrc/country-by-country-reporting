@@ -50,52 +50,63 @@ class SdesCallbackController @Inject() (
       )
       fileDetailsRepository
         .findByConversationId(sdesCallback.correlationID)
-        .flatMap { case Some(fileDetails) =>
-          val auditDetails = SDESAuditResponse(
+        .flatMap {
+          case Some(fileDetails) =>
+            val auditDetails = SDESAuditResponse(
+              sdesCallback,
+              Some(fileDetails)
+            )
+            auditService
+              .sendAuditEvent(sdesResponse, Json.toJson(Audit(auditDetails, userType = fileDetails.userType)))
+          case None => auditService.sendAuditEvent(sdesResponse, Json.toJson(Audit(SDESAuditResponse(
             sdesCallback,
-            fileDetails
-          )
-          auditService
-            .sendAuditEvent(sdesResponse, Json.toJson(Audit(auditDetails, userType = fileDetails.userType)))
-            .recoverWith { case e: Exception =>
-              logger.error(s"Failed to get fileDetails: ${e.getMessage}")
-              auditService.sendAuditEvent(sdesResponse, Json.toJson(Audit(auditDetails, error = Some(e.getMessage))))
-            }
-          sdesCallback match {
-            case SdesCallback(FileProcessingFailure, _, _, _, correlationID, _, failureReason) =>
-              fileDetailsRepository.findByConversationId(correlationID) flatMap {
-                case Some(fileDetails) if fileDetails.status == Pending =>
-                  val updatedStatus = failureReason match {
-                    case Some(reason) if reason.toLowerCase.contains("virus") => RejectedSDESVirus
-                    case _                                                    => RejectedSDES
-                  }
-                  fileDetailsRepository.updateStatus(correlationID.value, updatedStatus) map { _ =>
-                    emailService.sendAndLogEmail(
-                      fileDetails.subscriptionId,
-                      DateTimeFormatUtil.displayFormattedDate(fileDetails.submitted),
-                      fileDetails.messageRefId,
-                      fileDetails.agentDetails,
-                      isUploadSuccessful = false,
-                      fileDetails.reportType
-                    )
-                    logger.info(s"Updated status for conversationId: $correlationID to $updatedStatus")
-                    Ok
-                  }
-                case Some(fileDetails) if fileDetails.status != Pending =>
-                  logger.warn(s"File with conversationId: $correlationID is not in pending state")
-                  auditService.sendAuditEvent(sdesResponse, Json.toJson(Audit(auditDetails, error = Some("File is not in pending state"))))
-                  Future.successful(Ok)
-                case _ =>
-                  logger.error(s"No record found for the conversationId: $correlationID")
-                  auditService.sendAuditEvent(sdesResponse,
-                                              Json.toJson(Audit(auditDetails, error = Some(s"No file details found for the conversationId: $correlationID")))
+            None
+          ), error = Some("No file details found"))))
+        }
+        .recoverWith { case e: Exception =>
+          logger.error(s"Failed to get fileDetails: ${e.getMessage}")
+          auditService.sendAuditEvent(sdesResponse, Json.toJson(Audit(sdesCallback,
+            error = Some("Exception occurred while retrieving file details"))))
+        }
+        sdesCallback match {
+          case SdesCallback(FileProcessingFailure, _, _, _, correlationID, _, failureReason) =>
+            fileDetailsRepository.findByConversationId(correlationID) flatMap {
+              case Some(fileDetails) if fileDetails.status == Pending =>
+                val updatedStatus = failureReason match {
+                  case Some(reason) if reason.toLowerCase.contains("virus") => RejectedSDESVirus
+                  case _                                                    => RejectedSDES
+                }
+                fileDetailsRepository.updateStatus(correlationID.value, updatedStatus) map { _ =>
+                  emailService.sendAndLogEmail(
+                    fileDetails.subscriptionId,
+                    DateTimeFormatUtil.displayFormattedDate(fileDetails.submitted),
+                    fileDetails.messageRefId,
+                    fileDetails.agentDetails,
+                    isUploadSuccessful = false,
+                    fileDetails.reportType
                   )
-                  Future.successful(Ok)
-              }
-            case _ =>
-              auditService.sendAuditEvent(sdesResponse, Json.toJson(Audit(auditDetails, error = Some("Unsupported notification type"))))
-              Future.successful(Ok)
-          }
+                  logger.info(s"Updated status for conversationId: $correlationID to $updatedStatus")
+                  Ok
+                }
+              case Some(fileDetails) if fileDetails.status != Pending =>
+                val auditDetails = SDESAuditResponse(
+                  sdesCallback,
+                  Some(fileDetails)
+                )
+                logger.warn(s"File with conversationId: $correlationID is not in pending state")
+                auditService.sendAuditEvent(sdesResponse, Json.toJson(Audit(auditDetails, error = Some("File is not in pending state"))))
+                Future.successful(Ok)
+              case _ =>
+                logger.error(s"No record found for the conversationId: $correlationID")
+                auditService.sendAuditEvent(sdesResponse,
+                                            Json.toJson(Audit(SDESAuditResponse(
+                                              sdesCallback,
+                                              None), error = Some(s"No file details found for the conversationId: $correlationID")))
+                )
+                Future.successful(Ok)
+            }
+          case _ =>
+            Future.successful(Ok)
         }
     }
   }

@@ -30,8 +30,8 @@ case class SDESAuditResponse(
   checksum: String,
   dateTime: Option[ZonedDateTime],
   conversationId: String,
-  subscriptionId: String,
-  messageRefId: String,
+  subscriptionId: Option[String],
+  messageRefId: Option[String],
   errorMessage: Option[String],
   fileError: Boolean
 )
@@ -39,12 +39,16 @@ case class SDESAuditResponse(
 object SDESAuditResponse {
   implicit val format: OFormat[SDESAuditResponse] = Json.format[SDESAuditResponse]
 
-  def apply(sdesCallback: SdesCallback, fileDetails: FileDetails): SDESAuditResponse =
+  def apply(sdesCallback: SdesCallback, fileDetails: Option[FileDetails]): SDESAuditResponse = {
+    val (subscriptionId, messageRefId) = (
+      for (file <- fileDetails) yield file.subscriptionId,
+      for (file <- fileDetails) yield file.messageRefId
+    )
     new SDESAuditResponse(
       notification = sdesCallback.notification.toString,
       conversationId = sdesCallback.correlationID.value,
-      subscriptionId = fileDetails.subscriptionId,
-      messageRefId = fileDetails.messageRefId,
+      subscriptionId = subscriptionId,
+      messageRefId = messageRefId,
       fileName = sdesCallback.filename,
       correlationId = sdesCallback.correlationID.value,
       checkSumAlgorithm = sdesCallback.checksumAlgorithm.toString,
@@ -53,4 +57,5 @@ object SDESAuditResponse {
       errorMessage = sdesCallback.failureReason,
       fileError = sdesCallback.failureReason.isDefined
     )
+  }
 }

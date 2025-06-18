@@ -67,7 +67,7 @@ class SDESAuditResponseSpec extends SpecBase {
         None,
         None
       )
-      val jsonObj = SDESAuditResponse(sdesCallBack, fileDetails)
+      val jsonObj = SDESAuditResponse(sdesCallBack, Some(fileDetails))
       auditDetailRequest mustBe jsonObj
     }
 
@@ -111,7 +111,7 @@ class SDESAuditResponseSpec extends SpecBase {
         None,
         None
       )
-      val jsonObj = SDESAuditResponse(sdesCallBack, fileDetails)
+      val jsonObj = SDESAuditResponse(sdesCallBack, Some(fileDetails))
       auditDetailRequest mustBe jsonObj
     }
   }
