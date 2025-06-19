@@ -63,37 +63,34 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
     val conversationId: String              = request.headers.get("X-Conversation-ID").getOrElse("UNKNOWN_CONVERSATION_ID")
     val subscriptionId: String              = request.headers.get("X-Subscription-ID").getOrElse("UNKNOWN_SUBSCRIPTION_ID")
     val reportingEntityName: Option[String] = request.headers.get("X-Reporting-Entity-Name") // Optional header
-    val reportType: Option[String]          = Some("NEW_INFORMATION_FOR_EXISTING_REPORT") // Or derive this from content
+    val reportType: Option[String]          = Some("NEW_INFORMATION_FOR_EXISTING_REPORT") // todo Or derive this from content
 
     val messageRefId: Option[String]         = None
     val messageTypeIndicator: Option[String] = None
 
     request.body.validate[UpscanURL] match {
       case JsSuccess(upscanURL, _) =>
-        val fileSize: Long = 0L //FIND THIS
+        val fileSize: Long = 0L //todo FIND THIS
 
         validationEngine.validateUploadSubmission(upscanURL.url) map {
-          case SubmissionValidationSuccess(msd) =>
-            // In a real scenario, msd (MessageSubmissionData) would contain messageRefId, messageTypeIndicator
-            // messageRefId = Some(msd.messageRefId) // Assuming msd has this
-            // messageTypeIndicator = Some(msd.messageTypeIndicator) // Assuming msd has this
+          case SubmissionValidationSuccess(messageSubmissionData) =>
 
             val detail = AuditDetail(
               fileSize = fileSize,
               conversationId = conversationId,
               subscriptionId = subscriptionId,
-              messageRefId = messageRefId, // Populated from msd if available
-              messageTypeIndicator = messageTypeIndicator, // Populated from msd if available
+              messageRefId = messageRefId,
+              messageTypeIndicator = messageTypeIndicator,
               reportingEntityName = reportingEntityName,
               reportType = reportType,
               userType = request.affinityGroup.toString,
               fileError = false
             )
             auditService.sendValidationAuditEvent(ValidationAudit(AuditType.fileValidation, detail))
-            Ok(Json.toJsObject(SubmissionValidationSuccess(msd)))
+            Ok(Json.toJsObject(SubmissionValidationSuccess(messageSubmissionData)))
 
-          case SubmissionValidationFailure(validationErrors) => // <--- FIX 1: Renamed 'errors' to 'validationErrorsWrapper' for clarity and correct binding
-            val mappedValidationErrors = validationErrors.errors.map { err: GenericError => // <--- FIX 1: Access .errors on the wrapper
+          case SubmissionValidationFailure(validationErrors) =>
+            val mappedValidationErrors = validationErrors.errors.map { err: GenericError =>
 
               AuditValidationError(
                 code = err.lineNumber.toString,

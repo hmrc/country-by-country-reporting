@@ -22,10 +22,10 @@ case class AuditDetail(
   fileSize: Long,
   conversationId: String,
   subscriptionId: String,
-  messageRefId: Option[String], // Optional as it might only be available after parsing
-  messageTypeIndicator: Option[String], // Optional as it might only be available after parsing
+  messageRefId: Option[String],
+  messageTypeIndicator: Option[String],
   reportingEntityName: Option[String],
-  reportType: Option[String], // Optional if not always determined
+  reportType: Option[String],
   userType: String,
   fileError: Boolean,
   errorMessage: Option[String] = None,
@@ -34,7 +34,7 @@ case class AuditDetail(
 )
 
 object AuditDetail {
-  implicit val writes: OWrites[AuditDetail] = Json.writes[AuditDetail] // *** Change here as well ***
+  implicit val writes: OWrites[AuditDetail] = Json.writes[AuditDetail]
 }
 
 case class AuditValidationError(code: String, message: String)
