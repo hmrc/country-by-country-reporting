@@ -17,41 +17,45 @@
 package models.audit
 
 import models.sdes.SdesCallback
+import models.submission.FileDetails
 import play.api.libs.json.{Json, OFormat}
+
+import java.time.ZonedDateTime
 
 case class SDESAuditResponse(
   correlationId: String,
-  filename: String,
-  notificationType: String,
+  fileName: String,
+  notification: String,
+  checkSumAlgorithm: String,
   checksum: String,
-  outcome: String,
-  conversationId: Option[String],
+  dateTime: Option[ZonedDateTime],
+  conversationId: String,
   subscriptionId: Option[String],
   messageRefId: Option[String],
-  error: Option[String],
-  fileError: Option[String]
+  errorMessage: Option[String],
+  fileError: Boolean
 )
 
 object SDESAuditResponse {
   implicit val format: OFormat[SDESAuditResponse] = Json.format[SDESAuditResponse]
 
-  def apply(sdesCallback: SdesCallback,
-            conversationId: Option[String] = None,
-            subscriptionId: Option[String] = None,
-            messageRefId: Option[String] = None,
-            error: Option[String] = None,
-            fileError: Option[String] = None
-  ): SDESAuditResponse =
+  def apply(sdesCallback: SdesCallback, fileDetails: Option[FileDetails]): SDESAuditResponse = {
+    val (subscriptionId, messageRefId) = (
+      for (file <- fileDetails) yield file.subscriptionId,
+      for (file <- fileDetails) yield file.messageRefId
+    )
     new SDESAuditResponse(
-      correlationId = sdesCallback.correlationID.value,
-      filename = sdesCallback.filename,
-      notificationType = sdesCallback.notification.toString,
-      checksum = sdesCallback.checksum,
-      outcome = sdesCallback.notification.toString,
-      conversationId = conversationId,
+      notification = sdesCallback.notification.toString,
+      conversationId = sdesCallback.correlationID.value,
       subscriptionId = subscriptionId,
       messageRefId = messageRefId,
-      error = error,
-      fileError = fileError
+      fileName = sdesCallback.filename,
+      correlationId = sdesCallback.correlationID.value,
+      checkSumAlgorithm = sdesCallback.checksumAlgorithm.toString,
+      checksum = sdesCallback.checksum,
+      dateTime = sdesCallback.dateTime,
+      errorMessage = sdesCallback.failureReason,
+      fileError = sdesCallback.failureReason.isDefined
     )
+  }
 }
