@@ -16,7 +16,7 @@
 
 package services.audit
 
-import play.api.libs.json.{Json, OWrites}
+import play.api.libs.json.{Json, OWrites, Reads}
 
 case class AuditDetail(
   fileSize: Long,
@@ -35,10 +35,12 @@ case class AuditDetail(
 
 object AuditDetail {
   implicit val writes: OWrites[AuditDetail] = Json.writes[AuditDetail]
+  implicit val reads: Reads[AuditDetail]    = Json.reads[AuditDetail]
 }
 
 case class AuditValidationError(code: String, message: String)
 
 object AuditValidationError {
   implicit val writes: OWrites[AuditValidationError] = Json.writes[AuditValidationError]
+  implicit val reads: Reads[AuditValidationError]    = Json.reads[AuditValidationError]
 }
