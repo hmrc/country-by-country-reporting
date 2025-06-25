@@ -139,7 +139,7 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
 
           status(result) mustEqual OK
           verify(mockAuditService, times(1)).sendAuditEvent(is(AuditType.sdesResponse), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
-          verify(mockAuditService, times(1)).sendAuditEvent(is(AuditType.fileValidationError), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
+          verify(mockAuditService, times(1)).sendAuditEvent(is(AuditType.fileValidation), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
           verify(mockAuditService, times(2)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
           verify(mockFileDetailsRepository).updateStatus(sdesCallback.correlationID.value, updatedStatus)
           verify(mockEmailService, atLeast(1)).sendAndLogEmail(is(fileDetails.subscriptionId),
@@ -191,7 +191,7 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
 
         status(result) mustEqual OK
         verify(mockAuditService, times(1)).sendAuditEvent(is(AuditType.sdesResponse), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
-        verify(mockAuditService, times(1)).sendAuditEvent(is(AuditType.fileValidationError), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
+        verify(mockAuditService, times(1)).sendAuditEvent(is(AuditType.fileValidation), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
         verify(mockAuditService, times(2)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext]) // Total count
         verify(mockFileDetailsRepository, times(0)).updateStatus(any[String], any[FileStatus])
         verify(mockEmailService, times(0)).sendAndLogEmail(any[String],

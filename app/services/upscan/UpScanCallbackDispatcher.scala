@@ -16,16 +16,15 @@
 
 package services.upscan
 
+import models.audit.AuditType.fileValidation
 import models.audit.{Audit, UpscanAuditDetails}
-import models.audit.AuditType.{fileValidation, fileValidationError}
-
-import javax.inject.Inject
 import models.upscan._
 import play.api.Logging
 import play.api.libs.json.Json
 import services.audit.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class UpScanCallbackDispatcher @Inject() (sessionStorage: UploadProgressTracker, auditService: AuditService)(implicit
@@ -51,19 +50,19 @@ class UpScanCallbackDispatcher @Inject() (sessionStorage: UploadProgressTracker,
         logger.warn(s"FailedCallbackBody, QUARANTINE: ${s.reference.value}")
         val details =
           UpscanAuditDetails(s).copy(fileStatus = "QUARANTINED", fileError = Some(s.failureDetails.failureReason), error = Some(s.failureDetails.message))
-        (fileValidationError, details, Quarantined)
+        (fileValidation, details, Quarantined)
 
       case s: FailedCallbackBody if s.failureDetails.failureReason == "REJECTED" =>
         logger.warn(s"FailedCallbackBody, REJECTED: ${s.reference.value}")
         val details =
           UpscanAuditDetails(s).copy(fileStatus = "REJECTED", fileError = Some(s.failureDetails.failureReason), error = Some(s.failureDetails.message))
-        (fileValidationError, details, UploadRejected(s.failureDetails))
+        (fileValidation, details, UploadRejected(s.failureDetails))
 
       case f: FailedCallbackBody =>
         logger.warn(s"FailedCallbackBody: ${f.reference.value}")
         val details =
           UpscanAuditDetails(f).copy(fileStatus = "FAILED", fileError = Some(f.failureDetails.failureReason), error = Some(f.failureDetails.message))
-        (fileValidationError, details, Failed)
+        (fileValidation, details, Failed)
     }
     auditService.sendAuditEvent(auditEvent, Json.toJson(Audit(auditDetails)))
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package services.audit
+package services.audit // Make sure this package matches your file location
 
 import config.AppConfig
+import models.audit.ValidationAudit
 import play.api.Logging
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Disabled, Failure}
@@ -63,4 +64,41 @@ class AuditService @Inject() (
           auditResult
       }
     }
+
+  def sendValidationAuditEvent(
+    auditEvent: ValidationAudit
+  )(implicit
+    hc: HeaderCarrier,
+    ex: ExecutionContext
+  ): Future[AuditResult] = {
+
+    val detailAsJsValue: JsValue = Json.toJson(auditEvent)
+
+    auditConnector.sendExtendedEvent(
+      ExtendedDataEvent(
+        auditSource = appConfig.appName,
+        auditType = auditEvent.auditType,
+        detail = detailAsJsValue,
+        tags = AuditExtensions.auditHeaderCarrier(hc).toAuditDetails() ++
+          auditEvent.correlationId.map("correlationId" -> _).toMap
+      )
+    ) map { auditResult: AuditResult =>
+      auditResult match {
+        case AuditResult.Failure(msg, _) =>
+          logger.warn(
+            s"The attempt to issue audit event ${auditEvent.auditType} failed with message : $msg"
+          )
+          auditResult
+        case AuditResult.Disabled =>
+          logger.warn(
+            s"The attempt to issue audit event ${auditEvent.auditType} was unsuccessful, as auditing is currently disabled in config"
+          )
+          auditResult
+        case _ =>
+          logger.info(s"Audit event ${auditEvent.auditType} issued successful.")
+          auditResult
+      }
+    }
+  }
+
 }

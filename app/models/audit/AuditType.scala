@@ -16,20 +16,32 @@
 
 package models.audit
 
+import play.api.libs.json.OFormat.oFormatFromReadsAndOWrites
 import play.api.libs.json.{Json, OWrites}
+import services.audit.AuditDetail
 import uk.gov.hmrc.auth.core.AffinityGroup
 
 object AuditType {
-  val eisResponse         = "CountryByCountryReportingEISResponse"
-  val eisResponseError    = "CountryByCountryReportingEISResponseError"
-  val sdesResponse        = "SDESResponse"
-  val fileSubmission      = "CountryByCountryReportingFileSubmission"
-  val fileSubmissionError = "CountryByCountryReportingFileSubmissionError"
-  val fileValidation      = "CountryByCountryReportingFileValidation"
-  val fileValidationError = "CountryByCountryReportingFileValidationError"
+  val eisResponse          = "CountryByCountryReportingEISResponse"
+  val eisResponseError     = "CountryByCountryReportingEISResponseError"
+  val sdesResponse         = "SDESResponse"
+  val fileSubmission       = "CountryByCountryReportingFileSubmission"
+  val fileSubmissionError  = "CountryByCountryReportingFileSubmissionError"
+  val fileValidation       = "FileValidation"
   val updateContactDetails = "UpdateContactDetails"
 }
 
+final case class ValidationAudit(auditType: String, detail: AuditDetail, correlationId: Option[String] = None)
+
+object ValidationAudit {
+  implicit val writes: OWrites[ValidationAudit] = (audit: ValidationAudit) => {
+    val detailJson        = Json.toJsObject(audit.detail)
+    val correlationIdJson = audit.correlationId.map(corrId => Json.obj("correlationId" -> corrId)).getOrElse(Json.obj())
+    val auditTypeJson     = Json.obj("auditType" -> audit.auditType)
+
+    auditTypeJson ++ correlationIdJson ++ Json.obj("detail" -> detailJson)
+  }
+}
 final case class Audit[T](details: T, userType: Option[AffinityGroup] = None, correlationId: Option[String] = None, error: Option[String] = None)
 
 object Audit {
@@ -41,4 +53,5 @@ object Audit {
     val errorJson         = audit.error.map(error => Json.obj("error" -> error)).getOrElse(Json.obj())
     detailsJson ++ userTypeJson ++ correlationIdJson ++ errorJson
   }
+
 }
