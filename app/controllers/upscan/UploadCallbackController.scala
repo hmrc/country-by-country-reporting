@@ -17,12 +17,10 @@
 package controllers.upscan
 
 import models.audit.Audit
-import models.audit.AuditType.fileValidation
 import models.upscan.CallbackBody
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.mvc.{Action, ControllerComponents}
-import services.audit.AuditService
 import services.upscan.UpScanCallbackDispatcher
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -31,7 +29,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class UploadCallbackController @Inject() (
   val upscanCallbackDispatcher: UpScanCallbackDispatcher,
-  val auditService: AuditService,
   cc: ControllerComponents,
   implicit override val messagesApi: MessagesApi
 )(implicit ec: ExecutionContext)
@@ -45,10 +42,7 @@ class UploadCallbackController @Inject() (
   val callback: Action[JsValue] = Action.async(parse.json) { implicit request =>
     val callback = request.body.validate[CallbackBody]
     callback.fold(
-      _ => {
-        auditService.sendAuditEvent(fileValidation, Json.toJson(Audit(request.body, error = Some("Invalid Upscan callback body received"))))
-        Future.successful(BadRequest("Invalid callback body"))
-      },
+      _ => Future.successful(BadRequest("Invalid callback body")),
       validCallback =>
         upscanCallbackDispatcher
           .handleCallback(validCallback)
