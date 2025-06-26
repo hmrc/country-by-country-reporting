@@ -134,7 +134,7 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
           reportType = None,
           userType = request.affinityGroup.toString,
           fileError = true,
-          errorMessage = Some(s"Missing or invalid Upscan URL: ${JsError.toJson(errors).toString()}"),
+          errorMessage = Some(s"Missing or invalid Upscan URL: $errors"),
           errorURL = Some(MissingUpscanUrl),
           validationErrors = None
         )

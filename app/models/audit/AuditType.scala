@@ -30,17 +30,6 @@ object AuditType {
   val updateContactDetails = "UpdateContactDetails"
 }
 
-final case class ValidationAudit(auditType: String, detail: AuditDetailForSubmissionValidation, correlationId: Option[String] = None)
-
-object ValidationAudit {
-  implicit val writes: OWrites[ValidationAudit] = (audit: ValidationAudit) => {
-    val detailJson        = Json.toJsObject(audit.detail)
-    val correlationIdJson = audit.correlationId.map(corrId => Json.obj("correlationId" -> corrId)).getOrElse(Json.obj())
-    val auditTypeJson     = Json.obj("auditType" -> audit.auditType)
-
-    auditTypeJson ++ correlationIdJson ++ Json.obj("detail" -> detailJson)
-  }
-}
 final case class Audit[T](details: T, userType: Option[AffinityGroup] = None, correlationId: Option[String] = None, error: Option[String] = None)
 
 object Audit {

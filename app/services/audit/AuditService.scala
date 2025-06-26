@@ -18,7 +18,7 @@ package services.audit
 
 import config.AppConfig
 import play.api.Logging
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Disabled, Failure}
@@ -59,7 +59,7 @@ class AuditService @Inject() (
             s"The attempt to issue audit event $eventName was unsuccessful, as auditing is currently disabled in config"
           ); auditResult
         case _ =>
-          logger.info(s"Audit event $eventName issued successful.");
+          logger.info(s"Audit event $eventName issued successful.")
           auditResult
       }
     }
