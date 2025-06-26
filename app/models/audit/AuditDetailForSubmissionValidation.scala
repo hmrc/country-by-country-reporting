@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package services.audit
+package models.audit
 
 import play.api.libs.json.{Json, OWrites, Reads}
 
-case class AuditDetail(
-  fileSize: Long,
+case class AuditDetailForSubmissionValidation(
   conversationId: String,
   subscriptionId: String,
   messageRefId: Option[String],
@@ -33,9 +32,9 @@ case class AuditDetail(
   validationErrors: Option[Seq[AuditValidationError]] = None
 )
 
-object AuditDetail {
-  implicit val writes: OWrites[AuditDetail] = Json.writes[AuditDetail]
-  implicit val reads: Reads[AuditDetail]    = Json.reads[AuditDetail]
+object AuditDetailForSubmissionValidation {
+  implicit val writes: OWrites[AuditDetailForSubmissionValidation] = Json.writes[AuditDetailForSubmissionValidation]
+  implicit val reads: Reads[AuditDetailForSubmissionValidation]    = Json.reads[AuditDetailForSubmissionValidation]
 }
 
 case class AuditValidationError(code: String, message: String)

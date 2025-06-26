@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package controllers.validation
+package models.audit
 
 import base.SpecBase
 import models.submission.{CBC401, TestData}
 import models.validation.{GenericError, Message}
 import play.api.libs.json.Json
-import services.audit.{AuditDetail, AuditValidationError}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 
-class AuditDetailSpec extends SpecBase {
+class AuditDetailForSubmissionValidationSpec extends SpecBase {
 
   "Audit Detail for File Validation" - {
     val userType       = Organisation.toString
-    val fileSize       = 12345L
     val conversationId = "conv-id"
     val subscriptionId = "sub-id"
     val errorURL       = "validation-failure-url"
@@ -38,8 +36,7 @@ class AuditDetailSpec extends SpecBase {
       val reportingEntityName = "Test Company"
       val reportType          = TestData.toString
 
-      val auditDetailObject = AuditDetail(
-        fileSize = fileSize,
+      val auditDetailObject = AuditDetailForSubmissionValidation(
         conversationId = conversationId,
         subscriptionId = subscriptionId,
         messageRefId = Some(messageRefId),
@@ -52,7 +49,6 @@ class AuditDetailSpec extends SpecBase {
 
       val expectedJson = Json.parse(s"""
                                        |{
-                                       |    "fileSize" : $fileSize,
                                        |    "conversationId" : "$conversationId",
                                        |    "subscriptionId" : "$subscriptionId",
                                        |    "messageRefId" : "$messageRefId",
@@ -65,7 +61,7 @@ class AuditDetailSpec extends SpecBase {
                                        |""".stripMargin)
 
       Json.toJson(auditDetailObject) mustBe expectedJson
-      expectedJson.as[AuditDetail] mustBe auditDetailObject
+      expectedJson.as[AuditDetailForSubmissionValidation] mustBe auditDetailObject
     }
 
     "formats for a file validation failure (schema errors)" in {
@@ -80,8 +76,7 @@ class AuditDetailSpec extends SpecBase {
         AuditValidationError(code = err.lineNumber.toString, message = err.message.messageKey)
       }
 
-      val auditDetailObject = AuditDetail(
-        fileSize = fileSize,
+      val auditDetailObject = AuditDetailForSubmissionValidation(
         conversationId = conversationId,
         subscriptionId = subscriptionId,
         messageRefId = None,
@@ -97,7 +92,6 @@ class AuditDetailSpec extends SpecBase {
 
       val expectedJson = Json.parse(s"""
                                        |{
-                                       |    "fileSize" : $fileSize,
                                        |    "conversationId" : "$conversationId",
                                        |    "subscriptionId" : "$subscriptionId",
                                        |    "userType" : "$userType",
@@ -118,14 +112,13 @@ class AuditDetailSpec extends SpecBase {
                                        |""".stripMargin)
 
       Json.toJson(auditDetailObject) mustBe expectedJson
-      expectedJson.as[AuditDetail] mustBe auditDetailObject
+      expectedJson.as[AuditDetailForSubmissionValidation] mustBe auditDetailObject
     }
 
     "formats for an InvalidXmlError" in {
       val errorMessage = "SAX parse error: Premature end of file."
 
-      val auditDetailObject = AuditDetail(
-        fileSize = fileSize,
+      val auditDetailObject = AuditDetailForSubmissionValidation(
         conversationId = conversationId,
         subscriptionId = subscriptionId,
         messageRefId = None,
@@ -140,7 +133,6 @@ class AuditDetailSpec extends SpecBase {
 
       val expectedJson = Json.parse(s"""
                                        |{
-                                       |    "fileSize" : $fileSize,
                                        |    "conversationId" : "$conversationId",
                                        |    "subscriptionId" : "$subscriptionId",
                                        |    "userType" : "$userType",
@@ -151,14 +143,13 @@ class AuditDetailSpec extends SpecBase {
                                        |""".stripMargin)
 
       Json.toJson(auditDetailObject) mustBe expectedJson
-      expectedJson.as[AuditDetail] mustBe auditDetailObject
+      expectedJson.as[AuditDetailForSubmissionValidation] mustBe auditDetailObject
     }
 
     "formats for invalid Upscan URL" in {
       val errorMessage = "Missing or invalid Upscan URL"
 
-      val auditDetailObject = AuditDetail(
-        fileSize = fileSize,
+      val auditDetailObject = AuditDetailForSubmissionValidation(
         conversationId = conversationId,
         subscriptionId = subscriptionId,
         messageRefId = None,
@@ -174,7 +165,6 @@ class AuditDetailSpec extends SpecBase {
 
       val expectedJson = Json.parse(s"""
                                        |{
-                                       |    "fileSize" : $fileSize,
                                        |    "conversationId" : "$conversationId",
                                        |    "subscriptionId" : "$subscriptionId",
                                        |    "userType" : "$userType",
@@ -185,14 +175,13 @@ class AuditDetailSpec extends SpecBase {
                                        |""".stripMargin)
 
       Json.toJson(auditDetailObject) mustBe expectedJson
-      expectedJson.as[AuditDetail] mustBe auditDetailObject
+      expectedJson.as[AuditDetailForSubmissionValidation] mustBe auditDetailObject
     }
 
     "formats for an unexpected internal server error during validation" in {
       val errorMessage = "An unexpected error occurred during XML validation"
 
-      val auditDetailObject = AuditDetail(
-        fileSize = fileSize,
+      val auditDetailObject = AuditDetailForSubmissionValidation(
         conversationId = conversationId,
         subscriptionId = subscriptionId,
         messageRefId = None,
@@ -207,7 +196,6 @@ class AuditDetailSpec extends SpecBase {
 
       val expectedJson = Json.parse(s"""
                                        |{
-                                       |    "fileSize" : $fileSize,
                                        |    "conversationId" : "$conversationId",
                                        |    "subscriptionId" : "$subscriptionId",
                                        |    "userType" : "$userType",
@@ -218,7 +206,7 @@ class AuditDetailSpec extends SpecBase {
                                        |""".stripMargin)
 
       Json.toJson(auditDetailObject) mustBe expectedJson
-      expectedJson.as[AuditDetail] mustBe auditDetailObject
+      expectedJson.as[AuditDetailForSubmissionValidation] mustBe auditDetailObject
     }
   }
 }

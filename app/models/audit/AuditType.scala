@@ -18,7 +18,6 @@ package models.audit
 
 import play.api.libs.json.OFormat.oFormatFromReadsAndOWrites
 import play.api.libs.json.{Json, OWrites}
-import services.audit.AuditDetail
 import uk.gov.hmrc.auth.core.AffinityGroup
 
 object AuditType {
@@ -31,7 +30,7 @@ object AuditType {
   val updateContactDetails = "UpdateContactDetails"
 }
 
-final case class ValidationAudit(auditType: String, detail: AuditDetail, correlationId: Option[String] = None)
+final case class ValidationAudit(auditType: String, detail: AuditDetailForSubmissionValidation, correlationId: Option[String] = None)
 
 object ValidationAudit {
   implicit val writes: OWrites[ValidationAudit] = (audit: ValidationAudit) => {

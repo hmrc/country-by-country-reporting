@@ -17,13 +17,13 @@
 package controllers.validation
 
 import controllers.auth.IdentifierAuthAction
-import models.audit.{AuditType, ValidationAudit}
+import models.audit.{Audit, AuditDetailForSubmissionValidation, AuditType, AuditValidationError}
 import models.upscan.UpscanURL
 import models.validation.{GenericError, InvalidXmlError, SubmissionValidationFailure, SubmissionValidationSuccess}
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents}
-import services.audit.{AuditDetail, AuditService, AuditValidationError}
+import services.audit.AuditService
 import services.validation.UploadedXmlValidationEngine
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -46,14 +46,12 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
   def validateSubmission: Action[JsValue] = authenticate(parse.json).async { implicit request =>
     val conversationId: String = request.headers.get("X-Conversation-ID").getOrElse("UNKNOWN_CONVERSATION_ID")
     val subscriptionId: String = request.headers.get("X-Subscription-ID").getOrElse("UNKNOWN_SUBSCRIPTION_ID")
-    val fileSize               = 0L //todo where to get this?
 
     request.body.validate[UpscanURL] match {
       case JsSuccess(upscanURL, _) =>
         validationEngine.validateUploadSubmission(upscanURL.url) map {
           case SubmissionValidationSuccess(messageSubmissionData) =>
-            val detail = AuditDetail(
-              fileSize = fileSize,
+            val detail = AuditDetailForSubmissionValidation(
               conversationId = conversationId,
               subscriptionId = subscriptionId,
               messageRefId = Some(messageSubmissionData.messageRefId),
@@ -63,7 +61,7 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
               userType = request.affinityGroup.toString,
               fileError = false
             )
-            auditService.sendValidationAuditEvent(ValidationAudit(AuditType.fileValidation, detail))
+            auditService.sendAuditEvent(AuditType.fileValidation, Json.toJson(Audit(detail)))
             Ok(Json.toJsObject(SubmissionValidationSuccess(messageSubmissionData)))
 
           case SubmissionValidationFailure(validationErrors) =>
@@ -73,8 +71,7 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
                 message = err.message.toString
               )
             }
-            val detail = AuditDetail(
-              fileSize = fileSize,
+            val detail = AuditDetailForSubmissionValidation(
               conversationId = conversationId,
               subscriptionId = subscriptionId,
               messageRefId = None,
@@ -87,13 +84,12 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
               errorURL = Some(ValidationFailureErrorUrl),
               validationErrors = Some(mappedValidationErrors)
             )
-            auditService.sendValidationAuditEvent(ValidationAudit(AuditType.fileValidation, detail))
+            auditService.sendAuditEvent(AuditType.fileValidation, Json.toJson(Audit(detail)))
             logger.warn("Failed to validate XML submission against schema")
             Ok(Json.toJson(SubmissionValidationFailure(validationErrors)))
 
           case InvalidXmlError(saxException) =>
-            val detail = AuditDetail(
-              fileSize = fileSize,
+            val detail = AuditDetailForSubmissionValidation(
               conversationId = conversationId,
               subscriptionId = subscriptionId,
               messageRefId = None,
@@ -106,13 +102,12 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
               errorURL = Some(InvalidXmlErrorUrl),
               validationErrors = None
             )
-            auditService.sendValidationAuditEvent(ValidationAudit(AuditType.fileValidation, detail))
+            auditService.sendAuditEvent(AuditType.fileValidation, Json.toJson(Audit(detail)))
             logger.warn(s"InvalidXmlError: $saxException")
             BadRequest(InvalidXmlError(saxException).toString)
 
           case _ =>
-            val detail = AuditDetail(
-              fileSize = fileSize,
+            val detail = AuditDetailForSubmissionValidation(
               conversationId = conversationId,
               subscriptionId = subscriptionId,
               messageRefId = None,
@@ -125,13 +120,12 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
               errorURL = Some(InternalServerErrorUrl),
               validationErrors = None
             )
-            auditService.sendValidationAuditEvent(ValidationAudit(AuditType.fileValidation, detail))
+            auditService.sendAuditEvent(AuditType.fileValidation, Json.toJson(Audit(detail)))
             logger.warn("Failed to validate submission due to unexpected outcome from validationEngine")
             InternalServerError("Failed to validate submission")
         }
       case JsError(errors) =>
-        val detail = AuditDetail(
-          fileSize = fileSize,
+        val detail = AuditDetailForSubmissionValidation(
           conversationId = conversationId,
           subscriptionId = subscriptionId,
           messageRefId = None,
@@ -144,7 +138,7 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
           errorURL = Some(MissingUpscanUrl),
           validationErrors = None
         )
-        auditService.sendValidationAuditEvent(ValidationAudit(AuditType.fileValidation, detail))
+        auditService.sendAuditEvent(AuditType.fileValidation, Json.toJson(Audit(detail)))
         logger.warn(s"Missing upscan URL: $errors")
         Future.successful(InternalServerError("Missing upscan URL"))
     }
