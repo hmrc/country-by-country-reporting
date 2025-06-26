@@ -1,0 +1,334 @@
+<ValidationErrors>
+    <FileError>
+        <Code>50008</Code>
+        <Details>Invalid MessageRefID format</Details>
+    </FileError>
+    <FileError>
+        <Code>50009</Code>
+        <Details>MessageRefID has already been used</Details>
+    </FileError>
+    <RecordError>
+        <Code>50010</Code>
+        <Details>File Contains Test Data for Production Environment</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD10ENTUniqueCharactersForDocType</DocRefIDInError>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD11REPUniqueCharactersForDocType</DocRefIDInError>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD12ADDUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>80000</Code>
+        <Details>DocRefID already used</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1ENTUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>80001</Code>
+        <Details>DocRefID format</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1ENTUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>80002</Code>
+        <Details>CorrDocRefId unknown</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1ENTUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>80003</Code>
+        <Details>CorrDocRefId no longer valid</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1ENTUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>80004</Code>
+        <Details>CorrDocRefId for Initial data</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1ENTUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>80005</Code>
+        <Details>Missing CorrDocRefId</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD10ENTUniqueCharactersForDocType</DocRefIDInError>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD11REPUniqueCharactersForDocType</DocRefIDInError>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD12ADDUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>80006</Code>
+        <Details>DocSpec. CorrMessageRefID</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD10ENTUniqueCharactersForDocType</DocRefIDInError>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD11REPUniqueCharactersForDocType</DocRefIDInError>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD12ADDUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>80007</Code>
+        <Details>MessageSpec. CorrMessageRefID</Details>
+    </RecordError>
+    <RecordError>
+        <Code>80008</Code>
+        <Details>Resend option</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1REPUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>80009</Code>
+        <Details>Delete Reporting Entity</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1ENTUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>80010</Code>
+        <Details>Message TypeIndic</Details>
+    </RecordError>
+    <RecordError>
+        <Code>80011</Code>
+        <Details>CorrDocRefID twice in same message</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD10ENTUniqueCharactersForDocType</DocRefIDInError>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD11REPUniqueCharactersForDocType</DocRefIDInError>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD12ADDUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>80013</Code>
+        <Details>Resend option, unknown DocRefID</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1ENTUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>80014</Code>
+        <Details>Resend option, DocRefID is no longer valid</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1ENTUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 1</Code>
+        <Details>File contains multiple records (more than one CbcBody)</Details>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 2</Code>
+        <Details><![CDATA[MessageSpec > SendingEntityIN]]></Details>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 3</Code>
+        <Details>First part of DocRefID must match MessageRefId</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD10ENTUniqueCharactersForDocType</DocRefIDInError>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD11REPUniqueCharactersForDocType</DocRefIDInError>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD12ADDUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 4</Code>
+        <Details>MessageRefId (Filename match)</Details>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 5</Code>
+        <Details>Check</Details>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 6</Code>
+        <Details>MessageRefId (CbC ID incorrect)</Details>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 7</Code>
+        <Details>MessageRefId (MessageTypeIndic)</Details>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 8</Code>
+        <Details>MessageRefId (XML Creation TimeStamp)</Details>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 9</Code>
+        <Details>DocRefId (TIN)</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1ENTUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 10</Code>
+        <Details>DocRefId (DocTypeIndic)</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1REPUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 11</Code>
+        <Details>DocRefId (XML Parent Group Element)</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1ENTUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 12</Code>
+        <Details>Changing ReportingPeriod</Details>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 13</Code>
+        <Details>Reporting Period does not match Reporting Period End</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1ENTUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 14</Code>
+        <Details>Multiple Initial Files for same Reporting Period End</Details>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 15a</Code>
+        <Details>Submissions with overlapping Reporting Period (Initial)</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1ENTUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 15b</Code>
+        <Details>Submissions with overlapping Reporting Period (Correction)</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1ENTUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 16</Code>
+        <Details>Reporting Period Start date should always be before the End date</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1ENTUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 17</Code>
+        <Details>Oldest allowable ReportingPeriod</Details>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 18</Code>
+        <Details>Future ReportingPeriod</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1ENTUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 20</Code>
+        <Details>Reporting Entity TIN format</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1ENTUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 21a</Code>
+        <Details>Reporting Entity match ConstEntity TIN (Initial)</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1ENTUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 21b</Code>
+        <Details>Reporting Entity match ConstEntity TIN (Correction)</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1ENTUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 22a</Code>
+        <Details>Duplication of ConstEntity TIN (Initial)</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1REPUniqueCharactersForDocType2</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 22b</Code>
+        <Details>Duplication of ConstEntity TIN (Correction)</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1REPUniqueCharactersForDocType2</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 23a</Code>
+        <Details>currCode (Initial)</Details>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 23b</Code>
+        <Details>currCode (Correction)</Details>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 24a</Code>
+        <Details>ConstEntities Role (Initial)</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1REPUniqueCharactersForDocType2</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 24b</Code>
+        <Details>ConstEntities Role (Correction)</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1REPUniqueCharactersForDocType2</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 25a</Code>
+        <Details>Reporting Entity ReportingRole is CBC701 (Initial)</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1REPUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 25b</Code>
+        <Details>Reporting Entity ReportingRole is CBC701 (Initial)</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1REPUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 26a</Code>
+        <Details>Reporting Entity ReportingRole is CBC702 (Initial)</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1REPUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 26b</Code>
+        <Details>Reporting Entity ReportingRole is CBC702 (Correction)</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1REPUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 27a</Code>
+        <Details>Reporting Entity ReportingRole is CBC702 (Initial)</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1REPUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 27b</Code>
+        <Details>Reporting Entity ReportingRole is CBC702 (Correction)</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1REPUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 28</Code>
+        <Details>Failed Schema Validation following whitespace collapse</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD10ENTUniqueCharactersForDocType</DocRefIDInError>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD11REPUniqueCharactersForDocType</DocRefIDInError>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD12ADDUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 29</Code>
+        <Details>BizActivities CBC513 - Other Info</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1REPUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 30</Code>
+        <Details>Number of Employees</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1REPUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 31</Code>
+        <Details>Number of Employees</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1REPUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 32</Code>
+        <Details>Presence of CbCReports in an Initial</Details>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 33</Code>
+        <Details>CorrDocRefID for OECD0</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1ENTUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 34</Code>
+        <Details>MessageTypeIndic</Details>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 35</Code>
+        <Details>MessageTypeIndic</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD10ENTUniqueCharactersForDocType</DocRefIDInError>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD11REPUniqueCharactersForDocType</DocRefIDInError>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD12ADDUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 36</Code>
+        <Details>Schema Version Number</Details>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 37</Code>
+        <Details>TIN</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1REPUniqueCharactersForDocType2</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 38</Code>
+        <Details>SendingEntityIN</Details>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 39a</Code>
+        <Details>Reporting Entity ReportingRole is CBC703 or CBC704 (Initial)</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1REPUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 39b</Code>
+        <Details>Reporting Entity ReportingRole is CBC703 or CBC704 (Correction)</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1REPUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 40a</Code>
+        <Details>Reporting Entity ReportingRole is CBC703 or CBC704 (Initial)</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1REPUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 40b</Code>
+        <Details>Reporting Entity ReportingRole is CBC703 or CBC704 (Correction)</Details>
+        <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD1REPUniqueCharactersForDocType</DocRefIDInError>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 42</Code>
+        <Details>OECD0</Details>
+    </RecordError>
+    <RecordError>
+        <Code>CBC Error Code 43</Code>
+        <Details>OECD0</Details>
+    </RecordError>
+</ValidationErrors>
