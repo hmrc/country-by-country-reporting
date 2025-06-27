@@ -22,7 +22,7 @@ import connectors.SubmissionConnector
 import controllers.auth.IdentifierRequest
 import controllers.dateTimeNow
 import models.agentSubscription.AgentContactDetails
-import models.audit.AuditType
+import models.audit.{Audit, AuditDetailForFileSubmission, AuditType}
 import models.error.{BackendError, ReadSubscriptionError, RepositoryError, SubmissionServiceError}
 import models.submission._
 import models.subscription.ResponseDetail
@@ -76,8 +76,7 @@ class SubmissionService @Inject() (
                                              request.affinityGroup,
                                              Some(LargeFile)
       )
-      _ = auditService.sendAuditEvent(AuditType.fileSubmission, Json.toJson(fileDetails))
-      _ <- EitherT(persistFileDetails(fileDetails))
+      _ <- EitherT(persistFileDetails(fileDetails, submissionDetails))
     } yield conversationId).value
   }
 
@@ -108,17 +107,29 @@ class SubmissionService @Inject() (
               )
               _ = auditService.sendAuditEvent(AuditType.fileSubmission, Json.toJson(fileDetails))
               _ <- EitherT(addSubscriptionDetailsToXml(xml, submissionMetaData, orgContactDetails, fileDetails))
-              _ <- EitherT(persistFileDetails(fileDetails))
+              _ <- EitherT(persistFileDetails(fileDetails, submissionDetails))
             } yield conversationId
           case None =>
-            val error = SubmissionServiceError(s"Xml file with conversation Id [${conversationId.value}] is empty", Some(request.affinityGroup))
-            auditService.sendAuditEvent(AuditType.fileSubmissionError, Json.toJson(error))
+            val errorMessage = s"Xml file with conversation Id [${conversationId.value}] is empty"
+            val error        = SubmissionServiceError(errorMessage, Some(request.affinityGroup))
+            sendAuditEvent(submissionDetails = submissionDetails,
+                           fileStatus = Pending,
+                           userType = Some(request.affinityGroup),
+                           submissionTime = submissionTime,
+                           error = Some(errorMessage)
+            )
             EitherT.left(Future.successful(error))
         }
       case Failure(_) =>
+        val errorMessage = s"Failed to load xml file [$documentUrl] with conversation Id [${conversationId.value}]"
         val error =
-          SubmissionServiceError(s"Failed to load xml file [$documentUrl] with conversation Id [${conversationId.value}]", Some(request.affinityGroup))
-        auditService.sendAuditEvent(AuditType.fileSubmissionError, Json.toJson(error))
+          SubmissionServiceError(errorMessage, Some(request.affinityGroup))
+        sendAuditEvent(submissionDetails = submissionDetails,
+                       fileStatus = Pending,
+                       userType = Some(request.affinityGroup),
+                       submissionTime = submissionTime,
+                       error = Some(errorMessage)
+        )
         EitherT.left(Future.successful(error))
     }
 
@@ -193,10 +204,43 @@ class SubmissionService @Inject() (
       fileType
     )
 
-  private def persistFileDetails(fileDetails: FileDetails): Future[Either[BackendError, Boolean]] =
+  private def persistFileDetails(fileDetails: FileDetails, submissionDetails: SubmissionDetails)(implicit
+    hc: HeaderCarrier
+  ): Future[Either[BackendError, Boolean]] =
     fileDetailsRepository
       .insert(fileDetails)
-      .map(Right(_))
-      .recover(_ => Left(RepositoryError(s"Failed to persist details for file with conversation Id [${fileDetails._id.value}]")))
+      .map {
+        sendAuditEvent(submissionDetails = submissionDetails,
+                       fileStatus = fileDetails.status,
+                       userType = fileDetails.userType,
+                       submissionTime = fileDetails.submitted
+        )
+        Right(_)
+      }
+      .recover { _ =>
+        val errorMessage = s"Failed to persist details for file with conversation Id [${fileDetails._id.value}]"
+        sendAuditEvent(
+          submissionDetails = submissionDetails,
+          fileStatus = fileDetails.status,
+          submissionTime = fileDetails.submitted,
+          userType = fileDetails.userType,
+          error = Some(errorMessage)
+        )
+        Left(RepositoryError(errorMessage))
+      }
 
+  private def sendAuditEvent(submissionDetails: SubmissionDetails,
+                             fileStatus: FileStatus,
+                             userType: Option[AffinityGroup],
+                             submissionTime: LocalDateTime,
+                             error: Option[String] = None
+  )(implicit
+    hc: HeaderCarrier
+  ) = try {
+    val auditDetail = Audit(AuditDetailForFileSubmission(submissionDetails, fileStatus, submissionTime.toString), userType = userType, error = error)
+    auditService.sendAuditEvent(AuditType.fileSubmission, Json.toJson(auditDetail))
+  } catch {
+    case e: Exception =>
+      logger.error(s"Unable to send audit event for audit type ${AuditType.fileSubmission}, reason ${e.getMessage}")
+  }
 }
