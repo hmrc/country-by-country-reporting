@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,8 +59,9 @@ class AuditService @Inject() (
             s"The attempt to issue audit event $eventName was unsuccessful, as auditing is currently disabled in config"
           ); auditResult
         case _ =>
-          logger.info(s"Audit event $eventName issued successful.");
+          logger.info(s"Audit event $eventName issued successful.")
           auditResult
       }
     }
+
 }

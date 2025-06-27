@@ -16,6 +16,7 @@
 
 package models.audit
 
+import play.api.libs.json.OFormat.oFormatFromReadsAndOWrites
 import play.api.libs.json.{Json, OWrites}
 import uk.gov.hmrc.auth.core.AffinityGroup
 
@@ -24,8 +25,7 @@ object AuditType {
   val sdesResponse         = "SDESResponse"
   val fileSubmission       = "CountryByCountryReportingFileSubmission"
   val fileSubmissionError  = "CountryByCountryReportingFileSubmissionError"
-  val fileValidation       = "CountryByCountryReportingFileValidation"
-  val fileValidationError  = "CountryByCountryReportingFileValidationError"
+  val fileValidation       = "FileValidation"
   val updateContactDetails = "UpdateContactDetails"
 }
 
@@ -40,4 +40,5 @@ object Audit {
     val errorJson         = audit.error.map(error => Json.obj("error" -> error)).getOrElse(Json.obj())
     detailsJson ++ userTypeJson ++ correlationIdJson ++ errorJson
   }
+
 }
