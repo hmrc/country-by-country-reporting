@@ -23,8 +23,7 @@ import uk.gov.hmrc.auth.core.AffinityGroup
 object AuditType {
   val eisResponse          = "EISResponse"
   val sdesResponse         = "SDESResponse"
-  val fileSubmission       = "CountryByCountryReportingFileSubmission"
-  val fileSubmissionError  = "CountryByCountryReportingFileSubmissionError"
+  val fileSubmission       = "FileSubmission"
   val fileValidation       = "FileValidation"
   val updateContactDetails = "UpdateContactDetails"
 }

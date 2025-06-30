@@ -22,7 +22,7 @@ lazy val microservice = Project("country-by-country-reporting", file("."))
   )
   .settings(inConfig(Test)(testSettings): _*)
   .settings(scoverageSettings)
-  .settings(resolvers += Resolver.jcenterRepo)
+  .settings(resolvers += Resolver.mavenCentral)
   .settings(CodeCoverageSettings.settings: _*)
   .settings(
     ThisBuild / libraryDependencySchemes ++= Seq(

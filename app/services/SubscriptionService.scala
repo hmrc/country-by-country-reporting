@@ -17,8 +17,8 @@
 package services
 
 import connectors.SubscriptionConnector
-import models.audit.{Audit, AuditDetailForUpdateOrgSubscriptionRequest}
 import models.audit.AuditType.updateContactDetails
+import models.audit.{Audit, AuditDetailForUpdateOrgSubscriptionRequest}
 import models.error.{BackendError, ReadSubscriptionError, UpdateSubscriptionError}
 import models.subscription._
 import play.api.Logging
