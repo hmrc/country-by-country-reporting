@@ -18,8 +18,8 @@ package models.upscan
 
 import play.api.libs.json.{Json, OFormat}
 
-case class UpscanURL(url: String)
+case class ValidateRequest(url: String, conversationId: String, subscriptionId: String)
 
-object UpscanURL {
-  implicit val formats: OFormat[UpscanURL] = Json.format[UpscanURL]
+object ValidateRequest {
+  implicit val formats: OFormat[ValidateRequest] = Json.format[ValidateRequest]
 }
