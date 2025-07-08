@@ -18,9 +18,9 @@ package controllers.validation
 
 import base.SpecBase
 import controllers.auth.{FakeIdentifierAuthAction, IdentifierAuthAction}
-import models.audit.{Audit, AuditDetailForSubmissionValidation}
+import models.audit.{Audit, AuditDetailForSubmissionValidation, AuditValidationError}
 import models.submission.{CBC401, MessageSpecData, TestData}
-import models.validation.SubmissionValidationSuccess
+import models.validation._
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import play.api.Application
@@ -57,6 +57,11 @@ class SubmissionValidationControllerSpec extends SpecBase {
     reportType = TestData
   )
 
+  override def beforeEach(): Unit = {
+    reset(mockAuditService, mockValidationEngine)
+    super.beforeEach()
+  }
+
   "validateSubmission" - {
 
     when(mockValidationEngine.validateUploadSubmission(any()))
@@ -64,9 +69,13 @@ class SubmissionValidationControllerSpec extends SpecBase {
 
     "must validate a submission and return OK with success message" in {
 
-      val upscanUrl = "/some-upscan-url"
+      val upscanUrl      = "/some-upscan-url"
+      val conversationId = "conversationId123"
+      val subscriptionId = "subscriptionId123"
       val validJsonBody = Json.obj(
-        "url" -> upscanUrl
+        "url"            -> upscanUrl,
+        "conversationId" -> conversationId,
+        "subscriptionId" -> subscriptionId
       )
 
       val submissionSuccess = SubmissionValidationSuccess(messageSpecData)
@@ -75,10 +84,6 @@ class SubmissionValidationControllerSpec extends SpecBase {
         .thenReturn(Future.successful(submissionSuccess))
 
       val request = FakeRequest(POST, routes.SubmissionValidationController.validateSubmission.url, FakeHeaders(), validJsonBody)
-        .withHeaders(
-          "X-Conversation-ID" -> "conversationId123",
-          "X-Subscription-ID" -> "subscriptionId123"
-        )
 
       val result: Future[Result] = controller.validateSubmission()(request)
 
@@ -102,20 +107,28 @@ class SubmissionValidationControllerSpec extends SpecBase {
       verify(mockAuditService, times(1)).sendAuditEvent(eqTo("FileValidation"), eqTo(Json.toJson(expectedAudit)))(any(), any())
     }
 
-    "return InternalServerError and audit when UpscanURL is missing from the request body" in {
+    "must validate a submission and return OK with failure message" in {
 
-      val invalidJsonBody = Json.obj(
-        "someOtherField" -> "someValue"
+      val upscanUrl      = "/some-upscan-url"
+      val conversationId = "conversationId123"
+      val subscriptionId = "subscriptionId123"
+      val validJsonBody = Json.obj(
+        "url"            -> upscanUrl,
+        "conversationId" -> conversationId,
+        "subscriptionId" -> subscriptionId
       )
-      val request = FakeRequest(POST, routes.SubmissionValidationController.validateSubmission.url, FakeHeaders(), invalidJsonBody)
-        .withHeaders(
-          "X-Conversation-ID" -> "conversationId123",
-          "X-Subscription-ID" -> "subscriptionId123"
-        )
+
+      val expectedErrors =
+        Seq(GenericError(176, Message("xml.empty.field", List("Entity"))), GenericError(258, Message("xml.add.a.element", List("Summary"))))
+
+      val submissionError = SubmissionValidationFailure(ValidationErrors(expectedErrors))
+
+      when(mockValidationEngine.validateUploadSubmission(eqTo(upscanUrl)))
+        .thenReturn(Future.successful(submissionError))
+
+      val request = FakeRequest(POST, routes.SubmissionValidationController.validateSubmission.url, FakeHeaders(), validJsonBody)
 
       val result: Future[Result] = controller.validateSubmission()(request)
-
-      val expectedErrorMessage = s"Missing or invalid Upscan URL: List((/url,List(JsonValidationError(List(error.path.missing),List()))))"
 
       val expectedAuditDetail = AuditDetailForSubmissionValidation(
         conversationId = "conversationId123",
@@ -126,18 +139,76 @@ class SubmissionValidationControllerSpec extends SpecBase {
         reportType = None,
         userType = "Organisation",
         fileError = true,
-        errorMessage = Some(expectedErrorMessage),
-        errorURL = Some("country-by-country-reporting/problem/missing-url"),
-        validationErrors = None
+        errorMessage = Some("Failed to validate XML submission against schema"),
+        errorURL = Some("country-by-country-reporting/problem/validation-failure"),
+        validationErrors = Some(
+          expectedErrors.map(err =>
+            AuditValidationError(
+              code = err.lineNumber.toString,
+              message = err.message.toString
+            )
+          )
+        )
+      )
+      val expectedAudit = Audit(expectedAuditDetail)
+
+      status(result) mustBe OK
+      contentAsJson(result) mustBe Json.toJson(submissionError)
+      verify(mockAuditService, times(1)).sendAuditEvent(eqTo("FileValidation"), eqTo(Json.toJson(expectedAudit)))(any(), any())
+    }
+
+    "must validate a submission and return BadRequest with error message" in {
+
+      val upscanUrl      = "/some-upscan-url"
+      val conversationId = "conversationId123"
+      val subscriptionId = "subscriptionId123"
+      val validJsonBody = Json.obj(
+        "url"            -> upscanUrl,
+        "conversationId" -> conversationId,
+        "subscriptionId" -> subscriptionId
       )
 
-      val expectedValidationAudit = Json.toJson(expectedAuditDetail)
+      val invalidXmlError = InvalidXmlError("Sax Exception occurred")
+
+      when(mockValidationEngine.validateUploadSubmission(eqTo(upscanUrl)))
+        .thenReturn(Future.successful(invalidXmlError))
+
+      val request = FakeRequest(POST, routes.SubmissionValidationController.validateSubmission.url, FakeHeaders(), validJsonBody)
+
+      val result: Future[Result] = controller.validateSubmission()(request)
+
+      val expectedAuditDetail = AuditDetailForSubmissionValidation(
+        conversationId = "conversationId123",
+        subscriptionId = "subscriptionId123",
+        messageRefId = None,
+        messageTypeIndicator = None,
+        reportingEntityName = None,
+        reportType = None,
+        userType = "Organisation",
+        fileError = true,
+        errorMessage = Some("Sax Exception occurred"),
+        errorURL = Some("country-by-country-reporting/problem/not-xml"),
+        validationErrors = None
+      )
+      val expectedAudit = Audit(expectedAuditDetail)
+
+      status(result) mustBe BAD_REQUEST
+      verify(mockAuditService, times(1)).sendAuditEvent(eqTo("FileValidation"), eqTo(Json.toJson(expectedAudit)))(any(), any())
+    }
+
+    "return InternalServerError and audit when UpscanURL is missing from the request body" in {
+
+      val invalidJsonBody = Json.obj(
+        "someOtherField" -> "someValue"
+      )
+      val request = FakeRequest(POST, routes.SubmissionValidationController.validateSubmission.url, FakeHeaders(), invalidJsonBody)
+
+      val result: Future[Result] = controller.validateSubmission()(request)
 
       status(result) mustBe INTERNAL_SERVER_ERROR
       contentAsString(result) mustBe "Missing upscan URL"
-      verify(mockAuditService, times(1)).sendAuditEvent(eqTo("FileValidation"), eqTo(expectedValidationAudit))(any(), any())
+      verify(mockAuditService, times(0)).sendAuditEvent(any(), any())(any(), any())
     }
 
   }
-
 }

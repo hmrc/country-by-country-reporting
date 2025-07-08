@@ -16,15 +16,17 @@
 
 package controllers.validation
 
-import controllers.auth.IdentifierAuthAction
+import controllers.auth.{IdentifierAuthAction, IdentifierRequest}
 import models.audit.{Audit, AuditDetailForSubmissionValidation, AuditType, AuditValidationError}
-import models.upscan.UpscanURL
+import models.submission.MessageSpecData
+import models.upscan.ValidateRequest
 import models.validation.{GenericError, InvalidXmlError, SubmissionValidationFailure, SubmissionValidationSuccess}
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents}
 import services.audit.AuditService
 import services.validation.UploadedXmlValidationEngine
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.Inject
@@ -40,107 +42,103 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
 
   private val ValidationFailureErrorUrl = "country-by-country-reporting/problem/validation-failure"
   private val InvalidXmlErrorUrl        = "country-by-country-reporting/problem/not-xml"
-  private val MissingUpscanUrl          = "country-by-country-reporting/problem/missing-url"
   private val InternalServerErrorUrl    = "country-by-country-reporting/problem/internal-error"
 
   def validateSubmission: Action[JsValue] = authenticate(parse.json).async { implicit request =>
-    val conversationId: String = request.headers.get("X-Conversation-ID").getOrElse("UNKNOWN_CONVERSATION_ID")
-    val subscriptionId: String = request.headers.get("X-Subscription-ID").getOrElse("UNKNOWN_SUBSCRIPTION_ID")
-
-    request.body.validate[UpscanURL] match {
-      case JsSuccess(upscanURL, _) =>
-        validationEngine.validateUploadSubmission(upscanURL.url) map {
+    request.body.validate[ValidateRequest] match {
+      case JsSuccess(validateRequest, _) =>
+        validationEngine.validateUploadSubmission(validateRequest.url) map {
           case SubmissionValidationSuccess(messageSubmissionData) =>
-            val detail = AuditDetailForSubmissionValidation(
-              conversationId = conversationId,
-              subscriptionId = subscriptionId,
-              messageRefId = Some(messageSubmissionData.messageRefId),
-              messageTypeIndicator = Some(messageSubmissionData.messageTypeIndic.toString),
-              reportingEntityName = Some(messageSubmissionData.reportingEntityName),
-              reportType = Some(messageSubmissionData.reportType.toString),
-              userType = request.affinityGroup.toString,
-              fileError = false
-            )
-            auditService.sendAuditEvent(AuditType.fileValidation, Json.toJson(Audit(detail)))
+            sendSuccessfulAuditEvent(validateRequest, messageSubmissionData)
             Ok(Json.toJsObject(SubmissionValidationSuccess(messageSubmissionData)))
 
           case SubmissionValidationFailure(validationErrors) =>
+            logger.warn("Failed to validate XML submission against schema")
             val mappedValidationErrors = validationErrors.errors.map { err: GenericError =>
               AuditValidationError(
                 code = err.lineNumber.toString,
                 message = err.message.toString
               )
             }
-            val detail = AuditDetailForSubmissionValidation(
-              conversationId = conversationId,
-              subscriptionId = subscriptionId,
-              messageRefId = None,
-              messageTypeIndicator = None,
-              reportingEntityName = None,
-              reportType = None,
-              userType = request.affinityGroup.toString,
-              fileError = true,
-              errorMessage = Some("Failed to validate XML submission against schema"),
-              errorURL = Some(ValidationFailureErrorUrl),
-              validationErrors = Some(mappedValidationErrors)
-            )
-            auditService.sendAuditEvent(AuditType.fileValidation, Json.toJson(Audit(detail)))
-            logger.warn("Failed to validate XML submission against schema")
+            sendAuditEventForValidationErrors(validateRequest, mappedValidationErrors)
             Ok(Json.toJson(SubmissionValidationFailure(validationErrors)))
 
           case InvalidXmlError(saxException) =>
-            val detail = AuditDetailForSubmissionValidation(
-              conversationId = conversationId,
-              subscriptionId = subscriptionId,
-              messageRefId = None,
-              messageTypeIndicator = None,
-              reportingEntityName = None,
-              reportType = None,
-              userType = request.affinityGroup.toString,
-              fileError = true,
-              errorMessage = Some(saxException),
-              errorURL = Some(InvalidXmlErrorUrl),
-              validationErrors = None
-            )
-            auditService.sendAuditEvent(AuditType.fileValidation, Json.toJson(Audit(detail)))
             logger.warn(s"InvalidXmlError: $saxException")
+            sendAuditEventForExceptions(validateRequest, InvalidXmlErrorUrl, saxException)
             BadRequest(InvalidXmlError(saxException).toString)
 
           case _ =>
-            val detail = AuditDetailForSubmissionValidation(
-              conversationId = conversationId,
-              subscriptionId = subscriptionId,
-              messageRefId = None,
-              messageTypeIndicator = None,
-              reportingEntityName = None,
-              reportType = None,
-              userType = request.affinityGroup.toString,
-              fileError = true,
-              errorMessage = Some("An unexpected error occurred during XML validation"),
-              errorURL = Some(InternalServerErrorUrl),
-              validationErrors = None
-            )
-            auditService.sendAuditEvent(AuditType.fileValidation, Json.toJson(Audit(detail)))
             logger.warn("Failed to validate submission due to unexpected outcome from validationEngine")
+            val errorMessage = "An unexpected error occurred during XML validation"
+            sendAuditEventForExceptions(validateRequest, InternalServerErrorUrl, errorMessage)
             InternalServerError("Failed to validate submission")
         }
       case JsError(errors) =>
-        val detail = AuditDetailForSubmissionValidation(
-          conversationId = conversationId,
-          subscriptionId = subscriptionId,
-          messageRefId = None,
-          messageTypeIndicator = None,
-          reportingEntityName = None,
-          reportType = None,
-          userType = request.affinityGroup.toString,
-          fileError = true,
-          errorMessage = Some(s"Missing or invalid Upscan URL: $errors"),
-          errorURL = Some(MissingUpscanUrl),
-          validationErrors = None
-        )
-        auditService.sendAuditEvent(AuditType.fileValidation, Json.toJson(Audit(detail)))
         logger.warn(s"Missing upscan URL: $errors")
+        logger.warn(s"No Audit event triggered for request ${request.body}")
         Future.successful(InternalServerError("Missing upscan URL"))
     }
+  }
+
+  def sendSuccessfulAuditEvent(validateRequest: ValidateRequest,
+                               messageSpecData: MessageSpecData
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext, request: IdentifierRequest[JsValue]) = {
+    val detail = AuditDetailForSubmissionValidation(
+      conversationId = validateRequest.conversationId,
+      subscriptionId = validateRequest.subscriptionId,
+      messageRefId = Some(messageSpecData.messageRefId),
+      messageTypeIndicator = Some(messageSpecData.messageTypeIndic.toString),
+      reportingEntityName = Some(messageSpecData.reportingEntityName),
+      reportType = Some(messageSpecData.reportType.toString),
+      userType = request.affinityGroup.toString,
+      fileError = false
+    )
+    sendAuditEvent(detail)
+  }
+
+  private def sendAuditEvent(detail: AuditDetailForSubmissionValidation)(implicit hc: HeaderCarrier, ec: ExecutionContext) =
+    auditService.sendAuditEvent(AuditType.fileValidation, Json.toJson(Audit(detail)))
+
+  def sendAuditEventForValidationErrors(validateRequest: ValidateRequest,
+                                        mappedValidationErrors: Seq[AuditValidationError]
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext, request: IdentifierRequest[JsValue]) = {
+
+    val detail = AuditDetailForSubmissionValidation(
+      conversationId = validateRequest.conversationId,
+      subscriptionId = validateRequest.subscriptionId,
+      messageRefId = None,
+      messageTypeIndicator = None,
+      reportingEntityName = None,
+      reportType = None,
+      userType = request.affinityGroup.toString,
+      fileError = true,
+      errorMessage = Some("Failed to validate XML submission against schema"),
+      errorURL = Some(ValidationFailureErrorUrl),
+      validationErrors = Some(mappedValidationErrors)
+    )
+    sendAuditEvent(detail)
+  }
+
+  def sendAuditEventForExceptions(validateRequest: ValidateRequest, errorUrl: String, errorMessage: String)(implicit
+    hc: HeaderCarrier,
+    ec: ExecutionContext,
+    request: IdentifierRequest[JsValue]
+  ) = {
+
+    val detail = AuditDetailForSubmissionValidation(
+      conversationId = validateRequest.conversationId,
+      subscriptionId = validateRequest.subscriptionId,
+      messageRefId = None,
+      messageTypeIndicator = None,
+      reportingEntityName = None,
+      reportType = None,
+      userType = request.affinityGroup.toString,
+      fileError = true,
+      errorMessage = Some(errorMessage),
+      errorURL = Some(errorUrl),
+      validationErrors = None
+    )
+    sendAuditEvent(detail)
   }
 }
