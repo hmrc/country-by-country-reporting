@@ -75,6 +75,9 @@ class AuditDetailForSubmissionValidationSpec extends SpecBase {
       val auditValidationErrors = validationErrors.map { err =>
         AuditValidationError(code = err.lineNumber.toString, message = err.message.messageKey)
       }
+      val dataErrorsSummary: String = auditValidationErrors
+        .map(e => s"${e.code}: ${e.message}")
+        .mkString("; ")
 
       val auditDetailObject = AuditDetailForSubmissionValidation(
         conversationId = conversationId,
@@ -87,28 +90,17 @@ class AuditDetailForSubmissionValidationSpec extends SpecBase {
         fileError = true,
         errorMessage = Some(errorMessage),
         errorURL = Some(errorURL),
-        validationErrors = Some(auditValidationErrors)
+        validationErrors = Some(Map("dataErrorsSummary" -> dataErrorsSummary))
       )
 
       val expectedJson = Json.parse(s"""
-                                       |{
-                                       |    "conversationId" : "$conversationId",
-                                       |    "subscriptionId" : "$subscriptionId",
-                                       |    "userType" : "$userType",
-                                       |    "fileError" : true,
-                                       |    "errorMessage" : "$errorMessage",
-                                       |    "errorURL" : "$errorURL",
-                                       |    "validationErrors" : [
-                                       |        {
-                                       |            "code" : "10",
-                                       |            "message" : "Line 10 error message"
-                                       |        },
-                                       |        {
-                                       |            "code" : "25",
-                                       |            "message" : "Line 25 error message"
-                                       |        }
-                                       |    ]
-                                       |}
+                                       |{"conversationId":"conv-id",
+                                       |"subscriptionId":"sub-id",
+                                       |"userType":"Organisation",
+                                       |"fileError":true,
+                                       |"errorMessage":"Failed to validate XML submission against schema",
+                                       |"errorURL":"validation-failure-url",
+                                       |"validationErrors":{"dataErrorsSummary":"10: Line 10 error message; 25: Line 25 error message"}}
                                        |""".stripMargin)
 
       Json.toJson(auditDetailObject) mustBe expectedJson

@@ -40,9 +40,9 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
     extends BackendController(cc)
     with Logging {
 
-  private val ValidationFailureErrorUrl = "country-by-country-reporting/problem/validation-failure"
-  private val InvalidXmlErrorUrl        = "country-by-country-reporting/problem/not-xml"
-  private val InternalServerErrorUrl    = "country-by-country-reporting/problem/internal-error"
+  private val dataErrorsUrl          = "/problem/data-errors"
+  private val invalidXmlErrorUrl     = "/problem/invalid-xml"
+  private val internalServerErrorUrl = "/problem/there-is-a-problem"
 
   def validateSubmission: Action[JsValue] = authenticate(parse.json).async { implicit request =>
     request.body.validate[ValidateRequest] match {
@@ -65,13 +65,13 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
 
           case InvalidXmlError(saxException) =>
             logger.warn(s"InvalidXmlError: $saxException")
-            sendAuditEventForExceptions(validateRequest, InvalidXmlErrorUrl, saxException)
+            sendAuditEventForExceptions(validateRequest, invalidXmlErrorUrl, saxException)
             BadRequest(InvalidXmlError(saxException).toString)
 
           case _ =>
             logger.warn("Failed to validate submission due to unexpected outcome from validationEngine")
             val errorMessage = "An unexpected error occurred during XML validation"
-            sendAuditEventForExceptions(validateRequest, InternalServerErrorUrl, errorMessage)
+            sendAuditEventForExceptions(validateRequest, internalServerErrorUrl, errorMessage)
             InternalServerError("Failed to validate submission")
         }
       case JsError(errors) =>
@@ -104,6 +104,10 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
                                         mappedValidationErrors: Seq[AuditValidationError]
   )(implicit hc: HeaderCarrier, ec: ExecutionContext, request: IdentifierRequest[JsValue]) = {
 
+    val dataErrorsSummary: String = mappedValidationErrors
+      .map(e => s"${e.code}: ${e.message}")
+      .mkString("; ")
+
     val detail = AuditDetailForSubmissionValidation(
       conversationId = validateRequest.conversationId,
       subscriptionId = validateRequest.subscriptionId,
@@ -114,8 +118,8 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
       userType = request.affinityGroup.toString,
       fileError = true,
       errorMessage = Some("Failed to validate XML submission against schema"),
-      errorURL = Some(ValidationFailureErrorUrl),
-      validationErrors = Some(mappedValidationErrors)
+      errorURL = Some(dataErrorsUrl),
+      validationErrors = Some(Map("dataErrorsSummary" -> dataErrorsSummary))
     )
     sendAuditEvent(detail)
   }

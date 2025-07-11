@@ -30,9 +30,10 @@ import scala.concurrent.Future
 
 class UpScanCallbackDispatcherSpec extends SpecBase {
 
-  val mockUploadProgressTracker: UploadProgressTracker =
+  private val mockUploadProgressTracker: UploadProgressTracker =
     mock[UploadProgressTracker]
-  val mockAuditService: AuditService = mock[AuditService]
+  private val mockAuditService: AuditService = mock[AuditService]
+  private val uploadId                       = "upload-id"
 
   val application: Application =
     applicationBuilder()
@@ -41,6 +42,12 @@ class UpScanCallbackDispatcherSpec extends SpecBase {
         bind[AuditService].toInstance(mockAuditService)
       )
       .build()
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockAuditService)
+    reset(mockUploadProgressTracker)
+  }
 
   "UpscanCallbackDispatcher" - {
 
@@ -77,15 +84,13 @@ class UpScanCallbackDispatcherSpec extends SpecBase {
       when(
         mockUploadProgressTracker.registerUploadResult(reference, uploadStatus)
       ).thenReturn(Future.successful(true))
-      when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(AuditResult.Success))
 
       val uploadCallbackDispatcher =
         new UpScanCallbackDispatcher(mockUploadProgressTracker, mockAuditService)
 
       val result: Future[Boolean] =
-        uploadCallbackDispatcher.handleCallback(readyCallbackBody)
+        uploadCallbackDispatcher.handleCallback(readyCallbackBody, uploadId)
       result.futureValue mustBe true
-
     }
 
     "handleCallback must return Quarantined for the input FailedCallbackBody" in {
@@ -105,9 +110,9 @@ class UpScanCallbackDispatcherSpec extends SpecBase {
         new UpScanCallbackDispatcher(mockUploadProgressTracker, mockAuditService)
 
       val result: Future[Boolean] =
-        uploadCallbackDispatcher.handleCallback(readyCallbackBody)
+        uploadCallbackDispatcher.handleCallback(readyCallbackBody, uploadId)
       result.futureValue mustBe true
-
+      verify(mockAuditService, times(1)).sendAuditEvent(any(), any())(any(), any())
     }
 
     "handleCallback must return REJECTED for the input FailedCallbackBody" in {
@@ -127,9 +132,9 @@ class UpScanCallbackDispatcherSpec extends SpecBase {
         new UpScanCallbackDispatcher(mockUploadProgressTracker, mockAuditService)
 
       val result: Future[Boolean] =
-        uploadCallbackDispatcher.handleCallback(readyCallbackBody)
+        uploadCallbackDispatcher.handleCallback(readyCallbackBody, uploadId)
       result.futureValue mustBe true
-
+      verify(mockAuditService, times(1)).sendAuditEvent(any(), any())(any(), any())
     }
 
     "handleCallback must return Failed for the input FailedCallbackBody" in {
@@ -149,9 +154,9 @@ class UpScanCallbackDispatcherSpec extends SpecBase {
         new UpScanCallbackDispatcher(mockUploadProgressTracker, mockAuditService)
 
       val result: Future[Boolean] =
-        uploadCallbackDispatcher.handleCallback(readyCallbackBody)
+        uploadCallbackDispatcher.handleCallback(readyCallbackBody, uploadId)
       result.futureValue mustBe true
-
+      verify(mockAuditService, times(1)).sendAuditEvent(any(), any())(any(), any())
     }
 
   }
