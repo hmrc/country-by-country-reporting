@@ -29,7 +29,7 @@ case class AuditDetailForSubmissionValidation(
   fileError: Boolean,
   errorMessage: Option[String] = None,
   errorURL: Option[String] = None,
-  validationErrors: Option[Seq[AuditValidationError]] = None
+  validationErrors: Option[Map[String, String]] = None
 )
 
 object AuditDetailForSubmissionValidation {

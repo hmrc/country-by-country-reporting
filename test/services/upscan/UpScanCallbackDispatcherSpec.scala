@@ -42,6 +42,8 @@ class UpScanCallbackDispatcherSpec extends SpecBase {
       )
       .build()
 
+  private val uploadId = "upload-id"
+
   "UpscanCallbackDispatcher" - {
 
     "handleCallback must return UploadedSuccessfully for the input ReadyCallbackBody" in {
@@ -83,7 +85,7 @@ class UpScanCallbackDispatcherSpec extends SpecBase {
         new UpScanCallbackDispatcher(mockUploadProgressTracker, mockAuditService)
 
       val result: Future[Boolean] =
-        uploadCallbackDispatcher.handleCallback(readyCallbackBody)
+        uploadCallbackDispatcher.handleCallback(readyCallbackBody, uploadId)
       result.futureValue mustBe true
 
     }
@@ -105,7 +107,7 @@ class UpScanCallbackDispatcherSpec extends SpecBase {
         new UpScanCallbackDispatcher(mockUploadProgressTracker, mockAuditService)
 
       val result: Future[Boolean] =
-        uploadCallbackDispatcher.handleCallback(readyCallbackBody)
+        uploadCallbackDispatcher.handleCallback(readyCallbackBody, uploadId)
       result.futureValue mustBe true
 
     }
@@ -127,7 +129,7 @@ class UpScanCallbackDispatcherSpec extends SpecBase {
         new UpScanCallbackDispatcher(mockUploadProgressTracker, mockAuditService)
 
       val result: Future[Boolean] =
-        uploadCallbackDispatcher.handleCallback(readyCallbackBody)
+        uploadCallbackDispatcher.handleCallback(readyCallbackBody, uploadId)
       result.futureValue mustBe true
 
     }
@@ -149,7 +151,7 @@ class UpScanCallbackDispatcherSpec extends SpecBase {
         new UpScanCallbackDispatcher(mockUploadProgressTracker, mockAuditService)
 
       val result: Future[Boolean] =
-        uploadCallbackDispatcher.handleCallback(readyCallbackBody)
+        uploadCallbackDispatcher.handleCallback(readyCallbackBody, uploadId)
       result.futureValue mustBe true
 
     }

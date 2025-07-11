@@ -121,6 +121,10 @@ class SubmissionValidationControllerSpec extends SpecBase {
       val expectedErrors =
         Seq(GenericError(176, Message("xml.empty.field", List("Entity"))), GenericError(258, Message("xml.add.a.element", List("Summary"))))
 
+      val dataErrorsSummary: String = expectedErrors
+        .map(e => s"${e.lineNumber}: ${e.message}")
+        .mkString("; ")
+
       val submissionError = SubmissionValidationFailure(ValidationErrors(expectedErrors))
 
       when(mockValidationEngine.validateUploadSubmission(eqTo(upscanUrl)))
@@ -140,15 +144,8 @@ class SubmissionValidationControllerSpec extends SpecBase {
         userType = "Organisation",
         fileError = true,
         errorMessage = Some("Failed to validate XML submission against schema"),
-        errorURL = Some("country-by-country-reporting/problem/validation-failure"),
-        validationErrors = Some(
-          expectedErrors.map(err =>
-            AuditValidationError(
-              code = err.lineNumber.toString,
-              message = err.message.toString
-            )
-          )
-        )
+        errorURL = Some("/problem/data-errors"),
+        validationErrors = Some(Map("dataErrorsSummary" -> dataErrorsSummary))
       )
       val expectedAudit = Audit(expectedAuditDetail)
 
@@ -187,7 +184,7 @@ class SubmissionValidationControllerSpec extends SpecBase {
         userType = "Organisation",
         fileError = true,
         errorMessage = Some("Sax Exception occurred"),
-        errorURL = Some("country-by-country-reporting/problem/not-xml"),
+        errorURL = Some("/problem/invalid-xml"),
         validationErrors = None
       )
       val expectedAudit = Audit(expectedAuditDetail)

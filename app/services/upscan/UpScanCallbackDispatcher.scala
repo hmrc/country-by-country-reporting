@@ -17,7 +17,7 @@
 package services.upscan
 
 import models.audit.AuditType.fileValidation
-import models.audit.{Audit, UpscanAuditDetails}
+import models.audit.{Audit, AuditDetailForSubmissionValidation}
 import models.upscan._
 import play.api.Logging
 import play.api.libs.json.Json
@@ -31,42 +31,54 @@ class UpScanCallbackDispatcher @Inject() (sessionStorage: UploadProgressTracker,
   val ec: ExecutionContext
 ) extends Logging {
 
-  def handleCallback(callback: CallbackBody)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    val (auditEvent, auditDetails, uploadStatus) = callback match {
+  private val notXmlErrorUrl         = "/problem/not-xml"
+  private val virusErrorUrl          = "/problem/virus-found"
+  private val internalServerErrorUrl = "/problem/there-is-a-problem"
+
+  def handleCallback(callback: CallbackBody, uploadId: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    val uploadStatus = callback match {
       case s: ReadyCallbackBody =>
-        val details = UpscanAuditDetails(s)
-        (fileValidation,
-         details,
-         UploadedSuccessfully(
-           s.uploadDetails.fileName,
-           s.uploadDetails.fileMimeType,
-           s.downloadUrl,
-           Option(s.uploadDetails.size),
-           Option(s.uploadDetails.checksum)
-         )
+        UploadedSuccessfully(
+          s.uploadDetails.fileName,
+          s.uploadDetails.fileMimeType,
+          s.downloadUrl,
+          Option(s.uploadDetails.size),
+          Option(s.uploadDetails.checksum)
         )
 
-      case s: FailedCallbackBody if s.failureDetails.failureReason == "QUARANTINE" =>
-        logger.warn(s"FailedCallbackBody, QUARANTINE: ${s.reference.value}")
-        val details =
-          UpscanAuditDetails(s).copy(fileStatus = "QUARANTINED", fileError = Some(s.failureDetails.failureReason), error = Some(s.failureDetails.message))
-        (fileValidation, details, Quarantined)
+      case q: FailedCallbackBody if q.failureDetails.failureReason == "QUARANTINE" =>
+        logger.warn(s"FailedCallbackBody, QUARANTINE: ${q.reference.value}")
+        triggerAuditEvent(uploadId, q, virusErrorUrl)
+        Quarantined
 
-      case s: FailedCallbackBody if s.failureDetails.failureReason == "REJECTED" =>
-        logger.warn(s"FailedCallbackBody, REJECTED: ${s.reference.value}")
-        val details =
-          UpscanAuditDetails(s).copy(fileStatus = "REJECTED", fileError = Some(s.failureDetails.failureReason), error = Some(s.failureDetails.message))
-        (fileValidation, details, UploadRejected(s.failureDetails))
+      case r: FailedCallbackBody if r.failureDetails.failureReason == "REJECTED" =>
+        logger.warn(s"FailedCallbackBody, REJECTED: ${r.reference.value}")
+        triggerAuditEvent(uploadId, r, notXmlErrorUrl)
+        UploadRejected(r.failureDetails)
 
       case f: FailedCallbackBody =>
         logger.warn(s"FailedCallbackBody: ${f.reference.value}")
-        val details =
-          UpscanAuditDetails(f).copy(fileStatus = "FAILED", fileError = Some(f.failureDetails.failureReason), error = Some(f.failureDetails.message))
-        (fileValidation, details, Failed)
+        triggerAuditEvent(uploadId, f, internalServerErrorUrl)
+        Failed
     }
-    auditService.sendAuditEvent(auditEvent, Json.toJson(Audit(auditDetails)))
 
     sessionStorage.registerUploadResult(callback.reference, uploadStatus)
   }
 
+  private def triggerAuditEvent(uploadId: String, callbackBody: FailedCallbackBody, problemUrl: String)(implicit headerCarrier: HeaderCarrier) = {
+    val details = AuditDetailForSubmissionValidation(
+      conversationId = uploadId,
+      subscriptionId = "UNKNOWN ID", // SubscriptionID not available in the callback
+      messageRefId = None,
+      messageTypeIndicator = None,
+      reportingEntityName = None,
+      reportType = None,
+      userType = "UNKNOWN", // userType is not in the callback
+      fileError = true,
+      errorMessage = Some(s"${callbackBody.failureDetails.failureReason} : ${callbackBody.failureDetails.message}"),
+      errorURL = Some(problemUrl),
+      validationErrors = None
+    )
+    auditService.sendAuditEvent(fileValidation, Json.toJson(Audit(details)))
+  }
 }

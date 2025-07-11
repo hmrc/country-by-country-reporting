@@ -40,12 +40,14 @@ class UploadCallbackController @Inject() (
     )
 
   val callback: Action[JsValue] = Action.async(parse.json) { implicit request =>
-    val callback = request.body.validate[CallbackBody]
+    val uploadId: String = request.headers.get("X-Upload-Id").getOrElse("Missing UploadId header")
+    val callback         = request.body.validate[CallbackBody]
+
     callback.fold(
       _ => Future.successful(BadRequest("Invalid callback body")),
       validCallback =>
         upscanCallbackDispatcher
-          .handleCallback(validCallback)
+          .handleCallback(validCallback, uploadId)
           .map(_ => Ok)
     )
   }
