@@ -28,6 +28,7 @@ import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepositorySupport[FileDetails] {
 
@@ -247,6 +248,18 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
       }
     }
 
+  }
+
+  "findStaleSubmissions" - {
+    "should retrieve a stale pending submission " in {
+      val result: Future[Seq[FileDetails]] = for {
+        res <- repository.findStaleSubmissions()
+      } yield res
+
+      whenReady(result) {
+        _ mustBe List()
+      }
+    }
   }
 
 }

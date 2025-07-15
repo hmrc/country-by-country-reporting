@@ -111,4 +111,10 @@ class FileDetailsRepository @Inject() (
         true
       }
 
+  def findStaleSubmissions(): Future[Seq[FileDetails]] = {
+    Future {
+      Seq()
+    }
+  }
+
 }
