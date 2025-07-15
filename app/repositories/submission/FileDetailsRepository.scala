@@ -55,9 +55,9 @@ class FileDetailsRepository @Inject() (
                      .unique(false)
         ),
         IndexModel(ascending("status"), // Todo is there any config I need to add in some other project for this?
-          IndexOptions()
-            .name("status-index")
-            .unique(false)
+                   IndexOptions()
+                     .name("status-index")
+                     .unique(false)
         )
       ),
       replaceIndexes = true

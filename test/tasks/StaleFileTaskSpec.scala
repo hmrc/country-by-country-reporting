@@ -43,9 +43,6 @@ class StaleFileTaskSpec extends SpecBase {
   private val mockScheduler             = mock[Scheduler]
   private val mockCancellable           = mock[Cancellable]
   private val applicatinLifecycle       = app.injector.instanceOf[ApplicationLifecycle]
-  val runnableCaptor                    = ArgumentCaptor.forClass(classOf[Runnable])
-  val initialDelayCaptor                = ArgumentCaptor.forClass(classOf[FiniteDuration])
-  val intervalCaptor                    = ArgumentCaptor.forClass(classOf[FiniteDuration])
   when(mockAppConfig.staleTaskInterval) thenReturn 2.hours
 
   "StaleFileTask" - {
