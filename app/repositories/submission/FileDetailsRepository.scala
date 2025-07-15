@@ -17,9 +17,9 @@
 package repositories.submission
 
 import config.AppConfig
-import models.submission.{ConversationId, FileDetails, FileStatus}
+import models.submission.{ConversationId, FileDetails, FileStatus, Pending}
 import org.mongodb.scala.bson.conversions.Bson
-import org.mongodb.scala.model.Filters.equal
+import org.mongodb.scala.model.Filters._
 import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.Updates.set
 import org.mongodb.scala.model._
@@ -53,6 +53,11 @@ class FileDetailsRepository @Inject() (
                    IndexOptions()
                      .name("subscriptionId-index")
                      .unique(false)
+        ),
+        IndexModel(ascending("status"), // Todo is there any config I need to add in some other project for this?
+          IndexOptions()
+            .name("status-index")
+            .unique(false)
         )
       ),
       replaceIndexes = true
@@ -112,9 +117,12 @@ class FileDetailsRepository @Inject() (
       }
 
   def findStaleSubmissions(): Future[Seq[FileDetails]] = {
-    Future {
-      Seq()
-    }
+    val filter: Bson = and(
+      equal("status", Codecs.toBson(Pending.asInstanceOf[FileStatus])),
+      lt("submitted", LocalDateTime.now().minusSeconds(appConfig.staleTaskAlertAfter.toSeconds))
+    )
+
+    collection.find(filter).toFuture()
   }
 
 }
