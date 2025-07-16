@@ -16,8 +16,9 @@
 
 package tasks
 
-import org.apache.pekko.actor.ActorSystem
 import config.AppConfig
+import models.submission.FileDetails.logMessageForStaleReport
+import org.apache.pekko.actor.ActorSystem
 import play.api.Logging
 import play.api.inject.ApplicationLifecycle
 import repositories.submission.FileDetailsRepository
@@ -60,7 +61,7 @@ class StaleFileTask @Inject() (actorSystem: ActorSystem,
           repository
             .findStaleSubmissions()
             .map { files =>
-              files.foreach(file => logger.warn(s"StaleFileTask: Stale file found. ConversationId: ${file._id.value}, Filename: ${file.name}"))
+              files.foreach(file => logger.warn(logMessageForStaleReport(file)))
               files.length
             }
         }

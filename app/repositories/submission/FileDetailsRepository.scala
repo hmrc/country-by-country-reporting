@@ -54,7 +54,7 @@ class FileDetailsRepository @Inject() (
                      .name("subscriptionId-index")
                      .unique(false)
         ),
-        IndexModel(ascending("status"), // Todo is there any config I need to add in some other project for this?
+        IndexModel(ascending("status"),
                    IndexOptions()
                      .name("status-index")
                      .unique(false)

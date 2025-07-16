@@ -56,4 +56,14 @@ object FileDetails {
       case other         => other
     }
   implicit val format: Format[FileDetails] = Format(reads, writes)
+
+  def logMessageForStaleReport(fileDetails: FileDetails): String = {
+    val sentTo = fileDetails.fileType match {
+      case Some(LargeFile)  => "SDES"
+      case Some(NormalFile) => "EIS"
+      case _                => "EIS"
+    }
+    s"Stale file found - Report Type: ${fileDetails.reportType}, ConversationId: ${fileDetails._id.value}, Filename: ${fileDetails.name}, File Type: ${fileDetails.fileType
+      .getOrElse("")}, Sent to $sentTo"
+  }
 }
