@@ -21,6 +21,7 @@ import play.api.libs.json._
 
 case class AuditDetailForFileSubmission(conversationId: String,
                                         subscriptionId: String,
+                                        fileReferenceId: String,
                                         messageRefId: String,
                                         fileSize: Long,
                                         reportingEntityName: String,
@@ -34,9 +35,10 @@ case class AuditDetailForFileSubmission(conversationId: String,
 object AuditDetailForFileSubmission {
   implicit val format: OFormat[AuditDetailForFileSubmission] = Json.format[AuditDetailForFileSubmission]
 
-  def apply(sumbmissionDetails: SubmissionDetails, fileStatus: FileStatus, submissionTime: String): AuditDetailForFileSubmission =
+  def apply(sumbmissionDetails: SubmissionDetails, fileReferenceId: String, fileStatus: FileStatus, submissionTime: String): AuditDetailForFileSubmission =
     new AuditDetailForFileSubmission(conversationId = sumbmissionDetails.uploadId.value,
                                      subscriptionId = sumbmissionDetails.enrolmentId,
+                                     fileReferenceId = fileReferenceId,
                                      messageRefId = sumbmissionDetails.messageSpecData.messageRefId,
                                      fileSize = sumbmissionDetails.fileSize,
                                      reportingEntityName = sumbmissionDetails.messageSpecData.reportingEntityName,

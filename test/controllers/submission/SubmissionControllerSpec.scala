@@ -49,7 +49,7 @@ class SubmissionControllerSpec extends SpecBase with Generators with ScalaCheckD
 
         when(mockAppConf.maxNormalFileSizeBytes).thenReturn(submissionDetails.fileSize)
         when(mockAppConf.maxLargeFileSizeBytes).thenReturn(submissionDetails.fileSize + 1)
-        when(mockSubmissionService.submitNormalFile(mEq(submissionDetails))(any[IdentifierRequest[JsValue]], any[HeaderCarrier]))
+        when(mockSubmissionService.submitNormalFile(mEq(submissionDetails))(any[IdentifierRequest[JsValue]], any[HeaderCarrier], any[String]))
           .thenReturn(Future.successful(Right(conversationId)))
 
         val application = buildApplication()
@@ -70,7 +70,7 @@ class SubmissionControllerSpec extends SpecBase with Generators with ScalaCheckD
 
         when(mockAppConf.maxNormalFileSizeBytes).thenReturn(submissionDetails.fileSize - 1)
         when(mockAppConf.maxLargeFileSizeBytes).thenReturn(submissionDetails.fileSize + 1)
-        when(mockSubmissionService.submitLargeFile(mEq(submissionDetails))(any[IdentifierRequest[JsValue]], any[HeaderCarrier]))
+        when(mockSubmissionService.submitLargeFile(mEq(submissionDetails))(any[IdentifierRequest[JsValue]], any[HeaderCarrier], any[String]))
           .thenReturn(Future.successful(Right(conversationId)))
 
         val application = buildApplication()
@@ -106,7 +106,7 @@ class SubmissionControllerSpec extends SpecBase with Generators with ScalaCheckD
       forAll { submissionDetails: SubmissionDetails =>
         when(mockAppConf.maxNormalFileSizeBytes).thenReturn(submissionDetails.fileSize)
         when(mockAppConf.maxLargeFileSizeBytes).thenReturn(submissionDetails.fileSize + 1)
-        when(mockSubmissionService.submitNormalFile(mEq(submissionDetails))(any[IdentifierRequest[JsValue]], any[HeaderCarrier]))
+        when(mockSubmissionService.submitNormalFile(mEq(submissionDetails))(any[IdentifierRequest[JsValue]], any[HeaderCarrier], any[String]))
           .thenReturn(Future.successful(Left(SubmissionServiceError("Some service error"))))
 
         val application = buildApplication()
@@ -124,7 +124,7 @@ class SubmissionControllerSpec extends SpecBase with Generators with ScalaCheckD
       forAll { submissionDetails: SubmissionDetails =>
         when(mockAppConf.maxNormalFileSizeBytes).thenReturn(submissionDetails.fileSize - 1)
         when(mockAppConf.maxLargeFileSizeBytes).thenReturn(submissionDetails.fileSize + 1)
-        when(mockSubmissionService.submitLargeFile(mEq(submissionDetails))(any[IdentifierRequest[JsValue]], any[HeaderCarrier]))
+        when(mockSubmissionService.submitLargeFile(mEq(submissionDetails))(any[IdentifierRequest[JsValue]], any[HeaderCarrier], any[String]))
           .thenReturn(Future.successful(Left(SubmissionServiceError("Some service error"))))
 
         val application = buildApplication()

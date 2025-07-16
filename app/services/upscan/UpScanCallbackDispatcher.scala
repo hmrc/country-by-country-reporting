@@ -35,7 +35,7 @@ class UpScanCallbackDispatcher @Inject() (sessionStorage: UploadProgressTracker,
   private val virusErrorUrl          = "/problem/virus-found"
   private val internalServerErrorUrl = "/problem/there-is-a-problem"
 
-  def handleCallback(callback: CallbackBody, uploadId: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
+  def handleCallback(callback: CallbackBody)(implicit hc: HeaderCarrier): Future[Boolean] = {
     val uploadStatus = callback match {
       case s: ReadyCallbackBody =>
         UploadedSuccessfully(
@@ -48,32 +48,32 @@ class UpScanCallbackDispatcher @Inject() (sessionStorage: UploadProgressTracker,
 
       case q: FailedCallbackBody if q.failureDetails.failureReason == "QUARANTINE" =>
         logger.warn(s"FailedCallbackBody, QUARANTINE: ${q.reference.value}")
-        triggerAuditEvent(uploadId, q, virusErrorUrl)
+        triggerAuditEvent(q, virusErrorUrl)
         Quarantined
 
       case r: FailedCallbackBody if r.failureDetails.failureReason == "REJECTED" =>
         logger.warn(s"FailedCallbackBody, REJECTED: ${r.reference.value}")
-        triggerAuditEvent(uploadId, r, notXmlErrorUrl)
+        triggerAuditEvent(r, notXmlErrorUrl)
         UploadRejected(r.failureDetails)
 
       case f: FailedCallbackBody =>
         logger.warn(s"FailedCallbackBody: ${f.reference.value}")
-        triggerAuditEvent(uploadId, f, internalServerErrorUrl)
+        triggerAuditEvent(f, internalServerErrorUrl)
         Failed
     }
 
     sessionStorage.registerUploadResult(callback.reference, uploadStatus)
   }
 
-  private def triggerAuditEvent(uploadId: String, callbackBody: FailedCallbackBody, problemUrl: String)(implicit headerCarrier: HeaderCarrier) = {
+  private def triggerAuditEvent(callbackBody: FailedCallbackBody, problemUrl: String)(implicit headerCarrier: HeaderCarrier) = {
     val details = AuditDetailForSubmissionValidation(
-      conversationId = uploadId,
-      subscriptionId = "UNKNOWN ID", // SubscriptionID not available in the callback
+      conversationId = callbackBody.reference.value,
+      subscriptionId = "UNKNOWN ID",
       messageRefId = None,
       messageTypeIndicator = None,
       reportingEntityName = None,
       reportType = None,
-      userType = "UNKNOWN", // userType is not in the callback
+      userType = "UNKNOWN",
       fileError = true,
       errorMessage = Some(s"${callbackBody.failureDetails.failureReason} : ${callbackBody.failureDetails.message}"),
       errorURL = Some(problemUrl),
