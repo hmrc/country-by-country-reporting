@@ -17,10 +17,10 @@
 package controllers.validation
 
 import controllers.auth.{IdentifierAuthAction, IdentifierRequest}
-import models.audit.{Audit, AuditDetailForSubmissionValidation, AuditType, AuditValidationError}
+import models.audit.{Audit, AuditDetailForSubmissionValidation, AuditType}
 import models.submission.MessageSpecData
 import models.upscan.ValidateRequest
-import models.validation.{GenericError, InvalidXmlError, SubmissionValidationFailure, SubmissionValidationSuccess}
+import models.validation._
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents}
@@ -54,13 +54,7 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
 
           case SubmissionValidationFailure(validationErrors) =>
             logger.warn("Failed to validate XML submission against schema")
-            val mappedValidationErrors = validationErrors.errors.map { err: GenericError =>
-              AuditValidationError(
-                code = err.lineNumber.toString,
-                message = err.message.toString
-              )
-            }
-            sendAuditEventForValidationErrors(validateRequest, mappedValidationErrors)
+            sendAuditEventForValidationErrors(validateRequest, validationErrors.errors)
             Ok(Json.toJson(SubmissionValidationFailure(validationErrors)))
 
           case InvalidXmlError(saxException) =>
@@ -101,12 +95,8 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
     auditService.sendAuditEvent(AuditType.fileValidation, Json.toJson(Audit(detail)))
 
   def sendAuditEventForValidationErrors(validateRequest: ValidateRequest,
-                                        mappedValidationErrors: Seq[AuditValidationError]
+                                        mappedValidationErrors: Seq[GenericError]
   )(implicit hc: HeaderCarrier, ec: ExecutionContext, request: IdentifierRequest[JsValue]) = {
-
-    val dataErrorsSummary: String = mappedValidationErrors
-      .map(e => s"${e.code}: ${e.message}")
-      .mkString("; ")
 
     val detail = AuditDetailForSubmissionValidation(
       conversationId = validateRequest.conversationId,
@@ -119,7 +109,7 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
       fileError = true,
       errorMessage = Some("Failed to validate XML submission against schema"),
       errorURL = Some(dataErrorsUrl),
-      validationErrors = Some(Map("dataErrorsSummary" -> dataErrorsSummary))
+      validationErrors = Some(mappedValidationErrors)
     )
     sendAuditEvent(detail)
   }

@@ -60,7 +60,7 @@ class SubmissionService @Inject() (
 
   def submitLargeFile(
     submissionDetails: SubmissionDetails
-  )(implicit request: IdentifierRequest[JsValue], hc: HeaderCarrier): Future[Either[BackendError, ConversationId]] = {
+  )(implicit request: IdentifierRequest[JsValue], hc: HeaderCarrier, fileReferenceId: String): Future[Either[BackendError, ConversationId]] = {
     val conversationId = ConversationId.fromUploadId(submissionDetails.uploadId)
     logger.info(s"Submitting large file with conversation Id: [${conversationId.value}]")
     (for {
@@ -82,7 +82,7 @@ class SubmissionService @Inject() (
 
   def submitNormalFile(
     submissionDetails: SubmissionDetails
-  )(implicit request: IdentifierRequest[JsValue], hc: HeaderCarrier): Future[Either[BackendError, ConversationId]] = {
+  )(implicit request: IdentifierRequest[JsValue], hc: HeaderCarrier, fileReferenceId: String): Future[Either[BackendError, ConversationId]] = {
     val conversationId = ConversationId.fromUploadId(submissionDetails.uploadId)
     logger.info(s"Submitting normal sized file with conversation Id: [${conversationId.value}]")
     val submissionTime = dateTimeNow
@@ -112,11 +112,13 @@ class SubmissionService @Inject() (
           case None =>
             val errorMessage = s"Xml file with conversation Id [${conversationId.value}] is empty"
             val error        = SubmissionServiceError(errorMessage, Some(request.affinityGroup))
-            sendAuditEvent(submissionDetails = submissionDetails,
-                           fileStatus = Pending,
-                           userType = Some(request.affinityGroup),
-                           submissionTime = submissionTime,
-                           error = Some(errorMessage)
+            sendAuditEvent(
+              submissionDetails = submissionDetails,
+              fileReferenceId = fileReferenceId,
+              fileStatus = Pending,
+              userType = Some(request.affinityGroup),
+              submissionTime = submissionTime,
+              error = Some(errorMessage)
             )
             EitherT.left(Future.successful(error))
         }
@@ -124,11 +126,13 @@ class SubmissionService @Inject() (
         val errorMessage = s"Failed to load xml file [$documentUrl] with conversation Id [${conversationId.value}]"
         val error =
           SubmissionServiceError(errorMessage, Some(request.affinityGroup))
-        sendAuditEvent(submissionDetails = submissionDetails,
-                       fileStatus = Pending,
-                       userType = Some(request.affinityGroup),
-                       submissionTime = submissionTime,
-                       error = Some(errorMessage)
+        sendAuditEvent(
+          submissionDetails = submissionDetails,
+          fileReferenceId = fileReferenceId,
+          fileStatus = Pending,
+          userType = Some(request.affinityGroup),
+          submissionTime = submissionTime,
+          error = Some(errorMessage)
         )
         EitherT.left(Future.successful(error))
     }
@@ -205,15 +209,18 @@ class SubmissionService @Inject() (
     )
 
   private def persistFileDetails(fileDetails: FileDetails, submissionDetails: SubmissionDetails)(implicit
-    hc: HeaderCarrier
+    hc: HeaderCarrier,
+    fileReferenceId: String
   ): Future[Either[BackendError, Boolean]] =
     fileDetailsRepository
       .insert(fileDetails)
       .map {
-        sendAuditEvent(submissionDetails = submissionDetails,
-                       fileStatus = fileDetails.status,
-                       userType = fileDetails.userType,
-                       submissionTime = fileDetails.submitted
+        sendAuditEvent(
+          submissionDetails = submissionDetails,
+          fileReferenceId = fileReferenceId,
+          fileStatus = fileDetails.status,
+          userType = fileDetails.userType,
+          submissionTime = fileDetails.submitted
         )
         Right(_)
       }
@@ -221,6 +228,7 @@ class SubmissionService @Inject() (
         val errorMessage = s"Failed to persist details for file with conversation Id [${fileDetails._id.value}]"
         sendAuditEvent(
           submissionDetails = submissionDetails,
+          fileReferenceId = fileReferenceId,
           fileStatus = fileDetails.status,
           submissionTime = fileDetails.submitted,
           userType = fileDetails.userType,
@@ -230,6 +238,7 @@ class SubmissionService @Inject() (
       }
 
   private def sendAuditEvent(submissionDetails: SubmissionDetails,
+                             fileReferenceId: String,
                              fileStatus: FileStatus,
                              userType: Option[AffinityGroup],
                              submissionTime: LocalDateTime,
@@ -237,7 +246,8 @@ class SubmissionService @Inject() (
   )(implicit
     hc: HeaderCarrier
   ) = try {
-    val auditDetail = Audit(AuditDetailForFileSubmission(submissionDetails, fileStatus, submissionTime.toString), userType = userType, error = error)
+    val auditDetail =
+      Audit(AuditDetailForFileSubmission(submissionDetails, fileReferenceId, fileStatus, submissionTime.toString), userType = userType, error = error)
     auditService.sendAuditEvent(AuditType.fileSubmission, Json.toJson(auditDetail))
   } catch {
     case e: Exception =>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 package models.audit
 
-import play.api.libs.json.{Json, OWrites, Reads}
+import models.validation.GenericError
+import play.api.libs.json.{JsNull, Json, OWrites, Reads}
 
 case class AuditDetailForSubmissionValidation(
   conversationId: String,
@@ -29,17 +30,28 @@ case class AuditDetailForSubmissionValidation(
   fileError: Boolean,
   errorMessage: Option[String] = None,
   errorURL: Option[String] = None,
-  validationErrors: Option[Map[String, String]] = None
+  validationErrors: Option[Seq[GenericError]] = None
 )
 
 object AuditDetailForSubmissionValidation {
-  implicit val writes: OWrites[AuditDetailForSubmissionValidation] = Json.writes[AuditDetailForSubmissionValidation]
-  implicit val reads: Reads[AuditDetailForSubmissionValidation]    = Json.reads[AuditDetailForSubmissionValidation]
-}
 
-case class AuditValidationError(code: String, message: String)
+  implicit val reads: Reads[AuditDetailForSubmissionValidation] = Json.reads[AuditDetailForSubmissionValidation]
 
-object AuditValidationError {
-  implicit val writes: OWrites[AuditValidationError] = Json.writes[AuditValidationError]
-  implicit val reads: Reads[AuditValidationError]    = Json.reads[AuditValidationError]
+  implicit val writes: OWrites[AuditDetailForSubmissionValidation] = OWrites { detail =>
+    val baseJson = Json.writes[AuditDetailForSubmissionValidation].writes(detail)
+
+    detail.validationErrors match {
+      case Some(errs) =>
+        val formattedErrors = errs
+          .map(e => s"${e.lineNumber} -> ${e.message.messageKey} (${e.message.args.mkString(", ")})")
+          .mkString("; ")
+        baseJson + ("validationErrors" -> Json.toJson(formattedErrors))
+      case None =>
+        if (baseJson.value.get("validationErrors").contains(JsNull)) {
+          baseJson - "validationErrors"
+        } else {
+          baseJson
+        }
+    }
+  }
 }

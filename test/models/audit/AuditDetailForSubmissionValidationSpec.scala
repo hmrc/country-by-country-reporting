@@ -67,17 +67,11 @@ class AuditDetailForSubmissionValidationSpec extends SpecBase {
     "formats for a file validation failure (schema errors)" in {
       val errorMessage = "Failed to validate XML submission against schema"
 
-      val validationErrors = Seq(
-        GenericError(10, Message("Line 10 error message")),
-        GenericError(25, Message("Line 25 error message"))
-      )
-
-      val auditValidationErrors = validationErrors.map { err =>
-        AuditValidationError(code = err.lineNumber.toString, message = err.message.messageKey)
-      }
-      val dataErrorsSummary: String = auditValidationErrors
-        .map(e => s"${e.code}: ${e.message}")
-        .mkString("; ")
+      val testErrors =
+        Seq(
+          GenericError(176, Message("xml.empty.field", List("Entity"))),
+          GenericError(258, Message("xml.add.a.element", List("Summary")))
+        )
 
       val auditDetailObject = AuditDetailForSubmissionValidation(
         conversationId = conversationId,
@@ -90,23 +84,22 @@ class AuditDetailForSubmissionValidationSpec extends SpecBase {
         fileError = true,
         errorMessage = Some(errorMessage),
         errorURL = Some(errorURL),
-        validationErrors = Some(Map("dataErrorsSummary" -> dataErrorsSummary))
+        validationErrors = Some(testErrors)
       )
 
       val expectedJson = Json.parse(s"""
-                                       |{"conversationId":"conv-id",
-                                       |"subscriptionId":"sub-id",
-                                       |"userType":"Organisation",
-                                       |"fileError":true,
-                                       |"errorMessage":"Failed to validate XML submission against schema",
-                                       |"errorURL":"validation-failure-url",
-                                       |"validationErrors":{"dataErrorsSummary":"10: Line 10 error message; 25: Line 25 error message"}}
-                                       |""".stripMargin)
+             |{"conversationId":"conv-id",
+             |"subscriptionId":"sub-id",
+             |"userType":"Organisation",
+             |"fileError":true,
+             |"errorMessage":"Failed to validate XML submission against schema",
+             |"errorURL":"validation-failure-url",
+             |"validationErrors":"176 -> xml.empty.field (Entity); 258 -> xml.add.a.element (Summary)"}
+             |""".stripMargin)
 
       Json.toJson(auditDetailObject) mustBe expectedJson
-      expectedJson.as[AuditDetailForSubmissionValidation] mustBe auditDetailObject
-    }
 
+    }
     "formats for an InvalidXmlError" in {
       val errorMessage = "SAX parse error: Premature end of file."
 

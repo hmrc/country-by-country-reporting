@@ -101,7 +101,8 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
     )
     .build()
 
-  private val submissionService = app.injector.instanceOf[SubmissionService]
+  private val submissionService        = app.injector.instanceOf[SubmissionService]
+  implicit val fileReferenceId: String = "file-reference-id"
 
   "SubmissionService" - {
     "submitLargeFile" - {

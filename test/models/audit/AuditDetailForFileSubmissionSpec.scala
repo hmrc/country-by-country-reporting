@@ -41,6 +41,7 @@ class AuditDetailForFileSubmissionSpec extends SpecBase {
           |{
           |    "conversationId" : "7e67633b-596b-454d-b7b1-c85fe3fdf994",
           |    "subscriptionId" : "sub-123",
+          |    "fileReferenceId" : "file-reference-id",
           |    "messageRefId" : "msg-456",
           |    "fileSize" : 1234,
           |    "reportingEntityName" : "GlobalCorp Ltd",
@@ -53,7 +54,7 @@ class AuditDetailForFileSubmissionSpec extends SpecBase {
           |""".stripMargin)
       val auditDetailRequest = auditDetail.as[AuditDetailForFileSubmission]
 
-      val jsonObj = AuditDetailForFileSubmission(submissionDetails, Pending, "2025-07-25T00:00")
+      val jsonObj = AuditDetailForFileSubmission(submissionDetails, "file-reference-id", Pending, "2025-07-25T00:00")
       jsonObj mustBe auditDetailRequest
     }
   }

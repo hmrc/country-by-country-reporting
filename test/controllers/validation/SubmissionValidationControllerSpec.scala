@@ -18,7 +18,7 @@ package controllers.validation
 
 import base.SpecBase
 import controllers.auth.{FakeIdentifierAuthAction, IdentifierAuthAction}
-import models.audit.{Audit, AuditDetailForSubmissionValidation, AuditValidationError}
+import models.audit.{Audit, AuditDetailForSubmissionValidation}
 import models.submission.{CBC401, MessageSpecData, TestData}
 import models.validation._
 import org.mockito.ArgumentMatchers.any
@@ -119,19 +119,17 @@ class SubmissionValidationControllerSpec extends SpecBase {
       )
 
       val expectedErrors =
-        Seq(GenericError(176, Message("xml.empty.field", List("Entity"))), GenericError(258, Message("xml.add.a.element", List("Summary"))))
-
-      val dataErrorsSummary: String = expectedErrors
-        .map(e => s"${e.lineNumber}: ${e.message}")
-        .mkString("; ")
+        Seq(
+          GenericError(176, Message("xml.empty.field", List("Entity"))),
+          GenericError(258, Message("xml.add.a.element", List("Summary")))
+        )
 
       val submissionError = SubmissionValidationFailure(ValidationErrors(expectedErrors))
 
       when(mockValidationEngine.validateUploadSubmission(eqTo(upscanUrl)))
         .thenReturn(Future.successful(submissionError))
 
-      val request = FakeRequest(POST, routes.SubmissionValidationController.validateSubmission.url, FakeHeaders(), validJsonBody)
-
+      val request                = FakeRequest(POST, routes.SubmissionValidationController.validateSubmission.url, FakeHeaders(), validJsonBody)
       val result: Future[Result] = controller.validateSubmission()(request)
 
       val expectedAuditDetail = AuditDetailForSubmissionValidation(
@@ -145,7 +143,7 @@ class SubmissionValidationControllerSpec extends SpecBase {
         fileError = true,
         errorMessage = Some("Failed to validate XML submission against schema"),
         errorURL = Some("/problem/data-errors"),
-        validationErrors = Some(Map("dataErrorsSummary" -> dataErrorsSummary))
+        validationErrors = Some(expectedErrors)
       )
       val expectedAudit = Audit(expectedAuditDetail)
 

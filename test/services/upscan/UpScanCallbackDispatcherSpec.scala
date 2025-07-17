@@ -33,7 +33,6 @@ class UpScanCallbackDispatcherSpec extends SpecBase {
   private val mockUploadProgressTracker: UploadProgressTracker =
     mock[UploadProgressTracker]
   private val mockAuditService: AuditService = mock[AuditService]
-  private val uploadId                       = "upload-id"
 
   val application: Application =
     applicationBuilder()
@@ -89,7 +88,7 @@ class UpScanCallbackDispatcherSpec extends SpecBase {
         new UpScanCallbackDispatcher(mockUploadProgressTracker, mockAuditService)
 
       val result: Future[Boolean] =
-        uploadCallbackDispatcher.handleCallback(readyCallbackBody, uploadId)
+        uploadCallbackDispatcher.handleCallback(readyCallbackBody)
       result.futureValue mustBe true
     }
 
@@ -110,7 +109,7 @@ class UpScanCallbackDispatcherSpec extends SpecBase {
         new UpScanCallbackDispatcher(mockUploadProgressTracker, mockAuditService)
 
       val result: Future[Boolean] =
-        uploadCallbackDispatcher.handleCallback(readyCallbackBody, uploadId)
+        uploadCallbackDispatcher.handleCallback(readyCallbackBody)
       result.futureValue mustBe true
       verify(mockAuditService, times(1)).sendAuditEvent(any(), any())(any(), any())
     }
@@ -132,7 +131,7 @@ class UpScanCallbackDispatcherSpec extends SpecBase {
         new UpScanCallbackDispatcher(mockUploadProgressTracker, mockAuditService)
 
       val result: Future[Boolean] =
-        uploadCallbackDispatcher.handleCallback(readyCallbackBody, uploadId)
+        uploadCallbackDispatcher.handleCallback(readyCallbackBody)
       result.futureValue mustBe true
       verify(mockAuditService, times(1)).sendAuditEvent(any(), any())(any(), any())
     }
@@ -154,7 +153,7 @@ class UpScanCallbackDispatcherSpec extends SpecBase {
         new UpScanCallbackDispatcher(mockUploadProgressTracker, mockAuditService)
 
       val result: Future[Boolean] =
-        uploadCallbackDispatcher.handleCallback(readyCallbackBody, uploadId)
+        uploadCallbackDispatcher.handleCallback(readyCallbackBody)
       result.futureValue mustBe true
       verify(mockAuditService, times(1)).sendAuditEvent(any(), any())(any(), any())
     }
