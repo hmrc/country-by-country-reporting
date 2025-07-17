@@ -25,10 +25,11 @@ import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 class AuditDetailForSubmissionValidationSpec extends SpecBase {
 
   "Audit Detail for File Validation" - {
-    val userType       = Organisation.toString
-    val conversationId = "conv-id"
-    val subscriptionId = "sub-id"
-    val errorURL       = "validation-failure-url"
+    val userType        = Organisation.toString
+    val conversationId  = "conv-id"
+    val subscriptionId  = "sub-id"
+    val fileReferenceId = "file-reference-id"
+    val errorURL        = "validation-failure-url"
 
     "formats for a successful file validation (fileError = false)" in {
       val messageRefId        = "mref-id"
@@ -39,6 +40,7 @@ class AuditDetailForSubmissionValidationSpec extends SpecBase {
       val auditDetailObject = AuditDetailForSubmissionValidation(
         conversationId = conversationId,
         subscriptionId = subscriptionId,
+        fileReferenceId = fileReferenceId,
         messageRefId = Some(messageRefId),
         messageTypeIndicator = Some(messageTypeIndic),
         reportingEntityName = Some(reportingEntityName),
@@ -51,6 +53,7 @@ class AuditDetailForSubmissionValidationSpec extends SpecBase {
                                        |{
                                        |    "conversationId" : "$conversationId",
                                        |    "subscriptionId" : "$subscriptionId",
+                                       |    "fileReferenceId" : "$fileReferenceId",
                                        |    "messageRefId" : "$messageRefId",
                                        |    "messageTypeIndicator" : "$messageTypeIndic",
                                        |    "reportingEntityName" : "$reportingEntityName",
@@ -76,6 +79,7 @@ class AuditDetailForSubmissionValidationSpec extends SpecBase {
       val auditDetailObject = AuditDetailForSubmissionValidation(
         conversationId = conversationId,
         subscriptionId = subscriptionId,
+        fileReferenceId = fileReferenceId,
         messageRefId = None,
         messageTypeIndicator = None,
         reportingEntityName = None,
@@ -90,6 +94,7 @@ class AuditDetailForSubmissionValidationSpec extends SpecBase {
       val expectedJson = Json.parse(s"""
              |{"conversationId":"conv-id",
              |"subscriptionId":"sub-id",
+             |"fileReferenceId":"file-reference-id",
              |"userType":"Organisation",
              |"fileError":true,
              |"errorMessage":"Failed to validate XML submission against schema",
@@ -106,6 +111,7 @@ class AuditDetailForSubmissionValidationSpec extends SpecBase {
       val auditDetailObject = AuditDetailForSubmissionValidation(
         conversationId = conversationId,
         subscriptionId = subscriptionId,
+        fileReferenceId = fileReferenceId,
         messageRefId = None,
         messageTypeIndicator = None,
         reportingEntityName = None,
@@ -120,6 +126,7 @@ class AuditDetailForSubmissionValidationSpec extends SpecBase {
                                        |{
                                        |    "conversationId" : "$conversationId",
                                        |    "subscriptionId" : "$subscriptionId",
+                                       |    "fileReferenceId" : "$fileReferenceId",
                                        |    "userType" : "$userType",
                                        |    "fileError" : true,
                                        |    "errorMessage" : "$errorMessage",
@@ -137,6 +144,7 @@ class AuditDetailForSubmissionValidationSpec extends SpecBase {
       val auditDetailObject = AuditDetailForSubmissionValidation(
         conversationId = conversationId,
         subscriptionId = subscriptionId,
+        fileReferenceId = fileReferenceId,
         messageRefId = None,
         messageTypeIndicator = None,
         reportingEntityName = None,
@@ -152,6 +160,7 @@ class AuditDetailForSubmissionValidationSpec extends SpecBase {
                                        |{
                                        |    "conversationId" : "$conversationId",
                                        |    "subscriptionId" : "$subscriptionId",
+                                       |    "fileReferenceId" : "$fileReferenceId",
                                        |    "userType" : "$userType",
                                        |    "fileError" : true,
                                        |    "errorMessage" : "$errorMessage",
@@ -169,6 +178,7 @@ class AuditDetailForSubmissionValidationSpec extends SpecBase {
       val auditDetailObject = AuditDetailForSubmissionValidation(
         conversationId = conversationId,
         subscriptionId = subscriptionId,
+        fileReferenceId = fileReferenceId,
         messageRefId = None,
         messageTypeIndicator = None,
         reportingEntityName = None,
@@ -183,6 +193,7 @@ class AuditDetailForSubmissionValidationSpec extends SpecBase {
                                        |{
                                        |    "conversationId" : "$conversationId",
                                        |    "subscriptionId" : "$subscriptionId",
+                                       |    "fileReferenceId" : "$fileReferenceId",
                                        |    "userType" : "$userType",
                                        |    "fileError" : true,
                                        |    "errorMessage" : "$errorMessage",

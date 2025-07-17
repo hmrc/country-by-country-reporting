@@ -22,6 +22,7 @@ import play.api.libs.json.{JsNull, Json, OWrites, Reads}
 case class AuditDetailForSubmissionValidation(
   conversationId: String,
   subscriptionId: String,
+  fileReferenceId: String,
   messageRefId: Option[String],
   messageTypeIndicator: Option[String],
   reportingEntityName: Option[String],

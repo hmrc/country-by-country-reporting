@@ -75,12 +75,13 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
     }
   }
 
-  def sendSuccessfulAuditEvent(validateRequest: ValidateRequest,
-                               messageSpecData: MessageSpecData
+  private def sendSuccessfulAuditEvent(validateRequest: ValidateRequest,
+                                       messageSpecData: MessageSpecData
   )(implicit hc: HeaderCarrier, ec: ExecutionContext, request: IdentifierRequest[JsValue]) = {
     val detail = AuditDetailForSubmissionValidation(
-      conversationId = validateRequest.conversationId,
+      conversationId = "conversationId not provided",
       subscriptionId = validateRequest.subscriptionId,
+      fileReferenceId = validateRequest.conversationId,
       messageRefId = Some(messageSpecData.messageRefId),
       messageTypeIndicator = Some(messageSpecData.messageTypeIndic.toString),
       reportingEntityName = Some(messageSpecData.reportingEntityName),
@@ -94,13 +95,14 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
   private def sendAuditEvent(detail: AuditDetailForSubmissionValidation)(implicit hc: HeaderCarrier, ec: ExecutionContext) =
     auditService.sendAuditEvent(AuditType.fileValidation, Json.toJson(Audit(detail)))
 
-  def sendAuditEventForValidationErrors(validateRequest: ValidateRequest,
-                                        mappedValidationErrors: Seq[GenericError]
+  private def sendAuditEventForValidationErrors(validateRequest: ValidateRequest,
+                                                mappedValidationErrors: Seq[GenericError]
   )(implicit hc: HeaderCarrier, ec: ExecutionContext, request: IdentifierRequest[JsValue]) = {
 
     val detail = AuditDetailForSubmissionValidation(
-      conversationId = validateRequest.conversationId,
+      conversationId = "conversationId not provided",
       subscriptionId = validateRequest.subscriptionId,
+      fileReferenceId = validateRequest.conversationId,
       messageRefId = None,
       messageTypeIndicator = None,
       reportingEntityName = None,
@@ -114,15 +116,16 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
     sendAuditEvent(detail)
   }
 
-  def sendAuditEventForExceptions(validateRequest: ValidateRequest, errorUrl: String, errorMessage: String)(implicit
+  private def sendAuditEventForExceptions(validateRequest: ValidateRequest, errorUrl: String, errorMessage: String)(implicit
     hc: HeaderCarrier,
     ec: ExecutionContext,
     request: IdentifierRequest[JsValue]
   ) = {
 
     val detail = AuditDetailForSubmissionValidation(
-      conversationId = validateRequest.conversationId,
+      conversationId = "conversationId not provided",
       subscriptionId = validateRequest.subscriptionId,
+      fileReferenceId = validateRequest.conversationId,
       messageRefId = None,
       messageTypeIndicator = None,
       reportingEntityName = None,

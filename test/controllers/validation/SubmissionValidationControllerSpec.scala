@@ -63,33 +63,28 @@ class SubmissionValidationControllerSpec extends SpecBase {
   }
 
   "validateSubmission" - {
+    val upscanUrl               = "/some-upscan-url"
+    val conversationId          = "fileReferenceId123"
+    val subscriptionId          = "subscriptionId123"
+    val validateRequestJsonBody = Json.obj("url" -> upscanUrl, "conversationId" -> conversationId, "subscriptionId" -> subscriptionId)
 
     when(mockValidationEngine.validateUploadSubmission(any()))
       .thenReturn(Future.successful(SubmissionValidationSuccess(messageSpecData)))
 
     "must validate a submission and return OK with success message" in {
-
-      val upscanUrl      = "/some-upscan-url"
-      val conversationId = "conversationId123"
-      val subscriptionId = "subscriptionId123"
-      val validJsonBody = Json.obj(
-        "url"            -> upscanUrl,
-        "conversationId" -> conversationId,
-        "subscriptionId" -> subscriptionId
-      )
-
       val submissionSuccess = SubmissionValidationSuccess(messageSpecData)
 
       when(mockValidationEngine.validateUploadSubmission(eqTo(upscanUrl)))
         .thenReturn(Future.successful(submissionSuccess))
 
-      val request = FakeRequest(POST, routes.SubmissionValidationController.validateSubmission.url, FakeHeaders(), validJsonBody)
+      val request = FakeRequest(POST, routes.SubmissionValidationController.validateSubmission.url, FakeHeaders(), validateRequestJsonBody)
 
       val result: Future[Result] = controller.validateSubmission()(request)
 
       val expectedAuditDetail = AuditDetailForSubmissionValidation(
-        conversationId = "conversationId123",
+        conversationId = "conversationId not provided",
         subscriptionId = "subscriptionId123",
+        fileReferenceId = "fileReferenceId123",
         messageRefId = Some(messageSpecData.messageRefId),
         messageTypeIndicator = Some(messageSpecData.messageTypeIndic.toString),
         reportingEntityName = Some(messageSpecData.reportingEntityName),
@@ -108,16 +103,6 @@ class SubmissionValidationControllerSpec extends SpecBase {
     }
 
     "must validate a submission and return OK with failure message" in {
-
-      val upscanUrl      = "/some-upscan-url"
-      val conversationId = "conversationId123"
-      val subscriptionId = "subscriptionId123"
-      val validJsonBody = Json.obj(
-        "url"            -> upscanUrl,
-        "conversationId" -> conversationId,
-        "subscriptionId" -> subscriptionId
-      )
-
       val expectedErrors =
         Seq(
           GenericError(176, Message("xml.empty.field", List("Entity"))),
@@ -129,12 +114,13 @@ class SubmissionValidationControllerSpec extends SpecBase {
       when(mockValidationEngine.validateUploadSubmission(eqTo(upscanUrl)))
         .thenReturn(Future.successful(submissionError))
 
-      val request                = FakeRequest(POST, routes.SubmissionValidationController.validateSubmission.url, FakeHeaders(), validJsonBody)
+      val request                = FakeRequest(POST, routes.SubmissionValidationController.validateSubmission.url, FakeHeaders(), validateRequestJsonBody)
       val result: Future[Result] = controller.validateSubmission()(request)
 
       val expectedAuditDetail = AuditDetailForSubmissionValidation(
-        conversationId = "conversationId123",
+        conversationId = "conversationId not provided",
         subscriptionId = "subscriptionId123",
+        fileReferenceId = "fileReferenceId123",
         messageRefId = None,
         messageTypeIndicator = None,
         reportingEntityName = None,
@@ -153,28 +139,19 @@ class SubmissionValidationControllerSpec extends SpecBase {
     }
 
     "must validate a submission and return BadRequest with error message" in {
-
-      val upscanUrl      = "/some-upscan-url"
-      val conversationId = "conversationId123"
-      val subscriptionId = "subscriptionId123"
-      val validJsonBody = Json.obj(
-        "url"            -> upscanUrl,
-        "conversationId" -> conversationId,
-        "subscriptionId" -> subscriptionId
-      )
-
       val invalidXmlError = InvalidXmlError("Sax Exception occurred")
 
       when(mockValidationEngine.validateUploadSubmission(eqTo(upscanUrl)))
         .thenReturn(Future.successful(invalidXmlError))
 
-      val request = FakeRequest(POST, routes.SubmissionValidationController.validateSubmission.url, FakeHeaders(), validJsonBody)
+      val request = FakeRequest(POST, routes.SubmissionValidationController.validateSubmission.url, FakeHeaders(), validateRequestJsonBody)
 
       val result: Future[Result] = controller.validateSubmission()(request)
 
       val expectedAuditDetail = AuditDetailForSubmissionValidation(
-        conversationId = "conversationId123",
+        conversationId = "conversationId not provided",
         subscriptionId = "subscriptionId123",
+        fileReferenceId = "fileReferenceId123",
         messageRefId = None,
         messageTypeIndicator = None,
         reportingEntityName = None,
