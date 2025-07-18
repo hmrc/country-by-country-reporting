@@ -63,10 +63,12 @@ class SubmissionValidationControllerSpec extends SpecBase {
   }
 
   "validateSubmission" - {
-    val upscanUrl               = "/some-upscan-url"
-    val conversationId          = "fileReferenceId123"
-    val subscriptionId          = "subscriptionId123"
-    val validateRequestJsonBody = Json.obj("url" -> upscanUrl, "conversationId" -> conversationId, "subscriptionId" -> subscriptionId)
+    val upscanUrl       = "/some-upscan-url"
+    val conversationId  = "conversationId123"
+    val subscriptionId  = "subscriptionId123"
+    val fileReferenceId = "fileReferenceId123"
+    val validateRequestJsonBody =
+      Json.obj("url" -> upscanUrl, "conversationId" -> conversationId, "subscriptionId" -> subscriptionId, "fileReferenceId" -> fileReferenceId)
 
     when(mockValidationEngine.validateUploadSubmission(any()))
       .thenReturn(Future.successful(SubmissionValidationSuccess(messageSpecData)))
@@ -82,9 +84,9 @@ class SubmissionValidationControllerSpec extends SpecBase {
       val result: Future[Result] = controller.validateSubmission()(request)
 
       val expectedAuditDetail = AuditDetailForSubmissionValidation(
-        conversationId = "conversationId not provided",
-        subscriptionId = "subscriptionId123",
-        fileReferenceId = "fileReferenceId123",
+        conversationId = conversationId,
+        subscriptionId = subscriptionId,
+        fileReferenceId = fileReferenceId,
         messageRefId = Some(messageSpecData.messageRefId),
         messageTypeIndicator = Some(messageSpecData.messageTypeIndic.toString),
         reportingEntityName = Some(messageSpecData.reportingEntityName),
@@ -118,9 +120,9 @@ class SubmissionValidationControllerSpec extends SpecBase {
       val result: Future[Result] = controller.validateSubmission()(request)
 
       val expectedAuditDetail = AuditDetailForSubmissionValidation(
-        conversationId = "conversationId not provided",
-        subscriptionId = "subscriptionId123",
-        fileReferenceId = "fileReferenceId123",
+        conversationId = conversationId,
+        subscriptionId = subscriptionId,
+        fileReferenceId = fileReferenceId,
         messageRefId = None,
         messageTypeIndicator = None,
         reportingEntityName = None,
@@ -149,9 +151,9 @@ class SubmissionValidationControllerSpec extends SpecBase {
       val result: Future[Result] = controller.validateSubmission()(request)
 
       val expectedAuditDetail = AuditDetailForSubmissionValidation(
-        conversationId = "conversationId not provided",
-        subscriptionId = "subscriptionId123",
-        fileReferenceId = "fileReferenceId123",
+        conversationId = conversationId,
+        subscriptionId = subscriptionId,
+        fileReferenceId = fileReferenceId,
         messageRefId = None,
         messageTypeIndicator = None,
         reportingEntityName = None,
