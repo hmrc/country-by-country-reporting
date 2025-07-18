@@ -37,6 +37,7 @@ class UpScanCallbackDispatcher @Inject() (sessionStorage: UploadProgressTracker,
 
   def handleCallback(callback: CallbackBody)(implicit hc: HeaderCarrier): Future[Boolean] = {
     val uploadStatus = callback match {
+
       case s: ReadyCallbackBody =>
         UploadedSuccessfully(
           s.uploadDetails.fileName,
@@ -67,13 +68,14 @@ class UpScanCallbackDispatcher @Inject() (sessionStorage: UploadProgressTracker,
 
   private def triggerAuditEvent(callbackBody: FailedCallbackBody, problemUrl: String)(implicit headerCarrier: HeaderCarrier) = {
     val details = AuditDetailForSubmissionValidation(
-      conversationId = callbackBody.reference.value,
-      subscriptionId = "UNKNOWN ID",
+      conversationId = "conversationId not provided",
+      subscriptionId = "subscriptionId not provided",
+      fileReferenceId = callbackBody.reference.value,
       messageRefId = None,
       messageTypeIndicator = None,
       reportingEntityName = None,
       reportType = None,
-      userType = "UNKNOWN",
+      userType = "userType not provided",
       fileError = true,
       errorMessage = Some(s"${callbackBody.failureDetails.failureReason} : ${callbackBody.failureDetails.message}"),
       errorURL = Some(problemUrl),

@@ -16,7 +16,6 @@
 
 package models.audit
 
-import play.api.libs.json.OFormat.oFormatFromReadsAndOWrites
 import play.api.libs.json.{Json, OWrites}
 import uk.gov.hmrc.auth.core.AffinityGroup
 
