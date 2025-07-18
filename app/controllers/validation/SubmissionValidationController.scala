@@ -79,9 +79,9 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
                                        messageSpecData: MessageSpecData
   )(implicit hc: HeaderCarrier, ec: ExecutionContext, request: IdentifierRequest[JsValue]) = {
     val detail = AuditDetailForSubmissionValidation(
-      conversationId = "conversationId not provided",
+      conversationId = validateRequest.conversationId,
       subscriptionId = validateRequest.subscriptionId,
-      fileReferenceId = validateRequest.conversationId,
+      fileReferenceId = validateRequest.fileReferenceId,
       messageRefId = Some(messageSpecData.messageRefId),
       messageTypeIndicator = Some(messageSpecData.messageTypeIndic.toString),
       reportingEntityName = Some(messageSpecData.reportingEntityName),
@@ -100,9 +100,9 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
   )(implicit hc: HeaderCarrier, ec: ExecutionContext, request: IdentifierRequest[JsValue]) = {
 
     val detail = AuditDetailForSubmissionValidation(
-      conversationId = "conversationId not provided",
+      conversationId = validateRequest.conversationId,
       subscriptionId = validateRequest.subscriptionId,
-      fileReferenceId = validateRequest.conversationId,
+      fileReferenceId = validateRequest.fileReferenceId,
       messageRefId = None,
       messageTypeIndicator = None,
       reportingEntityName = None,
@@ -123,9 +123,9 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
   ) = {
 
     val detail = AuditDetailForSubmissionValidation(
-      conversationId = "conversationId not provided",
+      conversationId = validateRequest.conversationId,
       subscriptionId = validateRequest.subscriptionId,
-      fileReferenceId = validateRequest.conversationId,
+      fileReferenceId = validateRequest.fileReferenceId,
       messageRefId = None,
       messageTypeIndicator = None,
       reportingEntityName = None,
