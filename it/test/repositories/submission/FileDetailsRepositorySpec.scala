@@ -28,6 +28,8 @@ import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.duration.DurationInt
 
 class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepositorySupport[FileDetails] {
 
@@ -35,6 +37,7 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
 
   private val mockAppConfig = mock[AppConfig]
   when(mockAppConfig.cacheTtl) thenReturn 1
+  when(mockAppConfig.staleTaskAlertAfter) thenReturn 2.hours
 
   override lazy val repository = new FileDetailsRepository(mongoComponent, mockAppConfig, metricsService)
 
@@ -247,6 +250,27 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
       }
     }
 
+  }
+
+  "findStaleSubmissions" - {
+    "should retrieve a stale pending submission " in {
+      val oldPendingFile = fileDetails.copy(submitted = dateTimeNow.minusDays(1), name = "oldfile.xml", _id = ConversationId("conversationId777777"))
+      val oldRejectedFile = fileDetails.copy(status = RejectedSDES,
+        submitted = dateTimeNow.minusDays(1),
+        name = "oldishfile.xml",
+        _id = ConversationId("conversationId777778"))
+
+      val result: Future[Seq[FileDetails]] = for {
+        _   <- repository.insert(fileDetails)
+        _   <- repository.insert(oldPendingFile)
+        _   <- repository.insert(oldRejectedFile)
+        res <- repository.findStaleSubmissions()
+      } yield res
+
+      whenReady(result) {
+        _ mustBe List(oldPendingFile)
+      }
+    }
   }
 
 }
