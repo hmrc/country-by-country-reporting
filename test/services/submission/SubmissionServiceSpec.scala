@@ -121,7 +121,8 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
 
           result.futureValue.value mustBe conversationId
           assertOnFileDetails(agentRefNo, submissionDetails, agentDetails, conversationId)
-          verify(mockAuditService, atLeastOnce).sendAuditEvent(mEq(AuditType.fileSubmission), any[JsValue])(any(), any())
+          verify(mockAuditService, times(1)).sendAuditEvent(mEq(AuditType.fileSubmission), any[JsValue])(any(), any())
+          reset(mockAuditService)
         }
       }
 
@@ -185,7 +186,8 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
           val result = submissionService.submitLargeFile(submissionDetails)
 
           result.futureValue.left.value mustBe a[RepositoryError]
-          verify(mockAuditService, atLeastOnce).sendAuditEvent(mEq(AuditType.fileSubmission), any[JsValue])(any(), any())
+          verify(mockAuditService, times(2)).sendAuditEvent(mEq(AuditType.fileSubmission), any[JsValue])(any(), any())
+          reset(mockAuditService)
         }
       }
     }
@@ -220,7 +222,8 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
 
           result.futureValue.value mustBe conversationId
           assertOnFileDetails(agentRefNo, submissionDetails, agentDetails, conversationId)
-          verify(mockAuditService, atLeastOnce).sendAuditEvent(mEq(AuditType.fileSubmission), any[JsValue])(any(), any())
+          verify(mockAuditService, times(1)).sendAuditEvent(mEq(AuditType.fileSubmission), any[JsValue])(any(), any())
+          reset(mockAuditService)
         }
       }
 
@@ -254,7 +257,8 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
             val result = submissionService.submitNormalFile(submissionDetails)
 
             result.futureValue.left.value mustBe a[SubmissionServiceError]
-            verify(mockAuditService, atLeastOnce).sendAuditEvent(mEq(AuditType.fileSubmission), any[JsValue])(any(), any())
+            verify(mockAuditService, times(1)).sendAuditEvent(mEq(AuditType.fileSubmission), any[JsValue])(any(), any())
+            reset(mockAuditService)
         }
       }
 
