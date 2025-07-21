@@ -76,6 +76,13 @@ class SubmissionService @Inject() (
                                              request.affinityGroup,
                                              Some(LargeFile)
       )
+      _ = sendAuditEvent(
+        submissionDetails = submissionDetails,
+        fileReferenceId = fileReferenceId,
+        fileStatus = fileDetails.status,
+        userType = fileDetails.userType,
+        submissionTime = fileDetails.submitted
+      )
       _ <- EitherT(persistFileDetails(fileDetails, submissionDetails))
     } yield conversationId).value
   }
@@ -105,7 +112,13 @@ class SubmissionService @Inject() (
                                                      request.affinityGroup,
                                                      Some(NormalFile)
               )
-              _ = auditService.sendAuditEvent(AuditType.fileSubmission, Json.toJson(fileDetails))
+              _ = sendAuditEvent(
+                submissionDetails = submissionDetails,
+                fileReferenceId = fileReferenceId,
+                fileStatus = fileDetails.status,
+                userType = fileDetails.userType,
+                submissionTime = fileDetails.submitted
+              )
               _ <- EitherT(addSubscriptionDetailsToXml(xml, submissionMetaData, orgContactDetails, fileDetails))
               _ <- EitherT(persistFileDetails(fileDetails, submissionDetails))
             } yield conversationId
@@ -215,25 +228,11 @@ class SubmissionService @Inject() (
     fileDetailsRepository
       .insert(fileDetails)
       .map {
-        sendAuditEvent(
-          submissionDetails = submissionDetails,
-          fileReferenceId = fileReferenceId,
-          fileStatus = fileDetails.status,
-          userType = fileDetails.userType,
-          submissionTime = fileDetails.submitted
-        )
         Right(_)
       }
       .recover { _ =>
         val errorMessage = s"Failed to persist details for file with conversation Id [${fileDetails._id.value}]"
-        sendAuditEvent(
-          submissionDetails = submissionDetails,
-          fileReferenceId = fileReferenceId,
-          fileStatus = fileDetails.status,
-          submissionTime = fileDetails.submitted,
-          userType = fileDetails.userType,
-          error = Some(errorMessage)
-        )
+        logger.error(s"ERROR: $errorMessage")
         Left(RepositoryError(errorMessage))
       }
 
