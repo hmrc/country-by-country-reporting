@@ -186,7 +186,7 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
           val result = submissionService.submitLargeFile(submissionDetails)
 
           result.futureValue.left.value mustBe a[RepositoryError]
-          verify(mockAuditService, times(2)).sendAuditEvent(mEq(AuditType.fileSubmission), any[JsValue])(any(), any())
+          verify(mockAuditService, times(1)).sendAuditEvent(mEq(AuditType.fileSubmission), any[JsValue])(any(), any())
           reset(mockAuditService)
         }
       }

@@ -232,14 +232,7 @@ class SubmissionService @Inject() (
       }
       .recover { _ =>
         val errorMessage = s"Failed to persist details for file with conversation Id [${fileDetails._id.value}]"
-        sendAuditEvent(
-          submissionDetails = submissionDetails,
-          fileReferenceId = fileReferenceId,
-          fileStatus = fileDetails.status,
-          submissionTime = fileDetails.submitted,
-          userType = fileDetails.userType,
-          error = Some(errorMessage)
-        )
+        logger.error(s"ERROR: $errorMessage")
         Left(RepositoryError(errorMessage))
       }
 
