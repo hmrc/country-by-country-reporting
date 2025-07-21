@@ -46,5 +46,30 @@ class FileDetailsSpec extends AnyFreeSpec with Matchers {
       (json \ "conversationId").as[String] shouldBe "conversationId"
     }
 
+    "should contain relevant information to be logged when record is stale" in {
+      val fileDetails = FileDetails(
+        _id = ConversationId("conversationId"),
+        subscriptionId = "submissionId",
+        messageRefId = "messageRefId",
+        reportingEntityName = "reportingEntityName",
+        reportType = TestData,
+        status = Accepted,
+        name = "report.xml",
+        submitted = LocalDateTime.now(),
+        lastUpdated = LocalDateTime.now(),
+        agentDetails = None,
+        userType = None,
+        fileType = Some(LargeFile)
+      )
+
+      val expectedMessageLargeFile =
+        s"Stale file found - Report Type: TestData, ConversationId: conversationId, Filename: report.xml, File Type: LargeFile, Sent to SDES"
+      val expectedMessageNormalFile =
+        s"Stale file found - Report Type: TestData, ConversationId: conversationId, Filename: report.xml, File Type: NormalFile, Sent to EIS"
+
+      FileDetails.logMessageForStaleReport(fileDetails) shouldBe expectedMessageLargeFile
+      FileDetails.logMessageForStaleReport(fileDetails.copy(fileType = Some(NormalFile))) shouldBe expectedMessageNormalFile
+    }
+
   }
 }
