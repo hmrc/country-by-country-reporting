@@ -22,6 +22,9 @@ import models.agentSubscription.{AgentContactDetails, AgentResponseDetail}
 import models.submission._
 import models.subscription.{ContactInformation, OrganisationDetails}
 import models.xml.{FileErrorCode, FileErrors, ValidationErrors}
+import org.mongodb.scala.bson.collection.immutable.Document
+import org.scalatest.concurrent.Eventually.eventually
+import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import services.metrics.MetricsService
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
@@ -41,20 +44,19 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
 
   override lazy val repository = new FileDetailsRepository(mongoComponent, mockAppConfig, metricsService)
 
-  val dateTimeNow: LocalDateTime = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
-  val fileDetails: FileDetails =
-    FileDetails(
-      ConversationId("conversationId123456"),
-      "subscriptionId",
-      "messageRefId",
-      "Reporting Entity",
-      TestData,
-      Pending,
-      "file1.xml",
-      dateTimeNow,
-      dateTimeNow,
-      userType = Some(AffinityGroup.Organisation)
-    )
+  private val dateTimeNow: LocalDateTime = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
+  private val fileDetails: FileDetails = FileDetails(
+    ConversationId("conversationId123456"),
+    "subscriptionId",
+    "messageRefId",
+    "Reporting Entity",
+    TestData,
+    Pending,
+    "file1.xml",
+    dateTimeNow,
+    dateTimeNow,
+    userType = Some(AffinityGroup.Organisation)
+  )
 
   val agentPrimaryContact: ContactInformation = ContactInformation(
     OrganisationDetails("agentName"),
@@ -85,6 +87,11 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
     Some(agentDetails),
     Some(AffinityGroup.Agent)
   )
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    await(repository.collection.deleteMany(Document()).toFuture())
+  }
 
   "Insert" - {
     "must insert FileDetails" in {
@@ -127,6 +134,9 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
       whenReady(insert) { result =>
         result mustBe true
       }
+      eventually {
+        await(repository.findByConversationId(ConversationId("conversationId123456"))).isDefined mustBe true
+      }
       val res = repository.findByConversationId(ConversationId("conversationId123456"))
       whenReady(res) { result =>
         result mustBe Some(fileDetails)
@@ -137,6 +147,9 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
       val insert = repository.insert(agentFileDetails)
       whenReady(insert) { result =>
         result mustBe true
+      }
+      eventually {
+        await(repository.findByConversationId(ConversationId("conversationId1234567"))).isDefined mustBe true
       }
       val res = repository.findByConversationId(ConversationId("conversationId1234567"))
       whenReady(res) { result =>
@@ -159,6 +172,9 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
       val insert = repository.insert(fileDetails)
       whenReady(insert) { result =>
         result mustBe true
+      }
+      eventually {
+        await(repository.findByConversationId(ConversationId("conversationId123456"))).isDefined mustBe true
       }
       val res = repository.updateStatus("conversationId123456", Accepted)
       whenReady(res) { result =>
@@ -187,6 +203,9 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
       whenReady(insert) { result =>
         result mustBe true
       }
+      eventually {
+        await(repository.findByConversationId(ConversationId("conversationId1234567"))).isDefined mustBe true
+      }
       val res = repository.updateStatus("conversationId1234567", Accepted)
       whenReady(res) { result =>
         result must matchPattern {
@@ -213,6 +232,9 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
       val insert = repository.insert(fileDetails)
       whenReady(insert) { result =>
         result mustBe true
+      }
+      eventually {
+        await(repository.findByConversationId(ConversationId("conversationId123456"))).isDefined mustBe true
       }
       val res = repository.updateStatus("conversationId123456",
                                         Rejected(ValidationErrors(Some(Seq(FileErrors(FileErrorCode.FailedSchemaValidation, Some("details")))), None))
@@ -243,6 +265,9 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
       val insert = repository.insert(fileDetails)
       whenReady(insert) { result =>
         result mustBe true
+      }
+      eventually {
+        await(repository.findByConversationId(ConversationId("conversationId123456"))).isDefined mustBe true
       }
       val res = repository.findStatusByConversationId(ConversationId("conversationId123456"))
       whenReady(res) { result =>
