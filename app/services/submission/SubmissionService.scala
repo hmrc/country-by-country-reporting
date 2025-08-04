@@ -252,7 +252,6 @@ class SubmissionService @Inject() (
       userType = userType,
       error = error
     )
-    logger.info("auditDetail : " + auditDetail)
     auditService.sendAuditEvent(AuditType.fileSubmission, Json.toJson(auditDetail))
   } catch {
     case e: Exception =>

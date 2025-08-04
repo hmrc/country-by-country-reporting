@@ -33,6 +33,6 @@ object DateTimeFormatUtil {
     s"${dateTime.atZone(euLondonZoneId).format(timeFormatter)} on ${dateTime.atZone(euLondonZoneId).format(dateFormatter).capitalize}"
 
   def formattedDateForAudit(dateTime: LocalDateTime): String =
-    auditDateTimeFormatter.withZone(ZoneOffset.UTC).format(dateTime.toInstant(ZoneOffset.UTC))
+    auditDateTimeFormatter.withZone(ZoneOffset.UTC).format(dateTime)
 
 }
