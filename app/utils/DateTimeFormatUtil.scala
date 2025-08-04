@@ -17,11 +17,12 @@
 package utils
 
 import java.time.format.DateTimeFormatter
-import java.time.{Clock, LocalDateTime, ZoneId, ZonedDateTime}
+import java.time._
 
 object DateTimeFormatUtil {
 
-  private val euLondonZoneId: ZoneId = ZoneId.of("Europe/London")
+  private val euLondonZoneId: ZoneId                    = ZoneId.of("Europe/London")
+  private val auditDateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
 
   val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
   val timeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("h:mma")
@@ -30,5 +31,8 @@ object DateTimeFormatUtil {
 
   def displayFormattedDate(dateTime: LocalDateTime): String =
     s"${dateTime.atZone(euLondonZoneId).format(timeFormatter)} on ${dateTime.atZone(euLondonZoneId).format(dateFormatter).capitalize}"
+
+  def formattedDateForAudit(dateTime: LocalDateTime): String =
+    auditDateTimeFormatter.withZone(ZoneOffset.UTC).format(dateTime.toInstant(ZoneOffset.UTC))
 
 }
