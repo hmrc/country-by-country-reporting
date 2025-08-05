@@ -36,8 +36,8 @@ import services.{AgentSubscriptionService, DataExtraction, SubscriptionService, 
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.HttpErrorFunctions.is2xx
+import utils.DateTimeFormatUtil
 
-import java.time.format.DateTimeFormatter
 import java.time.{Clock, LocalDateTime}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -246,12 +246,12 @@ class SubmissionService @Inject() (
   )(implicit
     hc: HeaderCarrier
   ) = try {
-    val auditDetail =
-      Audit(
-        AuditDetailForFileSubmission(submissionDetails, fileReferenceId, fileStatus, submissionTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)),
-        userType = userType,
-        error = error
-      )
+    val formattedSubmissionTime = DateTimeFormatUtil.formattedDateForAudit(submissionTime)
+    val auditDetail = Audit(
+      AuditDetailForFileSubmission(submissionDetails, fileReferenceId, fileStatus, formattedSubmissionTime),
+      userType = userType,
+      error = error
+    )
     auditService.sendAuditEvent(AuditType.fileSubmission, Json.toJson(auditDetail))
   } catch {
     case e: Exception =>
