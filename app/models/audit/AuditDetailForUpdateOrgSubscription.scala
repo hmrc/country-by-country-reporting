@@ -40,7 +40,7 @@ object AuditDetailForUpdateOrgSubscriptionRequest {
     val (maybeSecondContactName, maybeSecondContactEmail, maybeSecondContactPhone) = (
       for (contact <- secondaryContact) yield contact.organisationDetails.organisationName,
       for (contact <- secondaryContact) yield contact.email,
-      for (contact <- secondaryContact) yield contact.phone.get
+      for (contact <- secondaryContact) yield contact.phone.getOrElse("")
     )
 
     new AuditDetailForUpdateOrgSubscriptionRequest(
