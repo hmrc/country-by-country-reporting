@@ -145,6 +145,8 @@ class EmailService @Inject() (emailConnector: EmailConnector, emailTemplate: Ema
       case Left(ReadSubscriptionError(value)) =>
         logger.warn(s"Failed to get contact information, received ReadSubscriptionError: $value")
         Future.successful(Seq(EmailResult("Failed to get contact information", None)))
+      case _ =>
+        Future.successful(Seq(EmailResult("Unexpected Error", None)))
     }
 
   private def send(emailAddress: Option[String],

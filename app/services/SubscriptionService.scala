@@ -19,7 +19,7 @@ package services
 import connectors.SubscriptionConnector
 import models.audit.AuditType.updateContactDetails
 import models.audit.{Audit, AuditDetailForUpdateOrgSubscriptionRequest}
-import models.error.{BackendError, ReadSubscriptionError, UpdateSubscriptionError}
+import models.error.{ApiError, ReadSubscriptionError, UpdateSubscriptionError}
 import models.subscription._
 import play.api.Logging
 import play.api.http.Status.OK
@@ -33,7 +33,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class SubscriptionService @Inject() (subscriptionConnector: SubscriptionConnector, auditService: AuditService) extends Logging {
 
-  def getContactInformation(enrolmentId: String)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Either[BackendError, ResponseDetail]] = {
+  def getContactInformation(enrolmentId: String)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Either[ApiError, ResponseDetail]] = {
 
     val subscriptionRequest: DisplaySubscriptionForCBCRequest =
       DisplaySubscriptionForCBCRequest(

@@ -20,15 +20,11 @@ import julienrf.json.derived
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.auth.core.AffinityGroup
 
-trait BackendError {
-  def detail: String
-}
+abstract class BackendError private[error] (val detail: String)
 
-final case class SdesSubmissionError(status: Int) extends BackendError {
-  override def detail: String = s"SDES submission failed with status $status"
-}
-final case class RepositoryError(detail: String) extends BackendError
-final case class SubmissionServiceError(detail: String, userType: Option[AffinityGroup] = None) extends BackendError
+final case class SdesSubmissionError(status: Int) extends BackendError(detail = s"SDES submission failed with status $status")
+final case class RepositoryError(override val detail: String) extends BackendError(detail = detail)
+final case class SubmissionServiceError(override val detail: String, userType: Option[AffinityGroup] = None) extends BackendError(detail = detail)
 
 object SubmissionServiceError {
   implicit val format: OFormat[SubmissionServiceError] = derived.oformat()
