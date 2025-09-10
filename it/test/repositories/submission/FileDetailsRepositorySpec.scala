@@ -280,10 +280,8 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
   "findStaleSubmissions" - {
     "should retrieve a stale pending submission " in {
       val oldPendingFile = fileDetails.copy(submitted = dateTimeNow.minusDays(1), name = "oldfile.xml", _id = ConversationId("conversationId777777"))
-      val oldRejectedFile = fileDetails.copy(status = RejectedSDES,
-        submitted = dateTimeNow.minusDays(1),
-        name = "oldishfile.xml",
-        _id = ConversationId("conversationId777778"))
+      val oldRejectedFile =
+        fileDetails.copy(status = RejectedSDES, submitted = dateTimeNow.minusDays(1), name = "oldishfile.xml", _id = ConversationId("conversationId777778"))
 
       val result: Future[Seq[FileDetails]] = for {
         _   <- repository.insert(fileDetails)

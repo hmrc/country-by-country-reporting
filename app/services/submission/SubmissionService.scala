@@ -84,7 +84,7 @@ class SubmissionService @Inject() (
         userType = fileDetails.userType,
         submissionTime = fileDetails.submitted
       )
-      _ <- EitherT(persistFileDetails(fileDetails, submissionDetails))
+      _ <- EitherT(persistFileDetails(fileDetails))
     } yield conversationId).value
   }
 
@@ -121,7 +121,7 @@ class SubmissionService @Inject() (
                 submissionTime = fileDetails.submitted
               )
               _ <- EitherT(addSubscriptionDetailsToXml(xml, submissionMetaData, orgContactDetails, fileDetails))
-              _ <- EitherT(persistFileDetails(fileDetails, submissionDetails))
+              _ <- EitherT(persistFileDetails(fileDetails))
             } yield conversationId
           case None =>
             val errorMessage = s"Xml file with conversation Id [${conversationId.value}] is empty"
@@ -222,10 +222,7 @@ class SubmissionService @Inject() (
       fileType
     )
 
-  private def persistFileDetails(fileDetails: FileDetails, submissionDetails: SubmissionDetails)(implicit
-    hc: HeaderCarrier,
-    fileReferenceId: String
-  ): Future[Either[BackendError, Boolean]] =
+  private def persistFileDetails(fileDetails: FileDetails): Future[Either[BackendError, Boolean]] =
     fileDetailsRepository
       .insert(fileDetails)
       .map {
@@ -245,7 +242,7 @@ class SubmissionService @Inject() (
                              error: Option[String] = None
   )(implicit
     hc: HeaderCarrier
-  ) = try {
+  ): Unit = try {
     val formattedSubmissionTime = DateTimeFormatUtil.formattedDateForAudit(submissionTime)
     val auditDetail = Audit(
       AuditDetailForFileSubmission(submissionDetails, fileReferenceId, fileStatus, formattedSubmissionTime),

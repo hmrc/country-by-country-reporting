@@ -16,14 +16,8 @@
 
 package models.error
 
-sealed trait ApiError extends BackendError {
-  override def detail: String
-}
+abstract class ApiError private[error] (detail: String) extends BackendError(detail)
 
-case class UpdateSubscriptionError(status: Int) extends ApiError {
-  override def detail: String = s"Failed to update subscription. Got status $status"
-}
+case class UpdateSubscriptionError(status: Int) extends ApiError(detail = s"Failed to update subscription. Got status $status")
 
-case class ReadSubscriptionError(status: Int) extends ApiError {
-  override def detail: String = s"Failed to read subscription. Got status $status"
-}
+case class ReadSubscriptionError(status: Int) extends ApiError(detail = s"Failed to read subscription. Got status $status")

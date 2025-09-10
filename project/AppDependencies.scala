@@ -1,8 +1,8 @@
-import sbt._
+import sbt.*
 
 object AppDependencies {
   private val mongoVersion     = "2.7.0"
-  private val bootstrapVersion = "9.18.0"
+  private val bootstrapVersion = "9.19.0"
 
   val compile: Seq[ModuleID] = Seq(
     "uk.gov.hmrc"       %% "bootstrap-backend-play-30" % bootstrapVersion,
@@ -20,7 +20,7 @@ object AppDependencies {
     "org.mockito"            %% "mockito-scala"           % "2.0.0",
     "wolfendale"             %% "scalacheck-gen-regexp"   % "0.1.2",
     "uk.gov.hmrc"            %% "bootstrap-test-play-30"  % bootstrapVersion,
-    "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-30" % mongoVersion,
+    "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-30" % mongoVersion
   ).map(_ % Test)
 
   val itDependencies: Seq[ModuleID] = Seq(

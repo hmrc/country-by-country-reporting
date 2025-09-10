@@ -20,9 +20,7 @@ import play.api.libs.json.{Json, OFormat}
 
 import java.time.LocalDateTime
 
-sealed trait DownStreamError extends BackendError {
-  override def detail: String
-}
+class DownStreamError private[error] (detail: String) extends BackendError(detail)
 
 final case class BusinessErrorDetail(processingDate: LocalDateTime, code: String, text: String)
 
@@ -30,9 +28,7 @@ object BusinessErrorDetail {
   implicit val format: OFormat[BusinessErrorDetail] = Json.format[BusinessErrorDetail]
 }
 
-final case class BusinessValidationError(errors: BusinessErrorDetail) extends DownStreamError {
-  override def detail: String = s"code: ${errors.code}, message: ${errors.text}"
-}
+final case class BusinessValidationError(errors: BusinessErrorDetail) extends DownStreamError(detail = s"code: ${errors.code}, message: ${errors.text}")
 
 object BusinessValidationError {
   implicit val format: OFormat[BusinessValidationError] = Json.format[BusinessValidationError]
@@ -44,9 +40,8 @@ object BackendSAPSystemErrorDetail {
   implicit val format: OFormat[BackendSAPSystemErrorDetail] = Json.format[BackendSAPSystemErrorDetail]
 }
 
-final case class BackendSAPSystemError(error: BackendSAPSystemErrorDetail) extends DownStreamError {
-  override def detail: String = s"code: ${error.code}, message: ${error.message}, logId: ${error.logID}"
-}
+final case class BackendSAPSystemError(error: BackendSAPSystemErrorDetail)
+    extends DownStreamError(detail = s"code: ${error.code}, message: ${error.message}, logId: ${error.logID}")
 
 object BackendSAPSystemError {
   implicit val format: OFormat[BackendSAPSystemError] = Json.format[BackendSAPSystemError]
@@ -71,9 +66,7 @@ object ErrorDetail {
   implicit val format: OFormat[ErrorDetail] = Json.format[ErrorDetail]
 }
 
-final case class ErrorDetails(errorDetail: ErrorDetail) extends DownStreamError {
-  override def detail: String = s"${errorDetail.sourceFaultDetail.map(_.detail.mkString)}"
-}
+final case class ErrorDetails(errorDetail: ErrorDetail) extends DownStreamError(detail = s"${errorDetail.sourceFaultDetail.map(_.detail.mkString)}")
 
 object ErrorDetails {
   implicit val format: OFormat[ErrorDetails] = Json.format[ErrorDetails]
