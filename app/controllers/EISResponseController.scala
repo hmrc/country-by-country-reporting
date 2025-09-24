@@ -89,7 +89,10 @@ class EISResponseController @Inject() (
               updatedFileDetails.messageRefId,
               updatedFileDetails.agentDetails,
               updatedFileDetails.status == FileStatusAccepted,
-              updatedFileDetails.reportType
+              updatedFileDetails.reportType,
+              DateTimeFormatUtil.displayFormattedDate(updatedFileDetails.reportingPeriodStartDate),
+              DateTimeFormatUtil.displayFormattedDate(updatedFileDetails.reportingPeriodEndDate),
+              updatedFileDetails.reportingEntityName,
             )
           case _ =>
             logger.warn("Upload file status is rejected on fast journey. No email has been sent")
