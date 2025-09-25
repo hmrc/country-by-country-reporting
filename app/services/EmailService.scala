@@ -45,10 +45,20 @@ class EmailService @Inject() (emailConnector: EmailConnector, emailTemplate: Ema
                       reportingPeriodStartDate: String,
                       reportingPeriodEndDate: String,
                       reportingEntityName: String
-                     )(implicit
-                       hc: HeaderCarrier
-                     ): Future[Seq[Int]] =
-    sendEmail(subscriptionId, submissionTime, messageRefId, agentDetails, isUploadSuccessful, reportType, reportingPeriodStartDate, reportingPeriodEndDate, reportingEntityName) map { responses: Seq[EmailResult] =>
+  )(implicit
+    hc: HeaderCarrier
+  ): Future[Seq[Int]] =
+    sendEmail(
+      subscriptionId,
+      submissionTime,
+      messageRefId,
+      agentDetails,
+      isUploadSuccessful,
+      reportType,
+      reportingPeriodStartDate,
+      reportingPeriodEndDate,
+      reportingEntityName
+    ) map { responses: Seq[EmailResult] =>
       responses.map {
         case EmailResult(emailType, Some(resp)) =>
           resp.status match {
@@ -76,22 +86,23 @@ class EmailService @Inject() (emailConnector: EmailConnector, emailTemplate: Ema
                 reportingPeriodStartDate: String,
                 reportingPeriodEndDate: String,
                 reportingEntityName: String
-               )(implicit hc: HeaderCarrier): Future[Seq[EmailResult]] =
+  )(implicit hc: HeaderCarrier): Future[Seq[EmailResult]] =
     subscriptionService.getContactInformation(subscriptionId).flatMap {
       case Right(responseDetail) =>
-        val emailAddress = Some(responseDetail.primaryContact.email)
-        val contactName = Some(responseDetail.primaryContact.organisationDetails.organisationName)
-        val secondaryEmailAddress = responseDetail.secondaryContact.map(_.email)
-        val secondaryName = responseDetail.secondaryContact.map(_.organisationDetails.organisationName)
-        val agentPrimaryEmail = agentDetails.map(_.subscriptionDetails.primaryContact.email)
-        val agentPrimaryName = agentDetails.map(_.subscriptionDetails.primaryContact.organisationDetails.organisationName)
-        val agentSecondaryEmail = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.email))
-        val agentSecondaryName = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.organisationDetails.organisationName))
-        val cbcId = responseDetail.subscriptionID
-        val reportTypeContent = getReportTypeMessage(reportType)
-
+        val emailAddress                     = Some(responseDetail.primaryContact.email)
+        val contactName                      = Some(responseDetail.primaryContact.organisationDetails.organisationName)
+        val secondaryEmailAddress            = responseDetail.secondaryContact.map(_.email)
+        val secondaryName                    = responseDetail.secondaryContact.map(_.organisationDetails.organisationName)
+        val agentPrimaryEmail                = agentDetails.map(_.subscriptionDetails.primaryContact.email)
+        val agentPrimaryName                 = agentDetails.map(_.subscriptionDetails.primaryContact.organisationDetails.organisationName)
+        val agentSecondaryEmail              = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.email))
+        val agentSecondaryName               = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.organisationDetails.organisationName))
+        val agentTradingName: Option[String] = agentDetails.flatMap(_.subscriptionDetails.tradingName)
+        val cbcId                            = responseDetail.subscriptionID
+        val reportTypeContent                = getReportTypeMessage(reportType)
         lazy val orgEmails: Seq[Future[EmailResult]] = Seq(
-          send(emailAddress,
+          send(
+            emailAddress,
             contactName,
             emailTemplate.getOrganisationTemplate(isUploadSuccessful),
             submissionTime,
@@ -100,7 +111,8 @@ class EmailService @Inject() (emailConnector: EmailConnector, emailTemplate: Ema
             None,
             Some(reportTypeContent),
             Some(reportingPeriodStartDate),
-            Some(reportingPeriodEndDate)
+            Some(reportingPeriodEndDate),
+            Some(reportingEntityName)
           )
             .map(res => EmailResult("Primary Org", res)),
           send(
@@ -113,7 +125,8 @@ class EmailService @Inject() (emailConnector: EmailConnector, emailTemplate: Ema
             None,
             Some(reportTypeContent),
             Some(reportingPeriodStartDate),
-            Some(reportingPeriodEndDate)
+            Some(reportingPeriodEndDate),
+            Some(reportingEntityName)
           )
             .map(res => EmailResult("Secondary Org", res))
         )
@@ -126,10 +139,11 @@ class EmailService @Inject() (emailConnector: EmailConnector, emailTemplate: Ema
             submissionTime,
             messageRefId,
             Some(cbcId),
-            Some(reportingEntityName),
+            agentTradingName,
             Some(reportTypeContent),
             Some(reportingPeriodStartDate),
-            Some(reportingPeriodEndDate)
+            Some(reportingPeriodEndDate),
+            Some(reportingEntityName)
           ).map(res => EmailResult("Primary Agent", res)),
           send(
             agentSecondaryEmail,
@@ -138,10 +152,11 @@ class EmailService @Inject() (emailConnector: EmailConnector, emailTemplate: Ema
             submissionTime,
             messageRefId,
             Some(cbcId),
-            Some(reportingEntityName),
+            agentTradingName,
             Some(reportTypeContent),
             Some(reportingPeriodStartDate),
-            Some(reportingPeriodEndDate)
+            Some(reportingPeriodEndDate),
+            Some(reportingEntityName)
           ).map(res => EmailResult("Secondary Agent", res))
         )
         (agentDetails.isDefined, isUploadSuccessful) match {
@@ -170,10 +185,10 @@ class EmailService @Inject() (emailConnector: EmailConnector, emailTemplate: Ema
                    cbcId: Option[String],
                    tradingName: Option[String],
                    reportType: Option[String],
-                   reportingEntityName: Option[String],
                    reportingPeriodStartDate: Option[String],
-                   reportingPeriodEndDate: Option[String]
-                  )(implicit hc: HeaderCarrier): Future[Option[HttpResponse]] =
+                   reportingPeriodEndDate: Option[String],
+                   reportingEntityName: Option[String]
+  )(implicit hc: HeaderCarrier): Future[Option[HttpResponse]] =
     emailAddress
       .filter(EmailAddress.isValid)
       .map { email =>

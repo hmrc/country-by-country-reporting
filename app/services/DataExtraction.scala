@@ -18,6 +18,7 @@ package services
 
 import models.submission._
 
+import java.time.LocalDateTime
 import javax.inject.Inject
 import scala.xml.{Elem, NodeSeq}
 
@@ -34,10 +35,10 @@ class DataExtraction()() {
     } yield MessageSpecData(
       messageID.text,
       typeIndic,
-      reportingEntityName.text,
-      startDate.text,
-      endDate.text,
-      getReportType(typeIndic, xml)
+      getReportType(typeIndic, xml),
+      LocalDateTime.parse(startDate.text),
+      LocalDateTime.parse(endDate.text),
+      reportingEntityName.text
     )
 
   def getReportType(messageTypeIndicator: MessageTypeIndic, xml: Elem): ReportType = {

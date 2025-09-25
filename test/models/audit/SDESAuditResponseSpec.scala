@@ -65,7 +65,10 @@ class SDESAuditResponseSpec extends SpecBase {
         LocalDateTime.now(),
         LocalDateTime.now(),
         None,
-        None
+        None,
+        None,
+        LocalDateTime.now(),
+        LocalDateTime.now()
       )
       val jsonObj = SDESAuditResponse(sdesCallBack, Some(fileDetails))
       auditDetailRequest mustBe jsonObj
@@ -109,7 +112,10 @@ class SDESAuditResponseSpec extends SpecBase {
         LocalDateTime.now(),
         LocalDateTime.now(),
         None,
-        None
+        None,
+        None,
+        LocalDateTime.now(),
+        LocalDateTime.now()
       )
       val jsonObj = SDESAuditResponse(sdesCallBack, Some(fileDetails))
       auditDetailRequest mustBe jsonObj

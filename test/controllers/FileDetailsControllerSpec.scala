@@ -21,7 +21,7 @@ import controllers.auth.{FakeIdentifierAuthAction, IdentifierAuthAction}
 import models.submission._
 import models.upscan.UploadId
 import models.xml.ValidationErrors
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, endsWith}
 import org.scalatest.BeforeAndAfterEach
 import play.api.Application
 import play.api.http.Status.{NOT_FOUND, OK}
@@ -51,10 +51,40 @@ class FileDetailsControllerSpec extends SpecBase with BeforeAndAfterEach {
 
   private val submissionTime1 = LocalDateTime.now()
   private val fileDetails1 =
-    FileDetails(conversationId, "subscriptionId1", "messageRefId1", "Reporting Entity", TestData, Pending, "fileName1", submissionTime1, submissionTime1)
+    FileDetails(
+      conversationId,
+      "subscriptionId1",
+      "messageRefId1",
+      "Reporting Entity",
+      TestData,
+      Pending,
+      "fileName1",
+      submissionTime1,
+      submissionTime1,
+      None,
+      None,
+      None,
+      startDate,
+      endDate
+    )
   private val submissionTime2 = LocalDateTime.now()
   private val fileDetails2 =
-    FileDetails(conversationId, "subscriptionId1", "messageRefId1", "Reporting Entity", TestData, Accepted, "fileName2", submissionTime2, submissionTime2)
+    FileDetails(
+      conversationId,
+      "subscriptionId1",
+      "messageRefId1",
+      "Reporting Entity",
+      TestData,
+      Accepted,
+      "fileName2",
+      submissionTime2,
+      submissionTime2,
+      None,
+      None,
+      None,
+      startDate,
+      endDate
+    )
   private val files = Seq(fileDetails1, fileDetails2)
 
   "FileDetailsController" - {
@@ -68,7 +98,12 @@ class FileDetailsControllerSpec extends SpecBase with BeforeAndAfterEach {
         status = Pending,
         name = "test.xml",
         submitted = LocalDateTime.now(),
-        lastUpdated = LocalDateTime.now()
+        lastUpdated = LocalDateTime.now(),
+        None,
+        None,
+        None,
+        startDate,
+        endDate
       )
 
       when(mockFileDetailsRepository.findByConversationId(any[ConversationId]())).thenReturn(Future.successful(Some(fileDetails)))

@@ -310,6 +310,8 @@ trait ModelGenerators {
       name                <- nonEmptyString
       submitted           <- arbitrary[LocalDateTime]
       lastUpdated         <- arbitrary[LocalDateTime]
+      reportingStartDate  <- arbitrary[LocalDateTime]
+      reportingEndDate    <- arbitrary[LocalDateTime]
     } yield models.submission.FileDetails(
       _id,
       subscriptionId,
@@ -319,7 +321,12 @@ trait ModelGenerators {
       status,
       name,
       submitted,
-      lastUpdated
+      lastUpdated,
+      None,
+      None,
+      None,
+      reportingStartDate,
+      reportingEndDate
     )
   }
 
@@ -333,6 +340,8 @@ trait ModelGenerators {
       name                <- nonEmptyString
       submitted           <- arbitrary[LocalDateTime]
       lastUpdated         <- arbitrary[LocalDateTime]
+      reportingStartDate  <- arbitrary[LocalDateTime]
+      reportingEndDate    <- arbitrary[LocalDateTime]
     } yield models.submission.FileDetails(
       _id,
       subscriptionId,
@@ -342,7 +351,12 @@ trait ModelGenerators {
       Pending,
       name,
       submitted,
-      lastUpdated
+      lastUpdated,
+      None,
+      None,
+      None,
+      reportingStartDate,
+      reportingEndDate
     )
   }
 
@@ -357,6 +371,8 @@ trait ModelGenerators {
       name                <- nonEmptyString
       submitted           <- arbitrary[LocalDateTime]
       lastUpdated         <- arbitrary[LocalDateTime]
+      reportingStartDate  <- arbitrary[LocalDateTime]
+      reportingEndDate    <- arbitrary[LocalDateTime]
     } yield models.submission.FileDetails(
       _id,
       subscriptionId,
@@ -366,7 +382,12 @@ trait ModelGenerators {
       status,
       name,
       submitted,
-      lastUpdated
+      lastUpdated,
+      None,
+      None,
+      None,
+      reportingStartDate,
+      reportingEndDate
     )
   }
 
@@ -394,11 +415,13 @@ trait ModelGenerators {
 
   implicit val arbitraryMessageSpecData: Arbitrary[MessageSpecData] = Arbitrary {
     for {
-      messageRefId        <- nonEmptyString
-      messageTypeIndic    <- Gen.oneOf(MessageTypeIndic.values)
-      reportingEntityName <- nonEmptyString
-      reporterType        <- Gen.oneOf(ReportType.values)
-    } yield MessageSpecData(messageRefId, messageTypeIndic, reportingEntityName, reporterType)
+      messageRefId             <- nonEmptyString
+      messageTypeIndic         <- Gen.oneOf(MessageTypeIndic.values)
+      reportingEntityName      <- nonEmptyString
+      reporterType             <- Gen.oneOf(ReportType.values)
+      reportingPeriodStartDate <- arbitrary[LocalDateTime]
+      reportingPeriodEndDate   <- arbitrary[LocalDateTime]
+    } yield MessageSpecData(messageRefId, messageTypeIndic, reporterType, reportingPeriodStartDate, reportingPeriodEndDate, reportingEntityName)
   }
 
   implicit val arbitrarySubmissionDetails: Arbitrary[SubmissionDetails] = Arbitrary {

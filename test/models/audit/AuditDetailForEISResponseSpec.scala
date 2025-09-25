@@ -78,7 +78,10 @@ class AuditDetailForEISResponseSpec extends SpecBase {
         LocalDateTime.now(),
         LocalDateTime.now(),
         None,
-        None
+        None,
+        None,
+        LocalDateTime.now(),
+        LocalDateTime.now()
       )
 
       val auditDetail = Json.parse("""
@@ -115,7 +118,10 @@ class AuditDetailForEISResponseSpec extends SpecBase {
         LocalDateTime.now(),
         LocalDateTime.now(),
         None,
-        None
+        None,
+        None,
+        LocalDateTime.now(),
+        LocalDateTime.now()
       )
 
       noException should be thrownBy AuditDetailForEISResponse(breResponse = breResponse, fileDetails = Some(fileDetails))
@@ -152,7 +158,10 @@ class AuditDetailForEISResponseSpec extends SpecBase {
         LocalDateTime.now(),
         LocalDateTime.now(),
         None,
-        None
+        None,
+        None,
+        LocalDateTime.now(),
+        LocalDateTime.now()
       )
 
       val auditDetail = Json.parse("""
@@ -209,7 +218,10 @@ class AuditDetailForEISResponseSpec extends SpecBase {
         LocalDateTime.now(),
         LocalDateTime.now(),
         None,
-        None
+        None,
+        None,
+        LocalDateTime.now(),
+        LocalDateTime.now()
       )
 
       val auditDetail = Json.parse("""
@@ -273,7 +285,10 @@ class AuditDetailForEISResponseSpec extends SpecBase {
         LocalDateTime.now(),
         LocalDateTime.now(),
         None,
-        None
+        None,
+        None,
+        LocalDateTime.now(),
+        LocalDateTime.now()
       )
 
       val auditDetail = Json.parse("""

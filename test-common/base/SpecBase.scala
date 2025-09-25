@@ -29,7 +29,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.{Clock, Instant, ZoneId}
+import java.time.{Clock, Instant, LocalDateTime, ZoneId}
 
 trait SpecBase
     extends AnyFreeSpec
@@ -50,6 +50,9 @@ trait SpecBase
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
   implicit val fixedClock: Clock = Clock.fixed(Instant.now(), ZoneId.of("UTC"))
+
+  val startDate = LocalDateTime.of(2012, 1, 1, 0, 0)
+  val endDate   = LocalDateTime.of(2016, 1, 1, 0, 0)
 
   protected def applicationBuilder(): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()

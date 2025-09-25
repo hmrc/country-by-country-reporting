@@ -32,12 +32,12 @@ import models.submission.{
   TestData
 }
 
+import java.time.LocalDateTime
 import scala.xml.Elem
 
 class DataExtractionSpec extends SpecBase {
 
   val dataExtraction: DataExtraction = app.injector.instanceOf[DataExtraction]
-
   def generateValidXml(
     reportingEntityDocTypeIndic: List[Option[String]] = List(None),
     cbcReportDocTypeIndic: List[Option[String]] = List(),
@@ -51,45 +51,50 @@ class DataExtractionSpec extends SpecBase {
       {
       reportingEntityDocTypeIndic.map(reportingEntityIndic =>
         <CbcBody>
-        <ReportingEntity>
-          <Entity>
-            <Name>Name</Name>
-          </Entity>
-          {
+          <ReportingEntity>
+            <Entity>
+              <Name>Name</Name>
+            </Entity>
+            <ReportingRole>CBC704</ReportingRole>
+            <ReportingPeriod>
+              <StartDate>2012-01-01T00:00:00</StartDate>
+              <EndDate>2016-01-01T00:00:00</EndDate>
+            </ReportingPeriod>
+            {
           if (reportingEntityIndic.nonEmpty) {
             <DocSpec>
-              <urn1:DocTypeIndic>{reportingEntityIndic.get}</urn1:DocTypeIndic>
-            </DocSpec>
+                <urn1:DocTypeIndic>{reportingEntityIndic.get}</urn1:DocTypeIndic>
+              </DocSpec>
           }
         }
-        </ReportingEntity>
-        {
+          </ReportingEntity>
+          {
           cbcReportDocTypeIndic.map(cbcReportIndic =>
             <CbcReports>
-          {
+              {
               if (cbcReportIndic.nonEmpty) {
                 <DocSpec>
-              <urn1:DocTypeIndic>{cbcReportIndic.get}</urn1:DocTypeIndic>
-            </DocSpec>
+                  <urn1:DocTypeIndic>{cbcReportIndic.get}</urn1:DocTypeIndic>
+                </DocSpec>
               }
             }
-        </CbcReports>
+            </CbcReports>
           )
         }
-        {
+          {
           additionalInfoDocTypeIndic.map(additionalInfoIndic =>
             <AdditionalInfo>
-          {
+              {
               if (additionalInfoIndic.nonEmpty) {
                 <DocSpec>
-              <urn1:DocTypeIndic>{additionalInfoIndic.get}</urn1:DocTypeIndic>
-            </DocSpec>
+                  <urn1:DocTypeIndic>{additionalInfoIndic.get}</urn1:DocTypeIndic>
+                </DocSpec>
               }
             }
-        </AdditionalInfo>
+            </AdditionalInfo>
           )
         }
-      </CbcBody>
+        </CbcBody>
       )
     }
     </CBC_OECD>
@@ -99,7 +104,7 @@ class DataExtractionSpec extends SpecBase {
     "must return Some(MessageSpecData) when given valid xml" in {
       val xml = generateValidXml(reportingEntityDocTypeIndic = List(Some("OECD1")))
 
-      dataExtraction.messageSpecData(xml) mustBe Some(MessageSpecData("MessageRefId", CBC401, "Name", NewInformation))
+      dataExtraction.messageSpecData(xml) mustBe Some(MessageSpecData("MessageRefId", CBC401, NewInformation, startDate, endDate, "Name"))
     }
 
     "must return None when given invalid xml" in {

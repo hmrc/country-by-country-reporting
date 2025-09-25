@@ -38,7 +38,7 @@ case class FileDetails(_id: ConversationId,
                        fileType: Option[FileType] = None,
                        reportingPeriodStartDate: LocalDateTime,
                        reportingPeriodEndDate: LocalDateTime
-                      )
+)
 object FileDetails {
   final val localDateTimeReads: Reads[LocalDateTime] =
     Reads

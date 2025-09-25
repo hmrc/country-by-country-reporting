@@ -99,13 +99,27 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
           Accepted,
           "file1.xml",
           LocalDateTime.now(),
+          LocalDateTime.now(),
+          None,
+          None,
+          None,
+          LocalDateTime.now(),
           LocalDateTime.now()
         )
 
       when(mockFileDetailsRepository.findByConversationId(any[ConversationId])).thenReturn(Future.successful(Some(fileDetails)))
       when(mockFileDetailsRepository.updateStatus(any[String], any[FileStatus])).thenReturn(Future.successful(Some(fileDetails)))
       when(
-        mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean], any[ReportType])(
+        mockEmailService.sendAndLogEmail(any[String],
+                                         any[String],
+                                         any[String],
+                                         any[Option[AgentContactDetails]],
+                                         any[Boolean],
+                                         any[ReportType],
+                                         any[String],
+                                         any[String],
+                                         any[String]
+        )(
           any[HeaderCarrier]
         )
       )
@@ -125,7 +139,16 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
 
     "must return FORBIDDEN when auth token fails the validation" in {
       when(
-        mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean], any[ReportType])(
+        mockEmailService.sendAndLogEmail(any[String],
+                                         any[String],
+                                         any[String],
+                                         any[Option[AgentContactDetails]],
+                                         any[Boolean],
+                                         any[ReportType],
+                                         any[String],
+                                         any[String],
+                                         any[String]
+        )(
           any[HeaderCarrier]
         )
       )
@@ -151,13 +174,27 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
           Rejected(ValidationErrors(None, None)),
           "file1.xml",
           LocalDateTime.now(),
+          LocalDateTime.now(),
+          None,
+          None,
+          None,
+          LocalDateTime.now(),
           LocalDateTime.now()
         )
       when(mockFileDetailsRepository.findByConversationId(any[ConversationId])).thenReturn(Future.successful(Some(fileDetails)))
       when(mockAuditService.sendAuditEvent(any[String], any[JsValue])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(Success))
       when(mockFileDetailsRepository.updateStatus(any[String], any[FileStatus])).thenReturn(Future.successful(Some(fileDetails)))
       when(
-        mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean], any[ReportType])(
+        mockEmailService.sendAndLogEmail(any[String],
+                                         any[String],
+                                         any[String],
+                                         any[Option[AgentContactDetails]],
+                                         any[Boolean],
+                                         any[ReportType],
+                                         any[String],
+                                         any[String],
+                                         any[String]
+        )(
           any[HeaderCarrier]
         )
       )
@@ -175,7 +212,10 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
                                                          any[String],
                                                          any[Option[AgentContactDetails]],
                                                          any[Boolean],
-                                                         any[ReportType]
+                                                         any[ReportType],
+                                                         any[String],
+                                                         any[String],
+                                                         any[String]
       )(any[HeaderCarrier])
       verify(mockAuditService, times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
     }
@@ -191,13 +231,27 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
           Pending,
           "file1.xml",
           LocalDateTime.now(),
+          LocalDateTime.now(),
+          None,
+          None,
+          None,
+          LocalDateTime.now(),
           LocalDateTime.now()
         )
       when(mockFileDetailsRepository.findByConversationId(any[ConversationId])).thenReturn(Future.successful(Some(fileDetails)))
       when(mockAuditService.sendAuditEvent(any[String], any[JsValue])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(Success))
       when(mockFileDetailsRepository.updateStatus(any[String], any[FileStatus])).thenReturn(Future.successful(Some(fileDetails)))
       when(
-        mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean], any[ReportType])(
+        mockEmailService.sendAndLogEmail(any[String],
+                                         any[String],
+                                         any[String],
+                                         any[Option[AgentContactDetails]],
+                                         any[Boolean],
+                                         any[ReportType],
+                                         any[String],
+                                         any[String],
+                                         any[String]
+        )(
           any[HeaderCarrier]
         )
       )
@@ -215,7 +269,10 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
                                                          any[String],
                                                          any[Option[AgentContactDetails]],
                                                          any[Boolean],
-                                                         any[ReportType]
+                                                         any[ReportType],
+                                                         any[String],
+                                                         any[String],
+                                                         any[String]
       )(any[HeaderCarrier])
       verify(mockAuditService, times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
     }
@@ -231,13 +288,27 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
           Accepted,
           "file1.xml",
           LocalDateTime.now().minusSeconds(11),
+          LocalDateTime.now(),
+          None,
+          None,
+          None,
+          LocalDateTime.now(),
           LocalDateTime.now()
         )
       when(mockFileDetailsRepository.findByConversationId(any[ConversationId])).thenReturn(Future.successful(Some(fileDetails)))
       when(mockAuditService.sendAuditEvent(any[String], any[JsValue])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(Success))
       when(mockFileDetailsRepository.updateStatus(any[String], any[FileStatus])).thenReturn(Future.successful(Some(fileDetails)))
       when(
-        mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean], any[ReportType])(
+        mockEmailService.sendAndLogEmail(any[String],
+                                         any[String],
+                                         any[String],
+                                         any[Option[AgentContactDetails]],
+                                         any[Boolean],
+                                         any[ReportType],
+                                         any[String],
+                                         any[String],
+                                         any[String]
+        )(
           any[HeaderCarrier]
         )
       )
@@ -255,7 +326,10 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
                                                          any[String],
                                                          any[Option[AgentContactDetails]],
                                                          any[Boolean],
-                                                         any[ReportType]
+                                                         any[ReportType],
+                                                         any[String],
+                                                         any[String],
+                                                         any[String]
       )(any[HeaderCarrier])
       verify(mockAuditService, times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
     }
@@ -271,13 +345,27 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
           Rejected(ValidationErrors(None, None)),
           "file1.xml",
           LocalDateTime.now().minusSeconds(11),
+          LocalDateTime.now(),
+          None,
+          None,
+          None,
+          LocalDateTime.now(),
           LocalDateTime.now()
         )
       when(mockFileDetailsRepository.findByConversationId(any[ConversationId])).thenReturn(Future.successful(Some(fileDetails)))
       when(mockAuditService.sendAuditEvent(any[String], any[JsValue])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(Success))
       when(mockFileDetailsRepository.updateStatus(any[String], any[FileStatus])).thenReturn(Future.successful(Some(fileDetails)))
       when(
-        mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean], any[ReportType])(
+        mockEmailService.sendAndLogEmail(any[String],
+                                         any[String],
+                                         any[String],
+                                         any[Option[AgentContactDetails]],
+                                         any[Boolean],
+                                         any[ReportType],
+                                         any[String],
+                                         any[String],
+                                         any[String]
+        )(
           any[HeaderCarrier]
         )
       )
@@ -295,7 +383,10 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
                                                          any[String],
                                                          any[Option[AgentContactDetails]],
                                                          any[Boolean],
-                                                         any[ReportType]
+                                                         any[ReportType],
+                                                         any[String],
+                                                         any[String],
+                                                         any[String]
       )(any[HeaderCarrier])
       verify(mockAuditService, times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
     }

@@ -34,24 +34,26 @@ class AuditDetailForFileSubmissionSpec extends SpecBase {
         fileSize = 1234,
         documentUrl = "test",
         checksum = "test",
-        messageSpecData = MessageSpecData("msg-456", CBC402, "GlobalCorp Ltd", NewInformation)
+        messageSpecData = MessageSpecData("msg-456", CBC402, NewInformation, startDate, endDate, "GlobalCorp Ltd")
       )
 
       val auditDetail = Json.parse("""
-          |{
-          |    "conversationId" : "7e67633b-596b-454d-b7b1-c85fe3fdf994",
-          |    "subscriptionId" : "sub-123",
-          |    "fileReferenceId" : "file-reference-id",
-          |    "messageRefId" : "msg-456",
-          |    "fileSize" : 1234,
-          |    "reportingEntityName" : "GlobalCorp Ltd",
-          |    "reportType" : "NEW_INFORMATION",
-          |    "status" : "Pending",
-          |    "fileName" : "cbc-report.xml",
-          |    "submittedDatetime" : "2025-07-25T00:00",
-          |    "fileType" : "XML"
-          |}
-          |""".stripMargin)
+                                     |{
+                                     |    "conversationId" : "7e67633b-596b-454d-b7b1-c85fe3fdf994",
+                                     |    "subscriptionId" : "sub-123",
+                                     |    "fileReferenceId" : "file-reference-id",
+                                     |    "messageRefId" : "msg-456",
+                                     |    "fileSize" : 1234,
+                                     |    "reportingEntityName" : "GlobalCorp Ltd",
+                                     |    "reportType" : "NEW_INFORMATION",
+                                     |    "reportingPeriodStartDate" : "2023-01-01T00:00:00",
+                                     |    "reportingPeriodEndDate" : "2023-12-31T00:00:00",
+                                     |    "status" : "Pending",
+                                     |    "fileName" : "cbc-report.xml",
+                                     |    "submittedDatetime" : "2025-07-25T00:00",
+                                     |    "fileType" : "XML"
+                                     |}
+                                     |""".stripMargin)
       val auditDetailRequest = auditDetail.as[AuditDetailForFileSubmission]
 
       val jsonObj = AuditDetailForFileSubmission(submissionDetails, "file-reference-id", Pending, "2025-07-25T00:00")

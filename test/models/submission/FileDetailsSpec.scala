@@ -39,7 +39,9 @@ class FileDetailsSpec extends AnyFreeSpec with Matchers {
         lastUpdated = LocalDateTime.now(),
         agentDetails = None,
         userType = None,
-        fileType = None
+        fileType = None,
+        reportingPeriodStartDate = LocalDateTime.now(),
+        reportingPeriodEndDate = LocalDateTime.now()
       )
 
       val json = Json.toJson(fileDetails)
@@ -59,7 +61,9 @@ class FileDetailsSpec extends AnyFreeSpec with Matchers {
         lastUpdated = LocalDateTime.now(),
         agentDetails = None,
         userType = None,
-        fileType = Some(LargeFile)
+        fileType = Some(LargeFile),
+        reportingPeriodStartDate = LocalDateTime.now(),
+        reportingPeriodEndDate = LocalDateTime.now()
       )
 
       val expectedMessageLargeFile =

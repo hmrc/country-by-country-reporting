@@ -219,7 +219,9 @@ class SubmissionService @Inject() (
       submissionTime,
       maybeAgentDetails,
       Option(affinityGroup),
-      fileType
+      fileType,
+      submissionDetails.messageSpecData.reportingPeriodStartDate,
+      submissionDetails.messageSpecData.reportingPeriodEndDate
     )
 
   private def persistFileDetails(fileDetails: FileDetails): Future[Either[BackendError, Boolean]] =
