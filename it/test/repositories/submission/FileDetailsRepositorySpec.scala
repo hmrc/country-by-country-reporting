@@ -55,7 +55,11 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
     "file1.xml",
     dateTimeNow,
     dateTimeNow,
-    userType = Some(AffinityGroup.Organisation)
+    None,
+    Some(AffinityGroup.Organisation),
+    None,
+    dateTimeNow,
+    dateTimeNow
   )
 
   val agentPrimaryContact: ContactInformation = ContactInformation(
@@ -85,7 +89,10 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
     dateTimeNow,
     dateTimeNow,
     Some(agentDetails),
-    Some(AffinityGroup.Agent)
+    Some(AffinityGroup.Agent),
+    None,
+    dateTimeNow,
+    dateTimeNow
   )
 
   override def beforeEach(): Unit = {
@@ -191,6 +198,8 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
                             _,
                             _,
                             _,
+                            _,
+                            _,
                             _
                 )
               ) =>
@@ -221,6 +230,8 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
                             _,
                             _,
                             Some(AffinityGroup.Agent),
+                            _,
+                            _,
                             _
                 )
               ) =>
@@ -254,6 +265,8 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
                             _,
                             None,
                             Some(AffinityGroup.Organisation),
+                            _,
+                            _,
                             _
                 )
               ) =>
