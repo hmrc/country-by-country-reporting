@@ -18,7 +18,7 @@ package services
 
 import models.submission._
 
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 import javax.inject.Inject
 import scala.xml.{Elem, NodeSeq}
 
@@ -36,8 +36,8 @@ class DataExtraction()() {
       messageID.text,
       typeIndic,
       getReportType(typeIndic, xml),
-      LocalDateTime.parse(startDate.text),
-      LocalDateTime.parse(endDate.text),
+      LocalDate.parse(startDate.text),
+      LocalDate.parse(endDate.text),
       reportingEntityName.text
     )
 

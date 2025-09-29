@@ -90,8 +90,8 @@ class SdesCallbackController @Inject() (
                   fileDetails.agentDetails,
                   isUploadSuccessful = false,
                   fileDetails.reportType,
-                  DateTimeFormatUtil.displayFormattedDate(fileDetails.reportingPeriodStartDate),
-                  DateTimeFormatUtil.displayFormattedDate(fileDetails.reportingPeriodEndDate),
+                  fileDetails.reportingPeriodStartDate.toString,
+                  fileDetails.reportingPeriodEndDate.toString,
                   fileDetails.reportingEntityName
                 )
                 logger.info(s"Updated status for conversationId: $correlationID to $updatedStatus")

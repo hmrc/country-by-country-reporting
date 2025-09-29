@@ -18,7 +18,7 @@ package models.submission
 
 import play.api.libs.json._
 
-import java.time.LocalDateTime
+import java.time.LocalDate
 
 sealed trait MessageTypeIndic
 case object CBC401 extends MessageTypeIndic
@@ -95,8 +95,8 @@ object ReportType {
 case class MessageSpecData(messageRefId: String,
                            messageTypeIndic: MessageTypeIndic,
                            reportType: ReportType,
-                           reportingPeriodStartDate: LocalDateTime,
-                           reportingPeriodEndDate: LocalDateTime,
+                           reportingPeriodStartDate: LocalDate,
+                           reportingPeriodEndDate: LocalDate,
                            reportingEntityName: String
 )
 

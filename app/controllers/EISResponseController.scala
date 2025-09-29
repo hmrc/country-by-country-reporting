@@ -90,8 +90,8 @@ class EISResponseController @Inject() (
               updatedFileDetails.agentDetails,
               updatedFileDetails.status == FileStatusAccepted,
               updatedFileDetails.reportType,
-              DateTimeFormatUtil.displayFormattedDate(updatedFileDetails.reportingPeriodStartDate),
-              DateTimeFormatUtil.displayFormattedDate(updatedFileDetails.reportingPeriodEndDate),
+              updatedFileDetails.reportingPeriodStartDate.toString,
+              updatedFileDetails.reportingPeriodEndDate.toString,
               updatedFileDetails.reportingEntityName
             )
           case _ =>
