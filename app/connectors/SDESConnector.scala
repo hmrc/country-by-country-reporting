@@ -48,7 +48,7 @@ class SDESConnector @Inject() (
         response.status match {
           case NO_CONTENT => Right(response.status)
           case _ =>
-            logger.warn(s"Received status [${response.status}] from SDES for correlationId [${request.audit.correlationID}]")
+            logger.error(s"Received status [${response.status}] from SDES for correlationId [${request.audit.correlationID}]")
             Left(response.status)
         }
       }

@@ -96,7 +96,7 @@ class EISResponseController @Inject() (
         }
         NoContent
       case _ =>
-        logger.warn("Failed to update the status:mongo error")
+        logger.error("Failed to update the status:mongo error")
         val auditDetails = AuditDetailForEISResponse(request.BREResponse, None)
         auditService.sendAuditEvent(AuditType.eisResponse, Json.toJson(Audit(auditDetails, error = Some("Failed to update the status: mongo error"))))
         InternalServerError
