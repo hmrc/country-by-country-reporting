@@ -48,9 +48,9 @@ object EmailRequest {
       ) ++ cbcId.map("cbcId" -> _)
         ++ tradingName.filter(_.nonEmpty).map("clientTradingName" -> _)
         ++ reportType.map("reportType" -> _)
-        ++ reportingEntityName.map("reportingEntityName" -> _)
-        ++ reportingPeriodStartDate.map("reportingPeriodStartDate" -> _)
-        ++ reportingPeriodEndDate.map("reportingPeriodEndDate" -> _)
+        ++ reportingEntityName.map("orgName" -> _)
+        ++ reportingPeriodStartDate.map("startPeriod" -> _)
+        ++ reportingPeriodEndDate.map("endPeriod" -> _)
     )
   }
 }

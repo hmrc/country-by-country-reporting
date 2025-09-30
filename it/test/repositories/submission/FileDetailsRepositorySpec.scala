@@ -29,7 +29,7 @@ import services.metrics.MetricsService
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
@@ -58,8 +58,8 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
     None,
     Some(AffinityGroup.Organisation),
     None,
-    dateTimeNow,
-    dateTimeNow
+    LocalDate.now(),
+    LocalDate.now()
   )
 
   val agentPrimaryContact: ContactInformation = ContactInformation(
@@ -91,8 +91,8 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
     Some(agentDetails),
     Some(AffinityGroup.Agent),
     None,
-    dateTimeNow,
-    dateTimeNow
+    LocalDate.now(),
+    LocalDate.now()
   )
 
   override def beforeEach(): Unit = {
