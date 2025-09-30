@@ -34,7 +34,7 @@ import services.audit.AuditService
 import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 import scala.xml.NodeSeq
@@ -103,8 +103,8 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
           None,
           None,
           None,
-          LocalDateTime.now(),
-          LocalDateTime.now()
+          LocalDate.now(),
+          LocalDate.now()
         )
 
       when(mockFileDetailsRepository.findByConversationId(any[ConversationId])).thenReturn(Future.successful(Some(fileDetails)))
@@ -178,8 +178,8 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
           None,
           None,
           None,
-          LocalDateTime.now(),
-          LocalDateTime.now()
+          LocalDate.now(),
+          LocalDate.now()
         )
       when(mockFileDetailsRepository.findByConversationId(any[ConversationId])).thenReturn(Future.successful(Some(fileDetails)))
       when(mockAuditService.sendAuditEvent(any[String], any[JsValue])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(Success))
@@ -235,8 +235,8 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
           None,
           None,
           None,
-          LocalDateTime.now(),
-          LocalDateTime.now()
+          LocalDate.now(),
+          LocalDate.now()
         )
       when(mockFileDetailsRepository.findByConversationId(any[ConversationId])).thenReturn(Future.successful(Some(fileDetails)))
       when(mockAuditService.sendAuditEvent(any[String], any[JsValue])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(Success))
@@ -292,8 +292,8 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
           None,
           None,
           None,
-          LocalDateTime.now(),
-          LocalDateTime.now()
+          LocalDate.now(),
+          LocalDate.now()
         )
       when(mockFileDetailsRepository.findByConversationId(any[ConversationId])).thenReturn(Future.successful(Some(fileDetails)))
       when(mockAuditService.sendAuditEvent(any[String], any[JsValue])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(Success))
@@ -349,8 +349,8 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
           None,
           None,
           None,
-          LocalDateTime.now(),
-          LocalDateTime.now()
+          LocalDate.now(),
+          LocalDate.now()
         )
       when(mockFileDetailsRepository.findByConversationId(any[ConversationId])).thenReturn(Future.successful(Some(fileDetails)))
       when(mockAuditService.sendAuditEvent(any[String], any[JsValue])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(Success))

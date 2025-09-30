@@ -19,13 +19,13 @@ package models.submission
 import base.SpecBase
 import play.api.libs.json.{JsResultException, JsString, Json}
 
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 
 class MessageSpecDataSpec extends SpecBase {
 
   "MessageSpecDataSpec" - {
-    val startDate = LocalDateTime.of(2023, 1, 1, 0, 0, 0)
-    val endDate   = LocalDateTime.of(2023, 12, 31, 0, 0, 0)
+    val startDate = LocalDate.of(2023, 1, 1)
+    val endDate   = LocalDate.of(2023, 12, 31)
 
     "must serialize MessageSpec for MessageTypeIndic CBC401 with dates" in {
 
@@ -36,8 +36,8 @@ class MessageSpecDataSpec extends SpecBase {
       "messageRefId":"XDSG111111",
       "messageTypeIndic":"CBC401",
       "reportType":"NEW_INFORMATION",
-      "reportingPeriodStartDate":"2023-01-01T00:00:00",
-      "reportingPeriodEndDate":"2023-12-31T00:00:00",
+      "reportingPeriodStartDate":"2023-01-01",
+      "reportingPeriodEndDate":"2023-12-31",
       "reportingEntityName":"Reporting Entity"
     }""")
 
@@ -49,8 +49,8 @@ class MessageSpecDataSpec extends SpecBase {
       "messageRefId":"XDSG333333",
       "messageTypeIndic":"CBC401",
       "reportType":"NEW_INFORMATION",
-      "reportingPeriodStartDate":"2023-01-01T00:00:00",
-      "reportingPeriodEndDate":"2023-12-31T00:00:00",
+      "reportingPeriodStartDate":"2023-01-01",
+      "reportingPeriodEndDate":"2023-12-31",
       "reportingEntityName":"Reporting Entity"
     }""")
 
@@ -65,8 +65,8 @@ class MessageSpecDataSpec extends SpecBase {
       "messageRefId":"XDSG111111",
       "messageTypeIndic":"CBC402",
       "reportType":"NEW_INFORMATION",
-      "reportingPeriodStartDate":"2023-01-01T00:00:00",
-      "reportingPeriodEndDate":"2023-12-31T00:00:00",
+      "reportingPeriodStartDate":"2023-01-01",
+      "reportingPeriodEndDate":"2023-12-31",
       "reportingEntityName":"Reporting Entity"
     }""")
 
@@ -78,8 +78,8 @@ class MessageSpecDataSpec extends SpecBase {
       "messageRefId":"XDSG333333",
       "messageTypeIndic":"CBC402",
       "reportType":"NEW_INFORMATION",
-      "reportingPeriodStartDate":"2023-01-01T00:00:00",
-      "reportingPeriodEndDate":"2023-12-31T00:00:00",
+      "reportingPeriodStartDate":"2023-01-01",
+      "reportingPeriodEndDate":"2023-12-31",
       "reportingEntityName":"Reporting Entity"
     }""")
 

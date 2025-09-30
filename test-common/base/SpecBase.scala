@@ -20,7 +20,7 @@ import org.mockito.MockitoSugar
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, EitherValues, OptionValues, TryValues}
+import org.scalatest._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
 import play.api.inject.Injector
@@ -29,7 +29,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.{Clock, Instant, LocalDateTime, ZoneId}
+import java.time.{Clock, Instant, LocalDate, ZoneId}
 
 trait SpecBase
     extends AnyFreeSpec
@@ -51,8 +51,8 @@ trait SpecBase
 
   implicit val fixedClock: Clock = Clock.fixed(Instant.now(), ZoneId.of("UTC"))
 
-  val startDate = LocalDateTime.of(2012, 1, 1, 0, 0)
-  val endDate   = LocalDateTime.of(2016, 1, 1, 0, 0)
+  val startDate = LocalDate.of(2012, 1, 1)
+  val endDate   = LocalDate.of(2016, 1, 1)
 
   protected def applicationBuilder(): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()

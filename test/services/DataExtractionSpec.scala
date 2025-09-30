@@ -57,8 +57,8 @@ class DataExtractionSpec extends SpecBase {
             </Entity>
             <ReportingRole>CBC704</ReportingRole>
             <ReportingPeriod>
-              <StartDate>2012-01-01T00:00:00</StartDate>
-              <EndDate>2016-01-01T00:00:00</EndDate>
+              <StartDate>2012-01-01</StartDate>
+              <EndDate>2016-01-01</EndDate>
             </ReportingPeriod>
             {
           if (reportingEntityIndic.nonEmpty) {

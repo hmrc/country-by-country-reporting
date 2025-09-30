@@ -20,7 +20,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.Json
 
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 
 class FileDetailsSpec extends AnyFreeSpec with Matchers {
 
@@ -40,8 +40,8 @@ class FileDetailsSpec extends AnyFreeSpec with Matchers {
         agentDetails = None,
         userType = None,
         fileType = None,
-        reportingPeriodStartDate = LocalDateTime.now(),
-        reportingPeriodEndDate = LocalDateTime.now()
+        reportingPeriodStartDate = LocalDate.now(),
+        reportingPeriodEndDate = LocalDate.now()
       )
 
       val json = Json.toJson(fileDetails)
@@ -62,8 +62,8 @@ class FileDetailsSpec extends AnyFreeSpec with Matchers {
         agentDetails = None,
         userType = None,
         fileType = Some(LargeFile),
-        reportingPeriodStartDate = LocalDateTime.now(),
-        reportingPeriodEndDate = LocalDateTime.now()
+        reportingPeriodStartDate = LocalDate.now(),
+        reportingPeriodEndDate = LocalDate.now()
       )
 
       val expectedMessageLargeFile =

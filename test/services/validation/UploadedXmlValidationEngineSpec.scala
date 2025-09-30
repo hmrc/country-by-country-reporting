@@ -24,7 +24,7 @@ import models.validation._
 import org.mockito.ArgumentMatchers.any
 import services.DataExtraction
 
-import java.time.LocalDateTime
+import java.time.LocalDate
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
@@ -37,7 +37,7 @@ class UploadedXmlValidationEngineSpec extends SpecBase {
   val lineNumber                          = 0
   val noErrors: ListBuffer[SaxParseError] = ListBuffer()
   val messageSpecData: MessageSpecData =
-    MessageSpecData("XBC99999999999", CBC401, NewInformation, LocalDateTime.now, LocalDateTime.now, "Reporting Entity Name")
+    MessageSpecData("XBC99999999999", CBC401, NewInformation, LocalDate.now, LocalDate.now, "Reporting Entity Name")
 
   val addressError1: SaxParseError = SaxParseError(20,
                                                    "cvc-minLength-valid: Value '' with length = '0' is " +

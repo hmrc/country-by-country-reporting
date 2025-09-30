@@ -310,8 +310,8 @@ trait ModelGenerators {
       name                <- nonEmptyString
       submitted           <- arbitrary[LocalDateTime]
       lastUpdated         <- arbitrary[LocalDateTime]
-      reportingStartDate  <- arbitrary[LocalDateTime]
-      reportingEndDate    <- arbitrary[LocalDateTime]
+      reportingStartDate  <- arbitrary[LocalDate]
+      reportingEndDate    <- arbitrary[LocalDate]
     } yield models.submission.FileDetails(
       _id,
       subscriptionId,
@@ -340,8 +340,8 @@ trait ModelGenerators {
       name                <- nonEmptyString
       submitted           <- arbitrary[LocalDateTime]
       lastUpdated         <- arbitrary[LocalDateTime]
-      reportingStartDate  <- arbitrary[LocalDateTime]
-      reportingEndDate    <- arbitrary[LocalDateTime]
+      reportingStartDate  <- arbitrary[LocalDate]
+      reportingEndDate    <- arbitrary[LocalDate]
     } yield models.submission.FileDetails(
       _id,
       subscriptionId,
@@ -371,8 +371,8 @@ trait ModelGenerators {
       name                <- nonEmptyString
       submitted           <- arbitrary[LocalDateTime]
       lastUpdated         <- arbitrary[LocalDateTime]
-      reportingStartDate  <- arbitrary[LocalDateTime]
-      reportingEndDate    <- arbitrary[LocalDateTime]
+      reportingStartDate  <- arbitrary[LocalDate]
+      reportingEndDate    <- arbitrary[LocalDate]
     } yield models.submission.FileDetails(
       _id,
       subscriptionId,
@@ -419,8 +419,8 @@ trait ModelGenerators {
       messageTypeIndic         <- Gen.oneOf(MessageTypeIndic.values)
       reportingEntityName      <- nonEmptyString
       reporterType             <- Gen.oneOf(ReportType.values)
-      reportingPeriodStartDate <- arbitrary[LocalDateTime]
-      reportingPeriodEndDate   <- arbitrary[LocalDateTime]
+      reportingPeriodStartDate <- arbitrary[LocalDate]
+      reportingPeriodEndDate   <- arbitrary[LocalDate]
     } yield MessageSpecData(messageRefId, messageTypeIndic, reporterType, reportingPeriodStartDate, reportingPeriodEndDate, reportingEntityName)
   }
 

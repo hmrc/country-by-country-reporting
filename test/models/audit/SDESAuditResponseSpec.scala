@@ -21,7 +21,7 @@ import models.sdes.SdesCallback
 import models.submission.{Accepted, ConversationId, FileDetails, NewInformation}
 import play.api.libs.json.Json
 
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 
 class SDESAuditResponseSpec extends SpecBase {
 
@@ -67,8 +67,8 @@ class SDESAuditResponseSpec extends SpecBase {
         None,
         None,
         None,
-        LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDate.now(),
+        LocalDate.now()
       )
       val jsonObj = SDESAuditResponse(sdesCallBack, Some(fileDetails))
       auditDetailRequest mustBe jsonObj
@@ -114,8 +114,8 @@ class SDESAuditResponseSpec extends SpecBase {
         None,
         None,
         None,
-        LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDate.now(),
+        LocalDate.now()
       )
       val jsonObj = SDESAuditResponse(sdesCallBack, Some(fileDetails))
       auditDetailRequest mustBe jsonObj
