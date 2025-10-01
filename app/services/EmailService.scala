@@ -24,6 +24,7 @@ import models.submission._
 import play.api.Logging
 import play.api.http.Status._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import utils.DateTimeFormatUtil
 
 import java.time.LocalDateTime
 import javax.inject.{Inject, Singleton}
@@ -204,8 +205,8 @@ class EmailService @Inject() (emailConnector: EmailConnector, emailTemplate: Ema
               tradingName,
               reportType,
               reportingEntityName,
-              reportingPeriodStartDate,
-              reportingPeriodEndDate
+              DateTimeFormatUtil.convertOptionalStringToDisplayDate(reportingPeriodStartDate),
+              DateTimeFormatUtil.convertOptionalStringToDisplayDate(reportingPeriodEndDate)
             )
           )
           .map(Some.apply)
