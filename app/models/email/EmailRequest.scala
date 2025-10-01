@@ -42,7 +42,7 @@ object EmailRequest {
       List(email),
       emailTemplate,
       Map(
-        "dateSubmitted"      -> submissionTime,
+        "dateSubmitted"      -> submissionTime.toLowerCase,
         "messageRefId"       -> messageRefId,
         "contactName"        -> contactName
       ) ++ cbcId.map("cbcId" -> _)

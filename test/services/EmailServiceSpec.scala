@@ -293,7 +293,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
           List(agentPrimaryContact.email),
           appConfig.emailAgentUnsuccessfulTemplate,
           Map(
-            "dateSubmitted"     -> submissionTime,
+            "dateSubmitted"     -> submissionTime.toLowerCase,
             "messageRefId"      -> messageRefId,
             "contactName"       -> agentPrimaryContact.organisationDetails.organisationName,
             "cbcId"             -> subscriptionId,
