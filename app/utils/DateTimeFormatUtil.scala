@@ -18,6 +18,7 @@ package utils
 
 import java.time.format.DateTimeFormatter
 import java.time._
+import scala.util.Try
 
 object DateTimeFormatUtil {
 
@@ -29,10 +30,20 @@ object DateTimeFormatUtil {
 
   def zonedDateTimeNow(implicit clock: Clock): ZonedDateTime = ZonedDateTime.now(clock.withZone(euLondonZoneId))
 
+  val dateInputFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
   def displayFormattedDate(dateTime: LocalDateTime): String =
     s"${dateTime.atZone(euLondonZoneId).format(timeFormatter)} on ${dateTime.atZone(euLondonZoneId).format(dateFormatter).capitalize}"
 
   def formattedDateForAudit(dateTime: LocalDateTime): String =
     auditDateTimeFormatter.withZone(ZoneOffset.UTC).format(dateTime)
 
+  def convertStringToDisplayDate(dateString: String): String =
+    Try {
+      val localDate = LocalDate.parse(dateString, dateInputFormatter)
+      localDate.format(dateFormatter)
+    }.getOrElse(dateString)
+
+  def convertOptionalStringToDisplayDate(optionalDateString: Option[String]): Option[String] =
+    optionalDateString.map(convertStringToDisplayDate)
 }

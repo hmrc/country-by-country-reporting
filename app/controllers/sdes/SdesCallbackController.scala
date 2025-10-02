@@ -89,7 +89,10 @@ class SdesCallbackController @Inject() (
                   fileDetails.messageRefId,
                   fileDetails.agentDetails,
                   isUploadSuccessful = false,
-                  fileDetails.reportType
+                  fileDetails.reportType,
+                  fileDetails.reportingPeriodStartDate.toString,
+                  fileDetails.reportingPeriodEndDate.toString,
+                  fileDetails.reportingEntityName
                 )
                 logger.info(s"Updated status for conversationId: $correlationID to $updatedStatus")
                 Ok

@@ -19,32 +19,71 @@ package models.submission
 import base.SpecBase
 import play.api.libs.json.{JsResultException, JsString, Json}
 
+import java.time.{LocalDate, LocalDateTime}
+
 class MessageSpecDataSpec extends SpecBase {
 
   "MessageSpecDataSpec" - {
-    "must serialize MessageSpec for MessageTypeIndic CBC401" in {
-      val msd = MessageSpecData("XDSG111111", CBC401, "Reporting Entity", NewInformation)
+    val startDate = LocalDate.of(2023, 1, 1)
+    val endDate   = LocalDate.of(2023, 12, 31)
+
+    "must serialize MessageSpec for MessageTypeIndic CBC401 with dates" in {
+
+      val msd = MessageSpecData("XDSG111111", CBC401, NewInformation, startDate, endDate, "Reporting Entity")
+
       val expectedJson =
-        Json.parse("""{"messageRefId":"XDSG111111","messageTypeIndic":"CBC401","reportingEntityName":"Reporting Entity","reportType":"NEW_INFORMATION"}""")
+        Json.parse("""{
+      "messageRefId":"XDSG111111",
+      "messageTypeIndic":"CBC401",
+      "reportType":"NEW_INFORMATION",
+      "reportingPeriodStartDate":"2023-01-01",
+      "reportingPeriodEndDate":"2023-12-31",
+      "reportingEntityName":"Reporting Entity"
+    }""")
+
       Json.toJson(msd) mustBe expectedJson
     }
     "must deserialize MessageSpec for MessageTypeIndic CBC401" in {
       val json =
-        Json.parse("""{"messageRefId":"XDSG333333","messageTypeIndic":"CBC401","reportingEntityName":"Reporting Entity","reportType":"NEW_INFORMATION"}""")
-      val expected = MessageSpecData("XDSG333333", CBC401, "Reporting Entity", NewInformation)
+        Json.parse("""{
+      "messageRefId":"XDSG333333",
+      "messageTypeIndic":"CBC401",
+      "reportType":"NEW_INFORMATION",
+      "reportingPeriodStartDate":"2023-01-01",
+      "reportingPeriodEndDate":"2023-12-31",
+      "reportingEntityName":"Reporting Entity"
+    }""")
+
+      val expected = MessageSpecData("XDSG333333", CBC401, NewInformation, startDate, endDate, "Reporting Entity")
 
       json.as[MessageSpecData] mustEqual expected
     }
     "must serialize MessageSpec for MessageTypeIndic CBC402" in {
-      val msd = MessageSpecData("XDSG111111", CBC402, "Reporting Entity", NewInformation)
+      val msd = MessageSpecData("XDSG111111", CBC402, NewInformation, startDate, endDate, "Reporting Entity")
       val expectedJson =
-        Json.parse("""{"messageRefId":"XDSG111111","messageTypeIndic":"CBC402","reportingEntityName":"Reporting Entity","reportType":"NEW_INFORMATION"}""")
+        Json.parse("""{
+      "messageRefId":"XDSG111111",
+      "messageTypeIndic":"CBC402",
+      "reportType":"NEW_INFORMATION",
+      "reportingPeriodStartDate":"2023-01-01",
+      "reportingPeriodEndDate":"2023-12-31",
+      "reportingEntityName":"Reporting Entity"
+    }""")
+
       Json.toJson(msd) mustBe expectedJson
     }
     "must deserialize MessageSpec for MessageTypeIndic CBC402" in {
       val json =
-        Json.parse("""{"messageRefId":"XDSG333333","messageTypeIndic":"CBC402","reportingEntityName":"Reporting Entity","reportType":"NEW_INFORMATION"}""")
-      val expected = MessageSpecData("XDSG333333", CBC402, "Reporting Entity", NewInformation)
+        Json.parse("""{
+      "messageRefId":"XDSG333333",
+      "messageTypeIndic":"CBC402",
+      "reportType":"NEW_INFORMATION",
+      "reportingPeriodStartDate":"2023-01-01",
+      "reportingPeriodEndDate":"2023-12-31",
+      "reportingEntityName":"Reporting Entity"
+    }""")
+
+      val expected = MessageSpecData("XDSG333333", CBC402, NewInformation, startDate, endDate, "Reporting Entity")
 
       json.as[MessageSpecData] mustEqual expected
     }

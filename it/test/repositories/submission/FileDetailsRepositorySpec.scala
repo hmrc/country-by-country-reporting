@@ -29,7 +29,7 @@ import services.metrics.MetricsService
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
@@ -55,7 +55,11 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
     "file1.xml",
     dateTimeNow,
     dateTimeNow,
-    userType = Some(AffinityGroup.Organisation)
+    None,
+    Some(AffinityGroup.Organisation),
+    None,
+    LocalDate.now(),
+    LocalDate.now()
   )
 
   val agentPrimaryContact: ContactInformation = ContactInformation(
@@ -85,7 +89,10 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
     dateTimeNow,
     dateTimeNow,
     Some(agentDetails),
-    Some(AffinityGroup.Agent)
+    Some(AffinityGroup.Agent),
+    None,
+    LocalDate.now(),
+    LocalDate.now()
   )
 
   override def beforeEach(): Unit = {
@@ -191,6 +198,8 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
                             _,
                             _,
                             _,
+                            _,
+                            _,
                             _
                 )
               ) =>
@@ -221,6 +230,8 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
                             _,
                             _,
                             Some(AffinityGroup.Agent),
+                            _,
+                            _,
                             _
                 )
               ) =>
@@ -254,6 +265,8 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
                             _,
                             None,
                             Some(AffinityGroup.Organisation),
+                            _,
+                            _,
                             _
                 )
               ) =>

@@ -24,7 +24,9 @@ import models.submission._
 import play.api.Logging
 import play.api.http.Status._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import utils.DateTimeFormatUtil
 
+import java.time.LocalDateTime
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -40,11 +42,24 @@ class EmailService @Inject() (emailConnector: EmailConnector, emailTemplate: Ema
                       messageRefId: String,
                       agentDetails: Option[AgentContactDetails],
                       isUploadSuccessful: Boolean,
-                      reportType: ReportType
+                      reportType: ReportType,
+                      reportingPeriodStartDate: String,
+                      reportingPeriodEndDate: String,
+                      reportingEntityName: String
   )(implicit
     hc: HeaderCarrier
   ): Future[Seq[Int]] =
-    sendEmail(subscriptionId, submissionTime, messageRefId, agentDetails, isUploadSuccessful, reportType) map { responses: Seq[EmailResult] =>
+    sendEmail(
+      subscriptionId,
+      submissionTime,
+      messageRefId,
+      agentDetails,
+      isUploadSuccessful,
+      reportType,
+      reportingPeriodStartDate,
+      reportingPeriodEndDate,
+      reportingEntityName
+    ) map { responses: Seq[EmailResult] =>
       responses.map {
         case EmailResult(emailType, Some(resp)) =>
           resp.status match {
@@ -68,31 +83,37 @@ class EmailService @Inject() (emailConnector: EmailConnector, emailTemplate: Ema
                 messageRefId: String,
                 agentDetails: Option[AgentContactDetails],
                 isUploadSuccessful: Boolean,
-                reportType: ReportType
+                reportType: ReportType,
+                reportingPeriodStartDate: String,
+                reportingPeriodEndDate: String,
+                reportingEntityName: String
   )(implicit hc: HeaderCarrier): Future[Seq[EmailResult]] =
     subscriptionService.getContactInformation(subscriptionId).flatMap {
       case Right(responseDetail) =>
-        val emailAddress          = Some(responseDetail.primaryContact.email)
-        val contactName           = Some(responseDetail.primaryContact.organisationDetails.organisationName)
-        val secondaryEmailAddress = responseDetail.secondaryContact.map(_.email)
-        val secondaryName         = responseDetail.secondaryContact.map(_.organisationDetails.organisationName)
-        val agentPrimaryEmail     = agentDetails.map(_.subscriptionDetails.primaryContact.email)
-        val agentPrimaryName      = agentDetails.map(_.subscriptionDetails.primaryContact.organisationDetails.organisationName)
-        val agentSecondaryEmail   = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.email))
-        val agentSecondaryName    = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.organisationDetails.organisationName))
-        val cbcId                 = responseDetail.subscriptionID
-        val tradingName           = responseDetail.tradingName
-        val reportTypeContent     = getReportTypeMessage(reportType)
-
+        val emailAddress                     = Some(responseDetail.primaryContact.email)
+        val contactName                      = Some(responseDetail.primaryContact.organisationDetails.organisationName)
+        val secondaryEmailAddress            = responseDetail.secondaryContact.map(_.email)
+        val secondaryName                    = responseDetail.secondaryContact.map(_.organisationDetails.organisationName)
+        val agentPrimaryEmail                = agentDetails.map(_.subscriptionDetails.primaryContact.email)
+        val agentPrimaryName                 = agentDetails.map(_.subscriptionDetails.primaryContact.organisationDetails.organisationName)
+        val agentSecondaryEmail              = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.email))
+        val agentSecondaryName               = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.organisationDetails.organisationName))
+        val agentTradingName: Option[String] = agentDetails.flatMap(_.subscriptionDetails.tradingName)
+        val cbcId                            = responseDetail.subscriptionID
+        val reportTypeContent                = getReportTypeMessage(reportType)
         lazy val orgEmails: Seq[Future[EmailResult]] = Seq(
-          send(emailAddress,
-               contactName,
-               emailTemplate.getOrganisationTemplate(isUploadSuccessful),
-               submissionTime,
-               messageRefId,
-               None,
-               None,
-               Some(reportTypeContent)
+          send(
+            emailAddress,
+            contactName,
+            emailTemplate.getOrganisationTemplate(isUploadSuccessful),
+            submissionTime,
+            messageRefId,
+            None,
+            None,
+            Some(reportTypeContent),
+            Some(reportingPeriodStartDate),
+            Some(reportingPeriodEndDate),
+            Some(reportingEntityName)
           )
             .map(res => EmailResult("Primary Org", res)),
           send(
@@ -103,7 +124,10 @@ class EmailService @Inject() (emailConnector: EmailConnector, emailTemplate: Ema
             messageRefId,
             None,
             None,
-            Some(reportTypeContent)
+            Some(reportTypeContent),
+            Some(reportingPeriodStartDate),
+            Some(reportingPeriodEndDate),
+            Some(reportingEntityName)
           )
             .map(res => EmailResult("Secondary Org", res))
         )
@@ -116,8 +140,11 @@ class EmailService @Inject() (emailConnector: EmailConnector, emailTemplate: Ema
             submissionTime,
             messageRefId,
             Some(cbcId),
-            tradingName,
-            Some(reportTypeContent)
+            agentTradingName,
+            Some(reportTypeContent),
+            Some(reportingPeriodStartDate),
+            Some(reportingPeriodEndDate),
+            Some(reportingEntityName)
           ).map(res => EmailResult("Primary Agent", res)),
           send(
             agentSecondaryEmail,
@@ -126,11 +153,13 @@ class EmailService @Inject() (emailConnector: EmailConnector, emailTemplate: Ema
             submissionTime,
             messageRefId,
             Some(cbcId),
-            tradingName,
-            Some(reportTypeContent)
+            agentTradingName,
+            Some(reportTypeContent),
+            Some(reportingPeriodStartDate),
+            Some(reportingPeriodEndDate),
+            Some(reportingEntityName)
           ).map(res => EmailResult("Secondary Agent", res))
         )
-
         (agentDetails.isDefined, isUploadSuccessful) match {
           case (false, _) =>
             logger.info("Organisation User: Org emails sent to email service")
@@ -156,14 +185,29 @@ class EmailService @Inject() (emailConnector: EmailConnector, emailTemplate: Ema
                    messageRefId: String,
                    cbcId: Option[String],
                    tradingName: Option[String],
-                   reportType: Option[String]
+                   reportType: Option[String],
+                   reportingPeriodStartDate: Option[String],
+                   reportingPeriodEndDate: Option[String],
+                   reportingEntityName: Option[String]
   )(implicit hc: HeaderCarrier): Future[Option[HttpResponse]] =
     emailAddress
       .filter(EmailAddress.isValid)
       .map { email =>
         emailConnector
           .sendEmail(
-            EmailRequest.fileUploadSubmission(email, contactName, template, submissionTime, messageRefId, cbcId, tradingName, reportType)
+            EmailRequest.fileUploadSubmission(
+              email,
+              contactName,
+              template,
+              submissionTime,
+              messageRefId,
+              cbcId,
+              tradingName,
+              reportType,
+              reportingEntityName,
+              DateTimeFormatUtil.convertOptionalStringToDisplayDate(reportingPeriodStartDate),
+              DateTimeFormatUtil.convertOptionalStringToDisplayDate(reportingPeriodEndDate)
+            )
           )
           .map(Some.apply)
       }

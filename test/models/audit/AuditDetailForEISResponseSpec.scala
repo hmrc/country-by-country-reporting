@@ -24,7 +24,7 @@ import models.xml.RecordErrorCode.MessageTypeIndic
 import models.xml.{BREResponse, FileErrors, GenericStatusMessage, RecordError, ValidationErrors, ValidationStatus}
 import play.api.libs.json.Json
 
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 import scala.xml.XML
 
 class AuditDetailForEISResponseSpec extends SpecBase {
@@ -78,7 +78,10 @@ class AuditDetailForEISResponseSpec extends SpecBase {
         LocalDateTime.now(),
         LocalDateTime.now(),
         None,
-        None
+        None,
+        None,
+        LocalDate.now(),
+        LocalDate.now()
       )
 
       val auditDetail = Json.parse("""
@@ -115,7 +118,10 @@ class AuditDetailForEISResponseSpec extends SpecBase {
         LocalDateTime.now(),
         LocalDateTime.now(),
         None,
-        None
+        None,
+        None,
+        LocalDate.now(),
+        LocalDate.now()
       )
 
       noException should be thrownBy AuditDetailForEISResponse(breResponse = breResponse, fileDetails = Some(fileDetails))
@@ -152,7 +158,10 @@ class AuditDetailForEISResponseSpec extends SpecBase {
         LocalDateTime.now(),
         LocalDateTime.now(),
         None,
-        None
+        None,
+        None,
+        LocalDate.now(),
+        LocalDate.now()
       )
 
       val auditDetail = Json.parse("""
@@ -209,7 +218,10 @@ class AuditDetailForEISResponseSpec extends SpecBase {
         LocalDateTime.now(),
         LocalDateTime.now(),
         None,
-        None
+        None,
+        None,
+        LocalDate.now(),
+        LocalDate.now()
       )
 
       val auditDetail = Json.parse("""
@@ -273,7 +285,10 @@ class AuditDetailForEISResponseSpec extends SpecBase {
         LocalDateTime.now(),
         LocalDateTime.now(),
         None,
-        None
+        None,
+        None,
+        LocalDate.now(),
+        LocalDate.now()
       )
 
       val auditDetail = Json.parse("""

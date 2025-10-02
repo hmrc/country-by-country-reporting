@@ -30,7 +30,10 @@ object EmailRequest {
                            messageRefId: String,
                            cbcId: Option[String],
                            tradingName: Option[String],
-                           reportType: Option[String]
+                           reportType: Option[String],
+                           reportingEntityName: Option[String],
+                           reportingPeriodStartDate: Option[String],
+                           reportingPeriodEndDate: Option[String]
   ): EmailRequest = {
 
     val contactName = name.fold("Registrant")(name => name)
@@ -39,12 +42,15 @@ object EmailRequest {
       List(email),
       emailTemplate,
       Map(
-        "dateSubmitted"      -> submissionTime,
+        "dateSubmitted"      -> submissionTime.toLowerCase,
         "messageRefId"       -> messageRefId,
         "contactName"        -> contactName
       ) ++ cbcId.map("cbcId" -> _)
         ++ tradingName.filter(_.nonEmpty).map("clientTradingName" -> _)
         ++ reportType.map("reportType" -> _)
+        ++ reportingEntityName.map("orgName" -> _)
+        ++ reportingPeriodStartDate.map("startPeriod" -> _)
+        ++ reportingPeriodEndDate.map("endPeriod" -> _)
     )
   }
 }

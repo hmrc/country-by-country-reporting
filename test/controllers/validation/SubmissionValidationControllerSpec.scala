@@ -33,6 +33,7 @@ import play.api.test.{FakeHeaders, FakeRequest}
 import services.audit.AuditService
 import services.validation.UploadedXmlValidationEngine
 
+import java.time.LocalDateTime
 import scala.concurrent.Future
 
 class SubmissionValidationControllerSpec extends SpecBase {
@@ -53,8 +54,10 @@ class SubmissionValidationControllerSpec extends SpecBase {
   private val messageSpecData = MessageSpecData(
     messageRefId = "messageRefId123",
     messageTypeIndic = CBC401,
-    reportingEntityName = "Reporting Entity Name",
-    reportType = TestData
+    reportType = TestData,
+    startDate,
+    endDate,
+    reportingEntityName = "Reporting Entity Name"
   )
 
   override def beforeEach(): Unit = {

@@ -85,7 +85,16 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
         when(mockFileDetailsRepository.findByConversationId(sdesCallback.correlationID)).thenReturn(Future.successful(Some(fileDetails)))
         when(mockFileDetailsRepository.updateStatus(sdesCallback.correlationID.value, updatedStatus)).thenReturn(Future.successful(Some(fileDetails)))
         when(
-          mockEmailService.sendAndLogEmail(any[String], any[String], any[String], any[Option[AgentContactDetails]], any[Boolean], any[ReportType])(
+          mockEmailService.sendAndLogEmail(any[String],
+                                           any[String],
+                                           any[String],
+                                           any[Option[AgentContactDetails]],
+                                           any[Boolean],
+                                           any[ReportType],
+                                           any[String],
+                                           any[String],
+                                           any[String]
+          )(
             any[HeaderCarrier]
           )
         )
@@ -96,12 +105,16 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
         status(result) mustEqual OK
         verify(mockAuditService, times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
         verify(mockFileDetailsRepository).updateStatus(sdesCallback.correlationID.value, updatedStatus)
-        verify(mockEmailService, atLeast(1)).sendAndLogEmail(is(fileDetails.subscriptionId),
-                                                             any[String],
-                                                             is(fileDetails.messageRefId),
-                                                             is(fileDetails.agentDetails),
-                                                             is(false),
-                                                             is(fileDetails.reportType)
+        verify(mockEmailService, atLeast(1)).sendAndLogEmail(
+          is(fileDetails.subscriptionId),
+          any[String],
+          is(fileDetails.messageRefId),
+          is(fileDetails.agentDetails),
+          is(false),
+          is(fileDetails.reportType),
+          any[String],
+          any[String],
+          any[String]
         )(
           any[HeaderCarrier]
         )
@@ -126,7 +139,10 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
                                                            any[String],
                                                            any[Option[AgentContactDetails]],
                                                            any[Boolean],
-                                                           any[ReportType]
+                                                           any[ReportType],
+                                                           any[String],
+                                                           any[String],
+                                                           any[String]
         )(
           any[HeaderCarrier]
         )

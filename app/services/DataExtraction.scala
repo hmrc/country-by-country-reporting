@@ -18,6 +18,7 @@ package services
 
 import models.submission._
 
+import java.time.{LocalDate, LocalDateTime}
 import javax.inject.Inject
 import scala.xml.{Elem, NodeSeq}
 
@@ -29,7 +30,16 @@ class DataExtraction()() {
       messageID           <- (xml \\ "MessageRefId").headOption
       typeIndic           <- (xml \\ "MessageTypeIndic").headOption.map(node => MessageTypeIndic.fromString(node.text))
       reportingEntityName <- (xml \\ "ReportingEntity" \\ "Entity" \\ "Name").headOption
-    } yield MessageSpecData(messageID.text, typeIndic, reportingEntityName.text, getReportType(typeIndic, xml))
+      startDate           <- (xml \\ "ReportingPeriod" \\ "StartDate").headOption
+      endDate             <- (xml \\ "ReportingPeriod" \\ "EndDate").headOption
+    } yield MessageSpecData(
+      messageID.text,
+      typeIndic,
+      getReportType(typeIndic, xml),
+      LocalDate.parse(startDate.text),
+      LocalDate.parse(endDate.text),
+      reportingEntityName.text
+    )
 
   def getReportType(messageTypeIndicator: MessageTypeIndic, xml: Elem): ReportType = {
     val allDocTypeIndicators: Seq[String]  = (xml \\ "DocTypeIndic").map(node => node.text)
