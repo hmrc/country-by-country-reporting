@@ -35,7 +35,7 @@ import services.validation.XMLValidationService
 import services.{AgentSubscriptionService, DataExtraction, SubscriptionService, TransformService}
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.HttpErrorFunctions.is2xx
+import uk.gov.hmrc.http.HttpErrorFunctions.{is2xx, is5xx}
 import utils.DateTimeFormatUtil
 
 import java.time.{Clock, LocalDateTime}
@@ -176,6 +176,9 @@ class SubmissionService @Inject() (
           if (is2xx(statusCode)) {
             Future.successful(Right(submissionMetaData.conversationId))
           } else {
+            if (is5xx(statusCode)) {
+              logger.error(s"Failed to submit file with conversation Id [${conversationId.value}]. Got status: $statusCode")
+            }
             Future.successful(Left(SubmissionServiceError(s"Failed to submit file with conversation Id [${conversationId.value}]. Got status: $statusCode")))
           }
         }

@@ -66,11 +66,11 @@ class EmailService @Inject() (emailConnector: EmailConnector, emailTemplate: Ema
             case NOT_FOUND   => logger.warn(s"$emailType email: The template cannot be found within the email service")
             case BAD_REQUEST => logger.warn(s"$emailType email: Missing parameters from email template: ${resp.body}")
             case ACCEPTED    => logger.info(s"$emailType email: Email queued")
-            case _           => logger.warn(s"$emailType email: Unhandled status received from email service ${resp.status}")
+            case _           => logger.error(s"$emailType email: Unhandled status received from email service ${resp.status}")
           }
           resp.status
         case EmailResult("Failed to get contact information", None) =>
-          logger.warn("Failed to send email due to ReadSubscriptionError")
+          logger.error("Failed to send email due to ReadSubscriptionError")
           INTERNAL_SERVER_ERROR
         case EmailResult(emailType, _) =>
           logger.warn(s"$emailType email: Failed to send email due to invalid or missing email address")

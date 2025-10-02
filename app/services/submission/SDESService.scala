@@ -52,7 +52,7 @@ class SDESService @Inject() (
     sdesConnector.sendFileNotification(fileNotificationRequest).map {
       case Right(_) => Right(conversationId)
       case Left(errorStatus) =>
-        logger.warn(s"Failed to send file with conversation Id [${conversationId.value}] to SDES. Got error status: $errorStatus")
+        logger.error(s"Failed to send file with conversation Id [${conversationId.value}] to SDES. Got error status: $errorStatus")
         Left(SdesSubmissionError(errorStatus))
     }
   }

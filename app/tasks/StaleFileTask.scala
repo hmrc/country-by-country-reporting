@@ -71,7 +71,7 @@ class StaleFileTask @Inject() (actorSystem: ActorSystem,
               case Some(staleRecordCount) => logger.info(s"StaleFileTask: Complete. $staleRecordCount stale files found.")
               case None                   => ()
             }
-          case Failure(e) => logger.warn(s"StaleFileTask: An error occurred: ${e.getMessage}", e)
+          case Failure(e) => logger.error(s"StaleFileTask: An error occurred: ${e.getMessage}", e)
         }
     }
 

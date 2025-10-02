@@ -56,7 +56,7 @@ class AgentSubscriptionController @Inject() (
         logger.warn("AgentReadSubscriptionNotFound ")
         NotFound("AgentReadSubscriptionNotFound")
       case Left(ReadSubscriptionError(value)) =>
-        logger.warn(s"AgentReadSubscriptionError $value")
+        logger.error(s"AgentReadSubscriptionError $value")
         InternalServerError(s"AgentReadSubscriptionError $value")
     }
   }
@@ -75,7 +75,7 @@ class AgentSubscriptionController @Inject() (
         agentSubscriptionService.updateContactInformation(validReq.toUpdateEtmpRequest).map {
           case Right(_) => Ok
           case Left(UpdateSubscriptionError(value)) =>
-            logger.warn(s"Agent updateContactInformation $value")
+            logger.error(s"Agent updateContactInformation $value")
             InternalServerError(s"Agent updateContactInformation $value")
         }
     )

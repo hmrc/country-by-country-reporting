@@ -106,7 +106,7 @@ class AgentSubscriptionService @Inject() (agentSubscriptionConnector: AgentSubsc
         logDownStreamError[BusinessValidationError](errorResponse, action)
         UnprocessableEntity(errorResponseBody)
       case INTERNAL_SERVER_ERROR =>
-        logDownStreamError[BackendSAPSystemError](errorResponse, action)
+        logErrorForDownstreamError[BackendSAPSystemError](errorResponse, action)
         InternalServerError(errorResponseBody)
       case BAD_REQUEST =>
         logDownStreamError[ErrorDetails](errorResponse, action)
@@ -115,7 +115,7 @@ class AgentSubscriptionService @Inject() (agentSubscriptionConnector: AgentSubsc
         logDownStreamError[ErrorDetails](errorResponse, action)
         Forbidden(errorResponseBody)
       case SERVICE_UNAVAILABLE =>
-        logDownStreamError[ErrorDetails](errorResponse, action)
+        logErrorForDownstreamError[ErrorDetails](errorResponse, action)
         ServiceUnavailable(errorResponseBody)
       case CONFLICT =>
         logDownStreamError[ErrorDetails](errorResponse, action)
@@ -136,6 +136,19 @@ class AgentSubscriptionService @Inject() (agentSubscriptionConnector: AgentSubsc
         logger.warn(s"Error with [$action] submission: ${value.detail}")
       case _ =>
         logger.warn(s"Failed to parse [$action] submission json")
+    }
+  }
+
+  private def logErrorForDownstreamError[T <: DownStreamError](
+    response: HttpResponse,
+    action: AgentSubscriptionAction
+  )(implicit reads: Reads[T]): Unit = {
+    val error = Try(Json.parse(response.body).validate[T])
+    error match {
+      case Success(JsSuccess(value, _)) =>
+        logger.error(s"Error with [$action] submission: ${value.detail}")
+      case _ =>
+        logger.error(s"Failed to parse [$action] submission json")
     }
   }
 
