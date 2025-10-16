@@ -297,7 +297,7 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
             "messageRefId"      -> messageRefId,
             "contactName"       -> agentPrimaryContact.organisationDetails.organisationName,
             "cbcId"             -> subscriptionId,
-            "clientTradingName" -> tradingName,
+            "clientTradingName" -> reportingEntityName,
             "reportType"        -> reportTypeContent,
             "startPeriod"       -> reportingStartDate,
             "endPeriod"         -> reportingEndDate,
