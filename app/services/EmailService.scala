@@ -98,7 +98,7 @@ class EmailService @Inject() (emailConnector: EmailConnector, emailTemplate: Ema
         val agentPrimaryName                 = agentDetails.map(_.subscriptionDetails.primaryContact.organisationDetails.organisationName)
         val agentSecondaryEmail              = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.email))
         val agentSecondaryName               = agentDetails.flatMap(_.subscriptionDetails.secondaryContact.map(_.organisationDetails.organisationName))
-        val agentTradingName: Option[String] = agentDetails.flatMap(_.subscriptionDetails.tradingName)
+        val agentTradingName: Option[String] = Some(reportingEntityName)
         val cbcId                            = responseDetail.subscriptionID
         val reportTypeContent                = getReportTypeMessage(reportType)
         lazy val orgEmails: Seq[Future[EmailResult]] = Seq(
