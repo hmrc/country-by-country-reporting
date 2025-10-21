@@ -26,7 +26,6 @@ import play.api.http.Status._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import utils.DateTimeFormatUtil
 
-import java.time.LocalDateTime
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 

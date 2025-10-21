@@ -163,7 +163,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
       status(result) mustEqual FORBIDDEN
     }
 
-    "must not send an email when on the fast journey and file upload is Rejected" in {
+    "must send an email when on the fast journey and file upload is Rejected" in {
       val fileDetails =
         FileDetails(
           ConversationId("conversationId123456"),
@@ -207,7 +207,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
       val result = route(application, request).value
 
       status(result) mustEqual NO_CONTENT
-      verify(mockEmailService, times(0)).sendAndLogEmail(any[String],
+      verify(mockEmailService, times(1)).sendAndLogEmail(any[String],
                                                          any[String],
                                                          any[String],
                                                          any[Option[AgentContactDetails]],
