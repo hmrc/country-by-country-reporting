@@ -18,7 +18,7 @@ package services
 
 import models.submission._
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDate
 import javax.inject.Inject
 import scala.xml.{Elem, NodeSeq}
 
