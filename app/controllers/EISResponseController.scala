@@ -79,8 +79,10 @@ class EISResponseController @Inject() (
 
     fileDetailsRepository.updateStatus(conversationId, fileStatus) map {
       case Some(updatedFileDetails) =>
-        updatedFileDetails.status match {
-          case FileStatusAccepted | Rejected(_) =>
+        val fastJourney = updatedFileDetails.lastUpdated.isBefore(updatedFileDetails.submitted.plusSeconds(appConfig.eisResponseWaitTime))
+
+        (fastJourney, updatedFileDetails.status) match {
+          case (_, FileStatusAccepted) | (false, Rejected(_)) =>
             emailService.sendAndLogEmail(
               updatedFileDetails.subscriptionId,
               DateTimeFormatUtil.displayFormattedDate(updatedFileDetails.submitted),
