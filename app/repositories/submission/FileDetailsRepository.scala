@@ -17,6 +17,7 @@
 package repositories.submission
 
 import config.AppConfig
+import controllers.dateTimeNow
 import models.submission.{ConversationId, FileDetails, FileStatus, Pending}
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.Filters._
@@ -27,7 +28,7 @@ import services.metrics.MetricsService
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
-import java.time.LocalDateTime
+import java.time.Clock
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,7 +38,7 @@ class FileDetailsRepository @Inject() (
   val mongo: MongoComponent,
   appConfig: AppConfig,
   metricsService: MetricsService
-)(implicit ec: ExecutionContext)
+)(implicit ec: ExecutionContext, clock: Clock)
     extends PlayMongoRepository[FileDetails](
       mongoComponent = mongo,
       collectionName = "file-details",
@@ -71,7 +72,7 @@ class FileDetailsRepository @Inject() (
     val filter: Bson = equal("_id", conversationId)
     val modifier = Updates.combine(
       set("status", Codecs.toBson(newStatus)),
-      set("lastUpdated", LocalDateTime.now)
+      set("lastUpdated", dateTimeNow)
     )
     val options: FindOneAndUpdateOptions =
       FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER)
@@ -119,7 +120,7 @@ class FileDetailsRepository @Inject() (
   def findStaleSubmissions(): Future[Seq[FileDetails]] = {
     val filter: Bson = and(
       equal("status", Codecs.toBson(Pending.asInstanceOf[FileStatus])),
-      lt("submitted", LocalDateTime.now().minusSeconds(appConfig.staleTaskAlertAfter.toSeconds))
+      lt("submitted", dateTimeNow.minusSeconds(appConfig.staleTaskAlertAfter.toSeconds))
     )
 
     collection.find(filter).toFuture()
