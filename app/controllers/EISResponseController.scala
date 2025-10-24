@@ -95,7 +95,9 @@ class EISResponseController @Inject() (
               updatedFileDetails.reportingEntityName
             )
           case _ =>
-            logger.warn("Upload file status is rejected on fast journey. No email has been sent")
+            logger.warn(
+              s"Upload file status is rejected on fast journey. No email has been sent: lastUpdated: ${updatedFileDetails.lastUpdated}, submitted: ${updatedFileDetails.submitted}"
+            )
         }
         NoContent
       case _ =>
