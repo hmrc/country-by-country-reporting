@@ -73,9 +73,9 @@ object AgentRequestDetailForUpdate {
       (__ \ "IDNumber").write[String] and
       (__ \ "tradingName").writeNullable[String] and
       (__ \ "isGBUser").write[Boolean] and
-      (__ \ "primaryContact").write[Seq[AgentContactInformation]] and
-      (__ \ "secondaryContact").writeNullable[Seq[AgentContactInformation]]
-  )(r => (r.IDType, r.IDNumber, r.tradingName, r.isGBUser, Seq(r.primaryContact), r.secondaryContact.map(Seq(_))))
+      (__ \ "primaryContact").write[AgentContactInformation] and
+      (__ \ "secondaryContact").writeNullable[AgentContactInformation]
+  )(r => (r.IDType, r.IDNumber, r.tradingName, r.isGBUser, r.primaryContact, r.secondaryContact))
 
   implicit class UpdateAgentSubscriptionRequestExtension(val req: AgentRequestDetailForUpdate) extends AnyVal {
 

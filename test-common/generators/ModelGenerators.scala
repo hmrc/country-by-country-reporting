@@ -22,7 +22,16 @@ import models.sdes.NotificationType.{FileProcessingFailure, NotificationType}
 import models.sdes._
 import models.submission._
 import models.subscription._
-import models.upscan.UploadId
+import models.upscan.{Reference, UploadId, UpscanInitiateResponse}
+import models.validation.{
+  GenericError,
+  InvalidXmlError,
+  Message,
+  SubmissionValidationFailure,
+  SubmissionValidationResult,
+  SubmissionValidationSuccess,
+  ValidationErrors
+}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 
@@ -496,5 +505,34 @@ trait ModelGenerators {
       correlationID <- arbitrary[ConversationId]
       dateTime      <- Gen.option(zonedDateTime.arbitrary)
     } yield SdesCallback(notification, filename, algorithm, checksum, correlationID, dateTime)
+  }
+
+  implicit val arbitraryUpscanInitiateResponse: Arbitrary[UpscanInitiateResponse] = Arbitrary {
+    for {
+      reference  <- nonEmptyString
+      postTarget <- nonEmptyString
+    } yield UpscanInitiateResponse(Reference(reference), postTarget, Map.empty)
+  }
+
+  implicit val arbitrarySubmissionValidationSuccess: Arbitrary[SubmissionValidationSuccess] = Arbitrary {
+    for {
+      messageSpecData <- arbitrary[MessageSpecData]
+    } yield SubmissionValidationSuccess(messageSpecData)
+  }
+
+  implicit val arbitrarySubmissionValidationFailure: Arbitrary[SubmissionValidationFailure] = Arbitrary {
+    for {
+      errorMessage <- nonEmptyString
+    } yield SubmissionValidationFailure(ValidationErrors(Seq(GenericError(1, Message(errorMessage)))))
+  }
+
+  implicit val arbitraryInvalidXmlError: Arbitrary[InvalidXmlError] = Arbitrary {
+    for {
+      errorMessage <- nonEmptyString
+    } yield InvalidXmlError(errorMessage)
+  }
+
+  implicit val arbitrarySubmissionValidationResult: Arbitrary[SubmissionValidationResult] = Arbitrary {
+    Gen.oneOf(arbitrary[SubmissionValidationSuccess], arbitrary[SubmissionValidationFailure], arbitrary[InvalidXmlError])
   }
 }
