@@ -60,6 +60,16 @@ class XmlValidationServiceSpec extends SpecBase {
       result.isLeft mustBe false
     }
 
+    "must correctly validate a submission with incorrect country code" in {
+      val service = app.injector.instanceOf[XMLValidationService]
+
+      val validSubmission = XML.loadFile("test/resources/cbc/fileUpload/invalidcbc_countrycode.xml")
+
+      val result = service.validate(validSubmission, xsdPath)
+
+      result.isLeft mustBe true
+    }
+
     "must correctly validate a submission with whitespace" in {
       val service = app.injector.instanceOf[XMLValidationService]
 
