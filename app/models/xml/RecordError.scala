@@ -16,19 +16,22 @@
 
 package models.xml
 
-import cats.implicits.catsSyntaxTuple3Semigroupal
-import com.lucidchart.open.xtract.{__, XmlReader}
 import play.api.libs.json.{Json, OFormat}
+
+import scala.xml.NodeSeq
 
 case class RecordError(code: RecordErrorCode, details: Option[String], docRefIDInError: Option[Seq[String]])
 
 object RecordError {
 
-  implicit val xmlReader: XmlReader[RecordError] = (
-    (__ \ "Code").read[RecordErrorCode],
-    (__ \ "Details").read[String].optional,
-    (__ \ "DocRefIDInError").read(strictReadOptionSeq[String])
-  ).mapN(apply)
+  given XmlReads[RecordError] with
+    def read(xml: NodeSeq): RecordError =
+      val code            = fromXml[RecordErrorCode](xml \# "Code")
+      val detailsText     = xml \# "Details"
+      val details         = Option.when(detailsText.nonEmpty)(detailsText.text.trim)
+      val docRefIDs       = (xml \# "DocRefIDInError").map(_.text.trim).filter(_.nonEmpty)
+      val docRefIDInError = if docRefIDs.nonEmpty then Some(docRefIDs) else None
+      RecordError(code, details, docRefIDInError)
 
-  implicit val format: OFormat[RecordError] = Json.format[RecordError]
+  given format: OFormat[RecordError] = Json.format[RecordError]
 }

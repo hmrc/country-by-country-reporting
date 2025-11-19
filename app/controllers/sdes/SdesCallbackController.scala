@@ -44,7 +44,7 @@ class SdesCallbackController @Inject() (
     with Logging {
 
   val callback: Action[JsValue] = Action.async(parse.json) { implicit request =>
-    withJsonBody[SdesCallback] { sdesCallback: SdesCallback =>
+    withJsonBody[SdesCallback] { (sdesCallback: SdesCallback) =>
       logger.info(
         s"SDESCallbackController: Received SDES ${sdesCallback.notification} callback for file: ${sdesCallback.filename} (${sdesCallback.correlationID})"
       )

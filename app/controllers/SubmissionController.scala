@@ -40,7 +40,7 @@ class SubmissionController @Inject() (
 
   def submitDisclosure: Action[JsValue] = authenticate.async(parse.json) { implicit request =>
     implicit val fileReferenceId: String =
-      request.headers.get("x-file-reference-id").getOrElse("FileReferenceId header not found") //this id originates from upscan
+      request.headers.get("x-file-reference-id").getOrElse("FileReferenceId header not found") // this id originates from upscan
     request.body
       .validate[SubmissionDetails]
       .fold(

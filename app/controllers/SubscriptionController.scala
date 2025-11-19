@@ -62,7 +62,6 @@ class SubscriptionController @Inject() (
           case Left(UpdateSubscriptionError(value)) =>
             logger.warn(s"UpdateSubscriptionError $value")
             InternalServerError(s"UpdateSubscriptionError $value")
-          case _ => InternalServerError("Unexpected error")
         }
     )
 

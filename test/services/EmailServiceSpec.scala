@@ -40,7 +40,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyChecks with BeforeAndAfterEach {
 
-  override def beforeEach: Unit =
+  override def beforeEach(): Unit =
     reset(
       mockEmailConnector,
       mockSubscriptionService

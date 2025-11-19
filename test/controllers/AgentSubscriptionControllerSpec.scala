@@ -123,7 +123,7 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
         val request =
           FakeRequest(
             POST,
-            routes.AgentSubscriptionController.createSubscription.url
+            routes.AgentSubscriptionController.createSubscription().url
           )
             .withJsonBody(Json.parse("""{"value": "field"}"""))
 
@@ -151,7 +151,7 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
           val request =
             FakeRequest(
               POST,
-              routes.AgentSubscriptionController.createSubscription.url
+              routes.AgentSubscriptionController.createSubscription().url
             )
               .withJsonBody(Json.toJson(subscriptionForCBCRequest))
 
@@ -180,7 +180,7 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
           val request =
             FakeRequest(
               POST,
-              routes.AgentSubscriptionController.createSubscription.url
+              routes.AgentSubscriptionController.createSubscription().url
             )
               .withJsonBody(Json.toJson(subscriptionForCBCRequest))
 
@@ -209,7 +209,7 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
           val request =
             FakeRequest(
               POST,
-              routes.AgentSubscriptionController.createSubscription.url
+              routes.AgentSubscriptionController.createSubscription().url
             )
               .withJsonBody(Json.toJson(subscriptionForCBCRequest))
 
@@ -238,7 +238,7 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
           val request =
             FakeRequest(
               POST,
-              routes.AgentSubscriptionController.createSubscription.url
+              routes.AgentSubscriptionController.createSubscription().url
             )
               .withJsonBody(Json.toJson(subscriptionForCBCRequest))
 
@@ -277,7 +277,7 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
           val request =
             FakeRequest(
               POST,
-              routes.AgentSubscriptionController.createSubscription.url
+              routes.AgentSubscriptionController.createSubscription().url
             )
               .withJsonBody(Json.toJson(subscriptionForCBCRequest))
 
@@ -306,7 +306,7 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
           val request =
             FakeRequest(
               POST,
-              routes.AgentSubscriptionController.createSubscription.url
+              routes.AgentSubscriptionController.createSubscription().url
             )
               .withJsonBody(Json.toJson(subscriptionForCBCRequest))
 
@@ -335,7 +335,7 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
           val request =
             FakeRequest(
               POST,
-              routes.AgentSubscriptionController.createSubscription.url
+              routes.AgentSubscriptionController.createSubscription().url
             )
               .withJsonBody(Json.toJson(subscriptionForCBCRequest))
 
@@ -351,7 +351,7 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
         when(mockAgentSubscriptionService.getContactInformation(any[String])(any[HeaderCarrier], any[ExecutionContext]))
           .thenReturn(Future.successful(Right(responseDetail.as[AgentResponseDetail])))
 
-        val request = FakeRequest(POST, routes.AgentSubscriptionController.readSubscription.url)
+        val request = FakeRequest(POST, routes.AgentSubscriptionController.readSubscription().url)
 
         val result = route(application, request).value
         status(result) mustEqual OK
@@ -365,7 +365,7 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
         val request =
           FakeRequest(
             POST,
-            routes.AgentSubscriptionController.readSubscription.url
+            routes.AgentSubscriptionController.readSubscription().url
           )
 
         val result = route(application, request).value
@@ -383,7 +383,7 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
         val request =
           FakeRequest(
             POST,
-            routes.AgentSubscriptionController.updateSubscription.url
+            routes.AgentSubscriptionController.updateSubscription().url
           ).withJsonBody(requestDetailJson)
 
         val result = route(application, request).value
@@ -398,7 +398,7 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
         val request =
           FakeRequest(
             POST,
-            routes.AgentSubscriptionController.updateSubscription.url
+            routes.AgentSubscriptionController.updateSubscription().url
           ).withJsonBody(requestDetailJson)
 
         val result = route(application, request).value

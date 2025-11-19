@@ -16,18 +16,19 @@
 
 package models.xml
 
-import cats.implicits._
-import com.lucidchart.open.xtract.{__, XmlReader}
 import play.api.libs.json.{Json, OFormat}
+
+import scala.xml.NodeSeq
 
 case class ValidationErrors(fileError: Option[Seq[FileErrors]], recordError: Option[Seq[RecordError]])
 
 object ValidationErrors {
 
-  implicit val xmlReader: XmlReader[ValidationErrors] = (
-    (__ \ "FileError").read(strictReadOptionSeq[FileErrors]),
-    (__ \ "RecordError").read(strictReadOptionSeq[RecordError])
-  ).mapN(apply)
+  given XmlReads[ValidationErrors] with
+    def read(xml: NodeSeq): ValidationErrors =
+      val fileError   = fromXml[Option[Seq[FileErrors]]](xml \# "FileError")
+      val recordError = fromXml[Option[Seq[RecordError]]](xml \# "RecordError")
+      ValidationErrors(fileError, recordError)
 
   implicit val format: OFormat[ValidationErrors] = Json.format[ValidationErrors]
 }

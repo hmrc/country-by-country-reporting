@@ -17,7 +17,6 @@
 package controllers.auth
 
 import com.google.inject.ImplementedBy
-import config.AppConfig
 import play.api.http.Status.UNAUTHORIZED
 import play.api.mvc.Results.Status
 import play.api.mvc._
@@ -33,8 +32,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class AgentOnlyAuthActionImpl @Inject() (
   override val authConnector: AuthConnector,
-  val parser: BodyParsers.Default,
-  config: AppConfig
+  val parser: BodyParsers.Default
 )(implicit val executionContext: ExecutionContext)
     extends AgentOnlyAuthAction
     with AuthorisedFunctions {

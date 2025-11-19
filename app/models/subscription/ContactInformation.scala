@@ -16,7 +16,6 @@
 
 package models.subscription
 
-import play.api.libs.functional.syntax.unlift
 import play.api.libs.json._
 
 case class OrganisationDetails(organisationName: String)
@@ -29,7 +28,7 @@ object OrganisationDetails {
   }
 
   implicit val writes: Writes[OrganisationDetails] =
-    (__ \ "organisation" \ "organisationName").write[String] contramap unlift(OrganisationDetails.unapply)
+    (__ \ "organisation" \ "organisationName").write[String] contramap (_.organisationName)
 
   def convertTo(contactName: Option[String]): Option[OrganisationDetails] =
     contactName.map(OrganisationDetails(_))
@@ -56,6 +55,6 @@ object ContactInformation {
         (__ \ "email").write[String] and
         (__ \ "phone").writeNullable[String] and
         (__ \ "mobile").writeNullable[String]
-    )(unlift(ContactInformation.unapply))
+    )(d => (d.organisationDetails, d.email, d.phone, d.mobile))
   }
 }

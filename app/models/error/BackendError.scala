@@ -16,7 +16,7 @@
 
 package models.error
 
-import julienrf.json.derived
+import play.api.libs.json._
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.auth.core.AffinityGroup
 
@@ -27,5 +27,5 @@ final case class RepositoryError(override val detail: String) extends BackendErr
 final case class SubmissionServiceError(override val detail: String, userType: Option[AffinityGroup] = None) extends BackendError(detail = detail)
 
 object SubmissionServiceError {
-  implicit val format: OFormat[SubmissionServiceError] = derived.oformat()
+  implicit val format: OFormat[SubmissionServiceError] = Json.format
 }

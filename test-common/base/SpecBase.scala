@@ -16,11 +16,11 @@
 
 package base
 
-import org.mockito.MockitoSugar
+import org.scalatest.*
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import org.scalatest._
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
 import play.api.inject.Injector
@@ -42,6 +42,8 @@ trait SpecBase
     with MockitoSugar
     with BeforeAndAfterEach
     with BeforeAndAfterAll {
+
+  export org.mockito.Mockito.{atLeast, never, reset, timeout, times, verify, verifyNoInteractions, when}
 
   def injector: Injector = app.injector
 

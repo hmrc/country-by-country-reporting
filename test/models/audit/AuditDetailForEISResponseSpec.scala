@@ -17,11 +17,10 @@
 package models.audit
 
 import base.SpecBase
-import com.lucidchart.open.xtract.XmlReader
 import models.submission.{Accepted, ConversationId, FileDetails, NewInformation}
 import models.xml.FileErrorCode.FailedSchemaValidation
 import models.xml.RecordErrorCode.MessageTypeIndic
-import models.xml.{BREResponse, FileErrors, GenericStatusMessage, RecordError, ValidationErrors, ValidationStatus}
+import models.xml.{fromXml, BREResponse, FileErrors, GenericStatusMessage, RecordError, ValidationErrors, ValidationStatus}
 import play.api.libs.json.Json
 
 import java.time.{LocalDate, LocalDateTime}
@@ -101,9 +100,9 @@ class AuditDetailForEISResponseSpec extends SpecBase {
 
     "marshal with rejected and all errors" in {
 
-      val validationErrorsXML                = XML.loadFile("test/resources/cbc/fileUpload/fileErrors.xml")
-      val validationErrors: ValidationErrors = XmlReader.of[ValidationErrors].read(validationErrorsXML).getOrElse(ValidationErrors(None, None))
-      val ganericStatusMessage               = GenericStatusMessage(validationErrors, ValidationStatus.rejected)
+      val validationErrorsXML  = XML.loadFile("test/resources/cbc/fileUpload/fileErrors.xml")
+      val validationErrors     = fromXml[ValidationErrors](validationErrorsXML)
+      val ganericStatusMessage = GenericStatusMessage(validationErrors, ValidationStatus.rejected)
 
       val breResponse = BREResponse("CBC", "conv-789", ganericStatusMessage)
 

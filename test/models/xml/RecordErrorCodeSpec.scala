@@ -17,7 +17,6 @@
 package models.xml
 
 import base.SpecBase
-import com.lucidchart.open.xtract.{ParseFailure, ParseSuccess}
 import models.xml.RecordErrorCode.UnknownRecordErrorCode
 
 class RecordErrorCodeSpec extends SpecBase {
@@ -26,18 +25,18 @@ class RecordErrorCodeSpec extends SpecBase {
     "read errorCode" in {
       for (errorCode <- RecordErrorCode.values) {
         val xml = <Code>{errorCode.code}</Code>
-        RecordErrorCode.xmlReads.read(xml) mustBe ParseSuccess(errorCode)
+        fromXml[RecordErrorCode](xml) mustBe errorCode
       }
     }
 
     "read unknown errorCode" in {
       val xml = <Code>{50000}</Code>
-      RecordErrorCode.xmlReads.read(xml) mustBe ParseSuccess(UnknownRecordErrorCode("50000"))
+      fromXml[RecordErrorCode](xml) mustBe UnknownRecordErrorCode("50000")
     }
 
     "read CBC Error Codes" in {
       val xml = <Code>CBC Error Code 39a</Code>
-      RecordErrorCode.xmlReads.read(xml) mustBe ParseSuccess(UnknownRecordErrorCode("CBC Error Code 39a"))
+      fromXml[RecordErrorCode](xml) mustBe UnknownRecordErrorCode("CBC Error Code 39a")
     }
   }
 }

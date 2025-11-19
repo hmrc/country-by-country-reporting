@@ -17,7 +17,6 @@
 package models.xml
 
 import base.SpecBase
-import com.lucidchart.open.xtract.{ParseFailure, ParseSuccess, XmlReader}
 import models.xml.FileErrorCode.MessageRefIDHasAlreadyBeenUsed
 import models.xml.RecordErrorCode.MessageTypeIndic
 import play.api.libs.json.{JsValue, Json}
@@ -35,11 +34,11 @@ class GenericStatusMessageSpec extends SpecBase {
         </gsm:ValidationResult>
       </gsm:GenericStatusMessage>
 
-      val result = XmlReader.of[GenericStatusMessage].read(xml)
+      val result = fromXml[GenericStatusMessage](xml)
 
-      result mustBe ParseSuccess(GenericStatusMessage(ValidationErrors(None, None), ValidationStatus.accepted))
-
-      Json.toJson(result.toOption.get) mustBe Json.parse("""{"validationErrors":{},"status":"Accepted"}""")
+      result mustBe GenericStatusMessage(ValidationErrors(None, None), ValidationStatus.accepted)
+//
+      Json.toJson(result) mustBe Json.parse("""{"validationErrors":{},"status":"Accepted"}""")
 
     }
 
@@ -61,23 +60,22 @@ class GenericStatusMessageSpec extends SpecBase {
         </gsm:ValidationResult>
       </gsm:GenericStatusMessage>
 
-      val result = XmlReader.of[GenericStatusMessage].read(xml)
-      result mustBe ParseSuccess(
-        GenericStatusMessage(
-          ValidationErrors(
-            Some(List(FileErrors(MessageRefIDHasAlreadyBeenUsed, Some("Duplicate message ref ID")))),
-            Some(
-              List(
-                RecordError(
-                  MessageTypeIndic,
-                  Some("A message can contain either new records (OECD1) or corrections/deletions (OECD2 and OECD3), but cannot contain a mixture of both"),
-                  Some(List("asjdhjjhjssjhdjshdAJGSJJS"))
-                )
+      val result = fromXml[GenericStatusMessage](xml)
+
+      result mustBe GenericStatusMessage(
+        ValidationErrors(
+          Some(List(FileErrors(MessageRefIDHasAlreadyBeenUsed, Some("Duplicate message ref ID")))),
+          Some(
+            List(
+              RecordError(
+                MessageTypeIndic,
+                Some("A message can contain either new records (OECD1) or corrections/deletions (OECD2 and OECD3), but cannot contain a mixture of both"),
+                Some(List("asjdhjjhjssjhdjshdAJGSJJS"))
               )
             )
-          ),
-          ValidationStatus.rejected
-        )
+          )
+        ),
+        ValidationStatus.rejected
       )
 
       val expectedJson: JsValue = Json.parse("""
@@ -85,15 +83,16 @@ class GenericStatusMessageSpec extends SpecBase {
                                                |{"fileError":[{"code":"50009","details":"Duplicate message ref ID"}],
                                                |"recordError":[{"code":"80010","details":"A message can contain either new records (OECD1) or corrections/deletions (OECD2 and OECD3), but cannot contain a mixture of both","docRefIDInError":["asjdhjjhjssjhdjshdAJGSJJS"]}]},
                                                |"status":"Rejected"}""".stripMargin)
-
-      Json.toJson(result.toOption.get) mustBe expectedJson
+      Json.toJson(result) mustBe expectedJson
 
     }
 
     "must fail for an invalid xml" in {
       val xml: Elem = <test>random XML</test>
 
-      XmlReader.of[GenericStatusMessage].read(xml) mustBe an[ParseFailure]
+      assertThrows[RuntimeException] {
+        fromXml[GenericStatusMessage](xml)
+      }
     }
   }
 }

@@ -36,17 +36,18 @@ object AuditDetailForFileSubmission {
   implicit val format: OFormat[AuditDetailForFileSubmission] = Json.format[AuditDetailForFileSubmission]
 
   def apply(sumbmissionDetails: SubmissionDetails, fileReferenceId: String, fileStatus: FileStatus, submissionTime: String): AuditDetailForFileSubmission =
-    new AuditDetailForFileSubmission(conversationId = sumbmissionDetails.uploadId.value,
-                                     subscriptionId = sumbmissionDetails.enrolmentId,
-                                     fileReferenceId = fileReferenceId,
-                                     messageRefId = sumbmissionDetails.messageSpecData.messageRefId,
-                                     fileSize = sumbmissionDetails.fileSize,
-                                     reportingEntityName = sumbmissionDetails.messageSpecData.reportingEntityName,
-                                     reportType = sumbmissionDetails.messageSpecData.reportType,
-                                     status = fileStatus.toString,
-                                     fileName = sumbmissionDetails.fileName,
-                                     submittedDatetime = submissionTime,
-                                     fileType = "XML"
+    new AuditDetailForFileSubmission(
+      conversationId = sumbmissionDetails.uploadId.value,
+      subscriptionId = sumbmissionDetails.enrolmentId,
+      fileReferenceId = fileReferenceId,
+      messageRefId = sumbmissionDetails.messageSpecData.messageRefId,
+      fileSize = sumbmissionDetails.fileSize,
+      reportingEntityName = sumbmissionDetails.messageSpecData.reportingEntityName,
+      reportType = sumbmissionDetails.messageSpecData.reportType,
+      status = fileStatus.toString,
+      fileName = sumbmissionDetails.fileName,
+      submittedDatetime = submissionTime,
+      fileType = "XML"
     )
 
 }

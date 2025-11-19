@@ -60,23 +60,21 @@ class DataExtractionSpec extends SpecBase {
               <StartDate>2012-01-01</StartDate>
               <EndDate>2016-01-01</EndDate>
             </ReportingPeriod>
-            {
-          if (reportingEntityIndic.nonEmpty) {
-            <DocSpec>
-                <urn1:DocTypeIndic>{reportingEntityIndic.get}</urn1:DocTypeIndic>
-              </DocSpec>
-          }
+          {
+          if reportingEntityIndic.nonEmpty then Seq(<DocSpec>
+              <urn1:DocTypeIndic>{reportingEntityIndic.get}</urn1:DocTypeIndic>
+            </DocSpec>)
+          else Seq.empty
         }
           </ReportingEntity>
           {
           cbcReportDocTypeIndic.map(cbcReportIndic =>
             <CbcReports>
               {
-              if (cbcReportIndic.nonEmpty) {
-                <DocSpec>
+              if cbcReportIndic.nonEmpty then Seq(<DocSpec>
                   <urn1:DocTypeIndic>{cbcReportIndic.get}</urn1:DocTypeIndic>
-                </DocSpec>
-              }
+                </DocSpec>)
+              else Seq.empty
             }
             </CbcReports>
           )
@@ -85,11 +83,10 @@ class DataExtractionSpec extends SpecBase {
           additionalInfoDocTypeIndic.map(additionalInfoIndic =>
             <AdditionalInfo>
               {
-              if (additionalInfoIndic.nonEmpty) {
-                <DocSpec>
+              if additionalInfoIndic.nonEmpty then Seq(<DocSpec>
                   <urn1:DocTypeIndic>{additionalInfoIndic.get}</urn1:DocTypeIndic>
-                </DocSpec>
-              }
+                </DocSpec>)
+              else Seq.empty
             }
             </AdditionalInfo>
           )

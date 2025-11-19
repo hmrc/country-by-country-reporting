@@ -67,7 +67,7 @@ class SubmissionService @Inject() (
     (for {
       orgContactDetails        <- EitherT(subscriptionService.getContactInformation(submissionDetails.enrolmentId))
       maybeAgentContactDetails <- EitherT(getAgentContactDetails())
-      _                        <- EitherT(sdesService.sendFileNotification(submissionDetails, orgContactDetails, conversationId))
+      _                        <- EitherT(sdesService.sendFileNotification(submissionDetails, orgContactDetails, conversationId)) // TODO: Send large file HERE
       reportType = submissionDetails.messageSpecData.reportType
       fileDetails = createFilePendingDetails(conversationId,
                                              submissionDetails,
@@ -171,7 +171,7 @@ class SubmissionService @Inject() (
           Left(SubmissionServiceError(s"Xml parse error file with conversation Id [${conversationId.value}]: ${parseErrors.mkString(", ")}"))
         )
       case Right(_) =>
-        submissionConnector.submitDisclosure(submissionXml, submissionMetaData.conversationId).flatMap { httpResponse =>
+        submissionConnector.submitDisclosure(submissionXml, submissionMetaData.conversationId).flatMap { httpResponse => // TODO: Send normal file HERE
           val statusCode = httpResponse.status
           if (is2xx(statusCode)) {
             Future.successful(Right(submissionMetaData.conversationId))

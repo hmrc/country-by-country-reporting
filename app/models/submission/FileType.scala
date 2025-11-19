@@ -16,8 +16,7 @@
 
 package models.submission
 
-import julienrf.json.derived
-import play.api.libs.json.OFormat
+import play.api.libs.json.*
 
 sealed trait FileType
 
@@ -34,5 +33,15 @@ object FileType {
     case _        => throw new NoSuchElementException
   }
 
-  implicit val format: OFormat[FileType] = derived.oformat[FileType]()
+  given Format[FileType] = Format(
+    Reads {
+      case obj: JsObject if obj.keys == Set("NormalFile") => JsSuccess(NormalFile)
+      case obj: JsObject if obj.keys == Set("LargeFile")  => JsSuccess(LargeFile)
+      case _                                              => JsError("Expected JsObject")
+    },
+    Writes {
+      case NormalFile => Json.obj("NormalFile" -> Json.obj())
+      case LargeFile  => Json.obj("LargeFile" -> Json.obj())
+    }
+  )
 }

@@ -19,9 +19,10 @@ package repositories.submission
 import base.SpecBase
 import config.AppConfig
 import models.agentSubscription.{AgentContactDetails, AgentResponseDetail}
-import models.submission._
+import models.submission.*
 import models.subscription.{ContactInformation, OrganisationDetails}
 import models.xml.{FileErrorCode, FileErrors, ValidationErrors}
+import org.mongodb.scala.SingleObservableFuture
 import org.mongodb.scala.bson.collection.immutable.Document
 import org.scalatest.concurrent.Eventually.eventually
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
@@ -39,10 +40,10 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
   lazy val metricsService: MetricsService = app.injector.instanceOf[MetricsService]
 
   private val mockAppConfig = mock[AppConfig]
-  when(mockAppConfig.cacheTtl) thenReturn 1
+  when(mockAppConfig.cacheTtl) thenReturn 1L
   when(mockAppConfig.staleTaskAlertAfter) thenReturn 2.hours
 
-  override lazy val repository = new FileDetailsRepository(mongoComponent, mockAppConfig, metricsService)
+  override val repository: FileDetailsRepository = new FileDetailsRepository(mongoComponent, mockAppConfig, metricsService)
 
   private val dateTimeNow: LocalDateTime = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
   private val fileDetails: FileDetails = FileDetails(

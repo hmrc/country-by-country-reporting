@@ -16,10 +16,7 @@
 
 package models.xml
 
-import com.lucidchart.open.xtract.{ParseError, ParseFailure, ParseSuccess, XmlReader}
 import play.api.libs.json.{__, JsString, Reads, Writes}
-
-import scala.xml.NodeSeq
 
 sealed abstract class RecordErrorCode(val code: String)
 
@@ -76,16 +73,11 @@ object RecordErrorCode {
     case otherCode => UnknownRecordErrorCode(otherCode)
   }
 
-  implicit val xmlReads: XmlReader[RecordErrorCode] =
-    (xml: NodeSeq) => {
-      case class RecordErrorCodeParseError(message: String) extends ParseError
-      values.find(x => x.code == xml.text) match {
-        case Some(errorCode) => ParseSuccess(errorCode)
-        case None =>
-          try ParseSuccess(UnknownRecordErrorCode(xml.text))
-          catch {
-            case _: Exception => ParseFailure(RecordErrorCodeParseError(s"Invalid or missing RecordErrorCode: ${xml.text}"))
-          }
-      }
-    }
+  given XmlReads[RecordErrorCode] with
+    def read(xml: scala.xml.NodeSeq): RecordErrorCode =
+      val text = xml.text.trim
+      RecordErrorCode.values
+        .find(_.code == text)
+        .getOrElse(RecordErrorCode.UnknownRecordErrorCode(text))
+
 }

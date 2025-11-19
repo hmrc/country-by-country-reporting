@@ -24,6 +24,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.xml.NodeSeq
+import play.api.libs.ws.DefaultBodyWritables._
 
 class SubmissionConnector @Inject() (
   val config: AppConfig,

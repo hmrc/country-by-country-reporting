@@ -24,7 +24,7 @@ class SdesCallbackSpec extends SpecBase with ScalaCheckPropertyChecks with Gener
 
   "SdesCallback" - {
     "marshal and unmarshal" in {
-      forAll { sdesCallback: SdesCallback =>
+      forAll { (sdesCallback: SdesCallback) =>
         val json = SdesCallback.format.writes(sdesCallback)
         val obj  = SdesCallback.format.reads(json).get
         obj mustBe sdesCallback

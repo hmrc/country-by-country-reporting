@@ -22,6 +22,7 @@ import models.agentSubscription.AgentSubscriptionEtmpRequest
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
+import play.api.libs.ws.JsonBodyWritables._
 
 import scala.concurrent.{ExecutionContext, Future}
 
