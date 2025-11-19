@@ -105,13 +105,13 @@ class FileDetailsRepository @Inject() (
     val filter: Bson = equal("subscriptionId", subscriptionId)
     collection
       .find(filter)
-      .toFuture
+      .toFuture()
   }
 
   def insert(fileDetails: FileDetails): Future[Boolean] =
     collection
       .insertOne(fileDetails)
-      .toFuture
+      .toFuture()
       .map { _ =>
         metricsService.fileStatusPendingCounter.inc()
         true

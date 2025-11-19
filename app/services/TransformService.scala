@@ -38,7 +38,9 @@ class TransformService @Inject() () {
           <conversationID>{metaData.conversationId.value}</conversationID>
           <schemaVersion>1.0.0</schemaVersion>
         </requestCommon>
-        <requestDetail>{addNameSpaces(addNameSpaceDefinitions(uploadedFile), Seq(NamespaceForNode("CBC_OECD", "cbc"), NamespaceForNode("DocSpec", "stf")))}</requestDetail>
+        <requestDetail>{
+      addNameSpaces(addNameSpaceDefinitions(uploadedFile), Seq(NamespaceForNode("CBC_OECD", "cbc"), NamespaceForNode("DocSpec", "stf")))
+    }</requestDetail>
         <requestAdditionalDetail>{transformSubscriptionDetails(subscriptionDetails, metaData.fileName, agentDetails)}</requestAdditionalDetail>
       </cadx:CBCSubmissionRequest>
 

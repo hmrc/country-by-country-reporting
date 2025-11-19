@@ -22,7 +22,7 @@ import models.audit.{Audit, AuditDetailForSubmissionValidation}
 import models.submission.{CBC401, MessageSpecData, TestData}
 import models.validation._
 import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchersSugar.eqTo
+import org.mockito.ArgumentMatchers.{eq => eqTo}
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -82,7 +82,7 @@ class SubmissionValidationControllerSpec extends SpecBase {
       when(mockValidationEngine.validateUploadSubmission(eqTo(upscanUrl)))
         .thenReturn(Future.successful(submissionSuccess))
 
-      val request = FakeRequest(POST, routes.SubmissionValidationController.validateSubmission.url, FakeHeaders(), validateRequestJsonBody)
+      val request = FakeRequest(POST, routes.SubmissionValidationController.validateSubmission().url, FakeHeaders(), validateRequestJsonBody)
 
       val result: Future[Result] = controller.validateSubmission()(request)
 
@@ -119,7 +119,7 @@ class SubmissionValidationControllerSpec extends SpecBase {
       when(mockValidationEngine.validateUploadSubmission(eqTo(upscanUrl)))
         .thenReturn(Future.successful(submissionError))
 
-      val request                = FakeRequest(POST, routes.SubmissionValidationController.validateSubmission.url, FakeHeaders(), validateRequestJsonBody)
+      val request                = FakeRequest(POST, routes.SubmissionValidationController.validateSubmission().url, FakeHeaders(), validateRequestJsonBody)
       val result: Future[Result] = controller.validateSubmission()(request)
 
       val expectedAuditDetail = AuditDetailForSubmissionValidation(
@@ -149,7 +149,7 @@ class SubmissionValidationControllerSpec extends SpecBase {
       when(mockValidationEngine.validateUploadSubmission(eqTo(upscanUrl)))
         .thenReturn(Future.successful(invalidXmlError))
 
-      val request = FakeRequest(POST, routes.SubmissionValidationController.validateSubmission.url, FakeHeaders(), validateRequestJsonBody)
+      val request = FakeRequest(POST, routes.SubmissionValidationController.validateSubmission().url, FakeHeaders(), validateRequestJsonBody)
 
       val result: Future[Result] = controller.validateSubmission()(request)
 
@@ -178,7 +178,7 @@ class SubmissionValidationControllerSpec extends SpecBase {
       val invalidJsonBody = Json.obj(
         "someOtherField" -> "someValue"
       )
-      val request = FakeRequest(POST, routes.SubmissionValidationController.validateSubmission.url, FakeHeaders(), invalidJsonBody)
+      val request = FakeRequest(POST, routes.SubmissionValidationController.validateSubmission().url, FakeHeaders(), invalidJsonBody)
 
       val result: Future[Result] = controller.validateSubmission()(request)
 

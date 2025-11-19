@@ -42,9 +42,9 @@ object EmailRequest {
       List(email),
       emailTemplate,
       Map(
-        "dateSubmitted"      -> submissionTime.toLowerCase,
-        "messageRefId"       -> messageRefId,
-        "contactName"        -> contactName
+        "dateSubmitted" -> submissionTime.toLowerCase,
+        "messageRefId"  -> messageRefId,
+        "contactName"   -> contactName
       ) ++ cbcId.map("cbcId" -> _)
         ++ tradingName.filter(_.nonEmpty).map("clientTradingName" -> _)
         ++ reportType.map("reportType" -> _)

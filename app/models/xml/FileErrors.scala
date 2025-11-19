@@ -16,18 +16,20 @@
 
 package models.xml
 
-import cats.implicits.catsSyntaxTuple2Semigroupal
-import com.lucidchart.open.xtract.{__, XmlReader}
 import play.api.libs.json.{Json, OFormat}
+
+import scala.xml.NodeSeq
 
 case class FileErrors(code: FileErrorCode, details: Option[String])
 
 object FileErrors {
 
-  implicit val xmlReader: XmlReader[FileErrors] = (
-    (__ \ "Code").read[FileErrorCode],
-    (__ \ "Details").read[String].optional
-  ).mapN(apply)
+  given XmlReads[FileErrors] with
+    def read(xml: NodeSeq): FileErrors =
+      val code        = fromXml[FileErrorCode](xml \# "Code")
+      val detailsText = xml \# "Details"
+      val details     = Option.when(detailsText.nonEmpty)(detailsText.text.trim)
+      FileErrors(code, details)
 
   implicit val format: OFormat[FileErrors] = Json.format[FileErrors]
 }

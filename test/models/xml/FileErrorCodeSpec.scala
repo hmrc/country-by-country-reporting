@@ -17,9 +17,9 @@
 package models.xml
 
 import base.SpecBase
-import com.lucidchart.open.xtract.{ParseFailure, ParseSuccess}
 import models.xml.FileErrorCode.UnknownFileErrorCode
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import models.xml.FileErrorCode.given
 
 class FileErrorCodeSpec extends SpecBase with ScalaCheckPropertyChecks {
 
@@ -27,18 +27,18 @@ class FileErrorCodeSpec extends SpecBase with ScalaCheckPropertyChecks {
     "read errorCode" in {
       for (errorCode <- FileErrorCode.values) {
         val xml = <Code>{errorCode.code}</Code>
-        FileErrorCode.xmlReads.read(xml) mustBe ParseSuccess(errorCode)
+        fromXml(xml) mustBe errorCode
       }
     }
 
     "read unknown errorCode" in {
       val xml = <Code>{50000}</Code>
-      FileErrorCode.xmlReads.read(xml) mustBe ParseSuccess(UnknownFileErrorCode("50000"))
+      fromXml(xml) mustBe UnknownFileErrorCode("50000")
     }
 
     "read CBC Error Codes" in {
       val xml = <Code>CBC Error Code 39a</Code>
-      FileErrorCode.xmlReads.read(xml) mustBe ParseSuccess(UnknownFileErrorCode("CBC Error Code 39a"))
+      fromXml(xml) mustBe UnknownFileErrorCode("CBC Error Code 39a")
     }
   }
 }

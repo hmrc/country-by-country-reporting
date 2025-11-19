@@ -20,7 +20,7 @@ import base.SpecBase
 import generators.Generators
 import models.submission.ConversationId
 import models.subscription.ResponseDetail
-import org.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 import java.time.LocalDateTime

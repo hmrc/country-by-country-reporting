@@ -87,14 +87,14 @@ class UpScanSessionRepository @Inject() (
 
     collection
       .findOneAndUpdate(filter, modifier, options)
-      .toFuture
+      .toFuture()
       .map(_ => true)
   }
 
   def insert(uploadDetails: UploadSessionDetails): Future[Boolean] =
     collection
       .insertOne(uploadDetails)
-      .toFuture
+      .toFuture()
       .map(_ => true)
 
 }

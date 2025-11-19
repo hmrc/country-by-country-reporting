@@ -58,7 +58,7 @@ class EmailService @Inject() (emailConnector: EmailConnector, emailTemplate: Ema
       reportingPeriodStartDate,
       reportingPeriodEndDate,
       reportingEntityName
-    ) map { responses: Seq[EmailResult] =>
+    ) map { (responses: Seq[EmailResult]) =>
       responses.map {
         case EmailResult(emailType, Some(resp)) =>
           resp.status match {

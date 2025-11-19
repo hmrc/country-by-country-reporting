@@ -44,7 +44,7 @@ class SubmissionControllerSpec extends SpecBase with Generators with ScalaCheckD
   "Submission controller" - {
 
     "must treat file having size <= maxNormalFileSizeBytes as normal file" in {
-      forAll { submissionDetails: SubmissionDetails =>
+      forAll { (submissionDetails: SubmissionDetails) =>
         val conversationId = ConversationId.fromUploadId(submissionDetails.uploadId)
 
         when(mockAppConf.maxNormalFileSizeBytes).thenReturn(submissionDetails.fileSize)
@@ -54,7 +54,7 @@ class SubmissionControllerSpec extends SpecBase with Generators with ScalaCheckD
 
         val application = buildApplication()
         running(application) {
-          val request = FakeRequest(POST, SubmissionController.submitDisclosure.url).withBody(Json.toJson(submissionDetails))
+          val request = FakeRequest(POST, SubmissionController.submitDisclosure().url).withBody(Json.toJson(submissionDetails))
 
           val result = route(application, request).value
 
@@ -65,7 +65,7 @@ class SubmissionControllerSpec extends SpecBase with Generators with ScalaCheckD
     }
 
     "must treat file having size > maxNormalFileSizeBytes as large file" in {
-      forAll { submissionDetails: SubmissionDetails =>
+      forAll { (submissionDetails: SubmissionDetails) =>
         val conversationId = ConversationId.fromUploadId(submissionDetails.uploadId)
 
         when(mockAppConf.maxNormalFileSizeBytes).thenReturn(submissionDetails.fileSize - 1)
@@ -75,7 +75,7 @@ class SubmissionControllerSpec extends SpecBase with Generators with ScalaCheckD
 
         val application = buildApplication()
         running(application) {
-          val request = FakeRequest(POST, SubmissionController.submitDisclosure.url).withBody(Json.toJson(submissionDetails))
+          val request = FakeRequest(POST, SubmissionController.submitDisclosure().url).withBody(Json.toJson(submissionDetails))
 
           val result = route(application, request).value
 
@@ -86,24 +86,24 @@ class SubmissionControllerSpec extends SpecBase with Generators with ScalaCheckD
     }
 
     "must return INTERNAL_SERVER_ERROR when file is larger than maxLargeFileSizeBytes" in {
-      forAll { submissionDetails: SubmissionDetails =>
-        when(mockAppConf.maxNormalFileSizeBytes).thenReturn(0)
+      forAll { (submissionDetails: SubmissionDetails) =>
+        when(mockAppConf.maxNormalFileSizeBytes).thenReturn(0L)
         when(mockAppConf.maxLargeFileSizeBytes).thenReturn(submissionDetails.fileSize - 1)
 
         val application = buildApplication()
         running(application) {
-          val request = FakeRequest(POST, SubmissionController.submitDisclosure.url).withBody(Json.toJson(submissionDetails))
+          val request = FakeRequest(POST, SubmissionController.submitDisclosure().url).withBody(Json.toJson(submissionDetails))
 
           val result = route(application, request).value
 
           status(result) mustBe INTERNAL_SERVER_ERROR
-          verifyZeroInteractions(mockSubmissionService)
+          verifyNoInteractions(mockSubmissionService)
         }
       }
     }
 
     "must return InternalServerError when a service error occurs during normal file submission" in {
-      forAll { submissionDetails: SubmissionDetails =>
+      forAll { (submissionDetails: SubmissionDetails) =>
         when(mockAppConf.maxNormalFileSizeBytes).thenReturn(submissionDetails.fileSize)
         when(mockAppConf.maxLargeFileSizeBytes).thenReturn(submissionDetails.fileSize + 1)
         when(mockSubmissionService.submitNormalFile(mEq(submissionDetails))(any[IdentifierRequest[JsValue]], any[HeaderCarrier], any[String]))
@@ -111,7 +111,7 @@ class SubmissionControllerSpec extends SpecBase with Generators with ScalaCheckD
 
         val application = buildApplication()
         running(application) {
-          val request = FakeRequest(POST, SubmissionController.submitDisclosure.url).withBody(Json.toJson(submissionDetails))
+          val request = FakeRequest(POST, SubmissionController.submitDisclosure().url).withBody(Json.toJson(submissionDetails))
 
           val result = route(application, request).value
 
@@ -121,7 +121,7 @@ class SubmissionControllerSpec extends SpecBase with Generators with ScalaCheckD
     }
 
     "must return INTERNAL_SERVER_ERROR when a service error occurs during large file submission" in {
-      forAll { submissionDetails: SubmissionDetails =>
+      forAll { (submissionDetails: SubmissionDetails) =>
         when(mockAppConf.maxNormalFileSizeBytes).thenReturn(submissionDetails.fileSize - 1)
         when(mockAppConf.maxLargeFileSizeBytes).thenReturn(submissionDetails.fileSize + 1)
         when(mockSubmissionService.submitLargeFile(mEq(submissionDetails))(any[IdentifierRequest[JsValue]], any[HeaderCarrier], any[String]))
@@ -129,7 +129,7 @@ class SubmissionControllerSpec extends SpecBase with Generators with ScalaCheckD
 
         val application = buildApplication()
         running(application) {
-          val request = FakeRequest(POST, SubmissionController.submitDisclosure.url).withBody(Json.toJson(submissionDetails))
+          val request = FakeRequest(POST, SubmissionController.submitDisclosure().url).withBody(Json.toJson(submissionDetails))
 
           val result = route(application, request).value
 

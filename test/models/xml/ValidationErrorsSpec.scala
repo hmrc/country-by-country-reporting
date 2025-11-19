@@ -17,7 +17,6 @@
 package models.xml
 
 import base.SpecBase
-import com.lucidchart.open.xtract.{ParseSuccess, XmlReader}
 import models.xml.FileErrorCode.MessageRefIDHasAlreadyBeenUsed
 import models.xml.RecordErrorCode.MessageTypeIndic
 
@@ -38,16 +37,14 @@ class ValidationErrorsSpec extends SpecBase {
         </gsm:RecordError>
       </gsm:ValidationErrors>
 
-      XmlReader.of[ValidationErrors].read(xml) mustBe ParseSuccess(
-        ValidationErrors(
-          Some(List(FileErrors(MessageRefIDHasAlreadyBeenUsed, Some("Duplicate message ref ID")))),
-          Some(
-            List(
-              RecordError(
-                MessageTypeIndic,
-                Some("A message can contain either new records (OECD1) or corrections/deletions (OECD2 and OECD3), but cannot contain a mixture of both"),
-                Some(List("asjdhjjhjssjhdjshdAJGSJJS"))
-              )
+      fromXml[ValidationErrors](xml) mustBe ValidationErrors(
+        Some(List(FileErrors(MessageRefIDHasAlreadyBeenUsed, Some("Duplicate message ref ID")))),
+        Some(
+          List(
+            RecordError(
+              MessageTypeIndic,
+              Some("A message can contain either new records (OECD1) or corrections/deletions (OECD2 and OECD3), but cannot contain a mixture of both"),
+              Some(List("asjdhjjhjssjhdjshdAJGSJJS"))
             )
           )
         )
@@ -59,7 +56,7 @@ class ValidationErrorsSpec extends SpecBase {
 
       val xml = <gsm:ValidationErrors></gsm:ValidationErrors>
 
-      XmlReader.of[ValidationErrors].read(xml) mustBe ParseSuccess(ValidationErrors(None, None))
+      fromXml[ValidationErrors](xml) mustBe ValidationErrors(None, None)
 
     }
   }

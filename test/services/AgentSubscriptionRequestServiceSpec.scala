@@ -33,7 +33,7 @@ import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import AgentSubscriptionEtmpRequest._
 import models.subscription.{ContactInformation, OrganisationDetails}
-import org.mockito.ArgumentMatchersSugar.eqTo
+import org.mockito.ArgumentMatchers.{eq => eqTo}
 import org.scalatest.prop.TableDrivenPropertyChecks
 
 import scala.concurrent.ExecutionContext.Implicits.global

@@ -58,7 +58,7 @@ class StaleFileTaskSpec extends SpecBase {
         mockTimestampSupport
       )
 
-      verify(mockActorSystem, never).scheduler
+      verify(mockActorSystem, never()).scheduler
     }
 
     "should be scheduled when staleTaskEnabled feature flag is true" in {

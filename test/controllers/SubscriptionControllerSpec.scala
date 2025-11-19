@@ -172,7 +172,7 @@ class SubscriptionControllerSpec extends SpecBase with Generators with ScalaChec
       val request =
         FakeRequest(
           POST,
-          routes.SubscriptionController.updateSubscription.url
+          routes.SubscriptionController.updateSubscription().url
         ).withJsonBody(requestDetailJson)
 
       val result = route(application, request).value
@@ -196,7 +196,7 @@ class SubscriptionControllerSpec extends SpecBase with Generators with ScalaChec
       val request =
         FakeRequest(
           POST,
-          routes.SubscriptionController.updateSubscription.url
+          routes.SubscriptionController.updateSubscription().url
         ).withJsonBody(requestDetailJson)
 
       val result = route(application, request).value

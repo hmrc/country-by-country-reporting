@@ -18,7 +18,7 @@ package repositories.upscan
 
 import base.SpecBase
 import config.AppConfig
-import models.upscan._
+import models.upscan.*
 import org.bson.types.ObjectId
 import org.mongodb.scala.model.Filters
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
@@ -42,9 +42,9 @@ class UpScanSessionRepositorySpec extends SpecBase with DefaultPlayMongoReposito
   )
 
   private val mockAppConfig = mock[AppConfig]
-  when(mockAppConfig.cacheTtl) thenReturn 1
+  when(mockAppConfig.cacheTtl) thenReturn 1L
 
-  override protected val repository = new UpScanSessionRepository(
+  override protected val repository: UpScanSessionRepository = new UpScanSessionRepository(
     mongoComponent = mongoComponent,
     appConfig = mockAppConfig,
     clock = stubClock

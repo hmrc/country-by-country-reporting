@@ -38,14 +38,14 @@ case class AgentRequestCommonForSubscription(
 )
 
 object AgentRequestCommonForSubscription {
-  //Format: ISO 8601 YYYY-MM-DDTHH:mm:ssZ e.g. 2020-09-23T16:12:11Zs
+  // Format: ISO 8601 YYYY-MM-DDTHH:mm:ssZ e.g. 2020-09-23T16:12:11Zs
   private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
 
   implicit val agentRequestCommonForSubscriptionFormats: OFormat[AgentRequestCommonForSubscription] =
     Json.format[AgentRequestCommonForSubscription]
 
   def apply(): AgentRequestCommonForSubscription = {
-    //Generate a 32 chars UUID without hyphens
+    // Generate a 32 chars UUID without hyphens
     val acknowledgementReference = UUID.randomUUID().toString.replace("-", "")
 
     AgentRequestCommonForSubscription(

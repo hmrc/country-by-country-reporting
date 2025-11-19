@@ -16,15 +16,27 @@
 
 package models
 
-import com.lucidchart.open.xtract.XmlReader.strictReadSeq
-import com.lucidchart.open.xtract.{ParseFailure, ParseSuccess, XmlReader}
+import scala.xml.NodeSeq
 
 package object xml {
-  implicit def strictReadOptionSeq[A](implicit reader: XmlReader[A]): XmlReader[Option[Seq[A]]] =
-    XmlReader { xml =>
-      strictReadSeq[A].read(xml) match {
-        case ParseSuccess(x) if x.nonEmpty => ParseSuccess(x)
-        case _                             => ParseFailure()
-      }
-    }.optional
+
+  trait XmlReads[T]:
+    def read(xml: NodeSeq): T
+
+  given seqReads[T](using r: XmlReads[T]): XmlReads[Seq[T]] with
+    def read(xml: NodeSeq): Seq[T] =
+      xml.map(r.read)
+
+  given optionReads[T](using r: XmlReads[T]): XmlReads[Option[T]] with
+    def read(xml: NodeSeq): Option[T] =
+      xml.headOption.map(r.read)
+
+  def fromXml[T](xml: NodeSeq)(using r: XmlReads[T]): T = r.read(xml)
+
+  extension (xml: NodeSeq)
+    def \#(label: String): NodeSeq =
+      xml.headOption
+        .map(_.child.filter(_.label == label))
+        .getOrElse(NodeSeq.Empty)
+
 }

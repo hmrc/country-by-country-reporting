@@ -25,7 +25,7 @@ object ValidationStatus extends Enumeration {
 
   val rejected: Value = Value("Rejected")
 
-  implicit val writes: Writes[ValidationStatus] = Writes[ValidationStatus] { v =>
+  given writes: Writes[ValidationStatus] = Writes[ValidationStatus] { v =>
     JsString(v.toString)
   }
 

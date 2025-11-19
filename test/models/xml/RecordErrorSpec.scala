@@ -17,7 +17,6 @@
 package models.xml
 
 import base.SpecBase
-import com.lucidchart.open.xtract.{ParseFailure, ParseSuccess, XmlReader}
 import models.xml.RecordErrorCode.UnknownRecordErrorCode
 
 import scala.xml.Elem
@@ -33,9 +32,7 @@ class RecordErrorSpec extends SpecBase {
           <gsm:DocRefIDInError>asjdhjjhjssjhdjshdAJGSJJS</gsm:DocRefIDInError>
         </gsm:RecordError>
 
-        XmlReader.of[RecordError].read(xml) mustBe ParseSuccess(
-          RecordError(errorCode, Some("error details"), Some(Seq("asjdhjjhjssjhdjshdAJGSJJS")))
-        )
+        fromXml[RecordError](xml) mustBe RecordError(errorCode, Some("error details"), Some(Seq("asjdhjjhjssjhdjshdAJGSJJS")))
       }
     }
 
@@ -45,7 +42,7 @@ class RecordErrorSpec extends SpecBase {
         <gsm:Details Language="EN">error message</gsm:Details>
       </gsm:FileError>
 
-      XmlReader.of[RecordError].read(xml) mustBe ParseSuccess(RecordError(UnknownRecordErrorCode("50011"), Some("error message"), None))
+      fromXml[RecordError](xml) mustBe RecordError(UnknownRecordErrorCode("50011"), Some("error message"), None)
     }
   }
 }

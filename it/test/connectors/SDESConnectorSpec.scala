@@ -62,7 +62,7 @@ class SDESConnectorSpec extends SpecBase with IntegrationPatience with WireMockH
       s"sendFileNotification must return $expectedConnectorResult when SDES returns status $sdesStatusCode" in {
         stubResponse("/sdes-stub/notification/fileready", sdesStatusCode)
 
-        forAll { fileTransferNotification: FileTransferNotification =>
+        forAll { (fileTransferNotification: FileTransferNotification) =>
           val result = connector.sendFileNotification(fileTransferNotification)
 
           result.futureValue mustBe expectedConnectorResult

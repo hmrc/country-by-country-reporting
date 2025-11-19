@@ -215,7 +215,7 @@ class TransformServiceSpec extends SpecBase {
 
   "add namespace definitions for CBC-oecd" in {
     val service = app.injector.instanceOf[TransformService]
-    val file = <CBC_OECD version="1.0.0">
+    val file    = <CBC_OECD version="1.0.0">
       <submission>Submitted Data</submission>
     </CBC_OECD>
 

@@ -17,7 +17,6 @@
 package models.xml
 
 import base.SpecBase
-import com.lucidchart.open.xtract.{ParseSuccess, XmlReader}
 import models.xml.FileErrorCode.MessageRefIDHasAlreadyBeenUsed
 import models.xml.RecordErrorCode.MessageTypeIndic
 
@@ -58,29 +57,27 @@ class BREResponseSpec extends SpecBase {
 
       val fileErrors = Some(List(FileErrors(MessageRefIDHasAlreadyBeenUsed, Some("Duplicate message ref ID"))))
 
-      val expectedResult = ParseSuccess(
-        BREResponse(
-          "CBC",
-          uuid,
-          GenericStatusMessage(
-            ValidationErrors(
-              fileErrors,
-              Some(
-                List(
-                  RecordError(
-                    MessageTypeIndic,
-                    Some("A message can contain either new records (OECD1) or corrections/deletions (OECD2 and OECD3), but cannot contain a mixture of both"),
-                    Some(List("asjdhjjhjssjhdjshdAJGSJJS"))
-                  )
+      val expectedResult = BREResponse(
+        "CBC",
+        uuid,
+        GenericStatusMessage(
+          ValidationErrors(
+            fileErrors,
+            Some(
+              List(
+                RecordError(
+                  MessageTypeIndic,
+                  Some("A message can contain either new records (OECD1) or corrections/deletions (OECD2 and OECD3), but cannot contain a mixture of both"),
+                  Some(List("asjdhjjhjssjhdjshdAJGSJJS"))
                 )
               )
-            ),
-            ValidationStatus.rejected
-          )
+            )
+          ),
+          ValidationStatus.rejected
         )
       )
 
-      XmlReader.of[BREResponse].read(xml) mustBe expectedResult
+      fromXml[BREResponse](xml) mustBe expectedResult
 
     }
 
@@ -104,9 +101,9 @@ class BREResponseSpec extends SpecBase {
         </requestDetail>
       </BREResponse>
 
-      val expectedResult = ParseSuccess(BREResponse("CBC", uuid, GenericStatusMessage(ValidationErrors(None, None), ValidationStatus.accepted)))
+      val expectedResult = BREResponse("CBC", uuid, GenericStatusMessage(ValidationErrors(None, None), ValidationStatus.accepted))
 
-      XmlReader.of[BREResponse].read(xml) mustBe expectedResult
+      fromXml[BREResponse](xml) mustBe expectedResult
 
     }
 

@@ -55,7 +55,6 @@ object FileDetails {
   final val writes: Writes[FileDetails] = (fileDetails: FileDetails) =>
     Json.writes[FileDetails].writes(fileDetails) match {
       case obj: JsObject => obj + ("conversationId" -> Json.toJson(fileDetails._id))
-      case other         => other
     }
   implicit val format: Format[FileDetails] = Format(reads, writes)
 
@@ -66,6 +65,6 @@ object FileDetails {
       case _                => "EIS"
     }
     s"Stale file found - Report Type: ${fileDetails.reportType}, ConversationId: ${fileDetails._id.value}, Filename: ${fileDetails.name}, File Type: ${fileDetails.fileType
-      .getOrElse("")}, Sent to $sentTo"
+        .getOrElse("")}, Sent to $sentTo"
   }
 }

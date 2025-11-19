@@ -17,8 +17,9 @@
 package models.xml
 
 import base.SpecBase
-import com.lucidchart.open.xtract.{ParseFailure, ParseSuccess, XmlReader}
 import models.xml.FileErrorCode.UnknownFileErrorCode
+import models.xml.FileErrorCode.given
+import org.scalatest.matchers.must.Matchers.mustBe
 
 import scala.xml.Elem
 
@@ -32,7 +33,8 @@ class FileErrorsSpec extends SpecBase {
           <gsm:Details Language="EN">Duplicate message ref ID</gsm:Details>
         </gsm:FileError>
 
-        XmlReader.of[FileErrors].read(xml) mustBe ParseSuccess(FileErrors(errorCode, Some("Duplicate message ref ID")))
+        fromXml[FileErrors](xml) mustBe FileErrors(errorCode, Some("Duplicate message ref ID"))
+
       }
     }
 
@@ -42,7 +44,8 @@ class FileErrorsSpec extends SpecBase {
         <gsm:Details Language="EN">error message</gsm:Details>
       </gsm:FileError>
 
-      XmlReader.of[FileErrors].read(xml) mustBe ParseSuccess(FileErrors(UnknownFileErrorCode("50011"), Some("error message")))
+      fromXml[FileErrors](xml) mustBe FileErrors(UnknownFileErrorCode("50011"), Some("error message"))
+
     }
   }
 }

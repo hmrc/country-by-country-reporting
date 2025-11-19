@@ -1,7 +1,7 @@
 import uk.gov.hmrc.DefaultBuildSettings
 
 ThisBuild / majorVersion := 0
-ThisBuild / scalaVersion := "2.13.16"
+ThisBuild / scalaVersion := "3.3.5"
 
 lazy val microservice = Project("country-by-country-reporting", file("."))
   .enablePlugins(PlayScala, SbtDistributablesPlugin)
@@ -12,13 +12,15 @@ lazy val microservice = Project("country-by-country-reporting", file("."))
     Test / scalafmtOnCompile                                   := true,
     ThisBuild / scalafmtOnCompile.withRank(KeyRanks.Invisible) := true,
     scalacOptions ++= Seq(
+      "-release", "11",
       "-Wconf:src=routes/.*:s",
-      "-Wconf:src=.+/test/.+:s",
-      "-Wconf:cat=deprecation&msg=\\.*()\\.*:s",
-      "-Wconf:cat=unused-imports&site=<empty>:s",
-      "-Wconf:cat=unused&src=.*RoutesPrefix\\.scala:s",
-      "-Wconf:cat=unused&src=.*Routes\\.scala:s"
-    )
+      "-Wconf:src=.*/Routes.scala:s",
+      "-Wconf:src=.*/RoutesPrefix.scala:s",
+      "-Wconf:src=.*/ReverseRoutes.scala:s",
+      "-Wconf:src=.*/test/.*:s",
+      "-Wconf:cat=deprecation:s"
+    ),
+    scalacOptions := scalacOptions.value.distinct
   )
   .settings(inConfig(Test)(testSettings): _*)
   .settings(scoverageSettings)
@@ -55,7 +57,8 @@ lazy val scoverageSettings = {
     ".*LanguageSwitchController",
     ".*handlers.*",
     ".*utils.*",
-    ".*Repository.*"
+    ".*Repository.*",
+    ".*/models/.*"
   )
 
   Seq(
@@ -71,5 +74,8 @@ lazy val testSettings: Seq[Def.Setting[_]] = Seq(fork := true, unmanagedSourceDi
 lazy val it = project
   .enablePlugins(PlayScala)
   .dependsOn(microservice % "test->test")
-  .settings(DefaultBuildSettings.itSettings())
+  .settings(
+    DefaultBuildSettings.itSettings(),
+    scalacOptions := scalacOptions.value.distinct
+  )
   .settings(libraryDependencies ++= AppDependencies.itDependencies)

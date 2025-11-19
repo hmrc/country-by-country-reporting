@@ -24,6 +24,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import play.api.libs.ws.JsonBodyWritables._
 
 @Singleton
 class EmailConnector @Inject() (val config: AppConfig, http: HttpClientV2)(implicit ex: ExecutionContext) {

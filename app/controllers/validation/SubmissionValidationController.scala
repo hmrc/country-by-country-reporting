@@ -40,9 +40,8 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
     extends BackendController(cc)
     with Logging {
 
-  private val dataErrorsUrl          = "/problem/data-errors"
-  private val invalidXmlErrorUrl     = "/problem/invalid-xml"
-  private val internalServerErrorUrl = "/problem/there-is-a-problem"
+  private val dataErrorsUrl      = "/problem/data-errors"
+  private val invalidXmlErrorUrl = "/problem/invalid-xml"
 
   def validateSubmission: Action[JsValue] = authenticate(parse.json).async { implicit request =>
     request.body.validate[ValidateRequest] match {
@@ -61,12 +60,6 @@ class SubmissionValidationController @Inject() (cc: ControllerComponents,
             logger.warn(s"InvalidXmlError: $saxException")
             sendAuditEventForExceptions(validateRequest, invalidXmlErrorUrl, saxException)
             BadRequest(InvalidXmlError(saxException).toString)
-
-          case _ =>
-            logger.warn("Failed to validate submission due to unexpected outcome from validationEngine")
-            val errorMessage = "An unexpected error occurred during XML validation"
-            sendAuditEventForExceptions(validateRequest, internalServerErrorUrl, errorMessage)
-            InternalServerError("Failed to validate submission")
         }
       case JsError(errors) =>
         logger.warn(s"Missing upscan URL: $errors")

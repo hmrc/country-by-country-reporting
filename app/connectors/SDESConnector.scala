@@ -27,6 +27,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 
 import javax.inject.Singleton
 import scala.concurrent.{ExecutionContext, Future}
+import play.api.libs.ws.JsonBodyWritables._
 
 @Singleton
 class SDESConnector @Inject() (
@@ -40,7 +41,7 @@ class SDESConnector @Inject() (
     request: FileTransferNotification
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[Int, Int]] =
     http
-      .post(url"${config.sdesUrl}") //, request, clientIdHeader)
+      .post(url"${config.sdesUrl}") // , request, clientIdHeader)
       .setHeader(clientIdHeader: _*)
       .withBody(Json.toJson(request))
       .execute[HttpResponse]
