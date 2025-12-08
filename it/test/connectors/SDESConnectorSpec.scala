@@ -22,7 +22,7 @@ import models.sdes._
 import org.scalatest.concurrent.IntegrationPatience
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
-import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, NO_CONTENT}
+import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, NO_CONTENT, REQUEST_TIMEOUT}
 import wiremock.WireMockHelper
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -54,7 +54,8 @@ class SDESConnectorSpec extends SpecBase with IntegrationPatience with WireMockH
     ("sdesStatusCode", "expectedConnectorResult"),
     (NO_CONTENT, Right(NO_CONTENT)),
     (BAD_REQUEST, Left(BAD_REQUEST)),
-    (INTERNAL_SERVER_ERROR, Left(INTERNAL_SERVER_ERROR))
+    (INTERNAL_SERVER_ERROR, Left(INTERNAL_SERVER_ERROR)),
+    (REQUEST_TIMEOUT, Left(REQUEST_TIMEOUT))
   )
 
   "SDESConnector" - {

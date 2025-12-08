@@ -24,7 +24,7 @@ import org.scalacheck.Gen
 import org.scalatest.concurrent.IntegrationPatience
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
-import play.api.http.Status.OK
+import play.api.http.Status.{OK, REQUEST_TIMEOUT}
 import wiremock.WireMockHelper
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -88,6 +88,19 @@ class SubscriptionConnectorSpec extends SpecBase with WireMockHelper with Integr
           result.futureValue.status mustBe errorCode
         }
       }
+
+      "must return status as REQUEST_TIMEOUT for read Subscription" in {
+        stubResponse(
+          "/dac6/dct50d/v1",
+          REQUEST_TIMEOUT
+        )
+
+        forAll(arbitrary[DisplaySubscriptionForCBCRequest]) { sub =>
+          val result = connector.readSubscriptionInformation(sub)
+
+          result.futureValue.status mustBe REQUEST_TIMEOUT
+        }
+      }
     }
 
     "update subscription" - {
@@ -113,6 +126,18 @@ class SubscriptionConnectorSpec extends SpecBase with WireMockHelper with Integr
 
           val result = connector.updateSubscription(sub)
           result.futureValue.status mustBe errorCode
+        }
+      }
+
+      "must return status as REQUEST_TIMEOUT for update Subscription" in {
+        stubResponse(
+          "/dac6/dct50e/v1",
+          REQUEST_TIMEOUT
+        )
+
+        forAll(arbitrary[UpdateSubscriptionForCBCRequest]) { sub =>
+          val result = connector.updateSubscription(sub)
+          result.futureValue.status mustBe REQUEST_TIMEOUT
         }
       }
     }
