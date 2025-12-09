@@ -23,7 +23,7 @@ import org.scalacheck.Arbitrary.arbitrary
 import org.scalatest.concurrent.IntegrationPatience
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
-import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK}
+import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK, REQUEST_TIMEOUT}
 import play.api.inject.guice.GuiceApplicationBuilder
 import wiremock.WireMockHelper
 
@@ -80,6 +80,16 @@ class EmailConnectorSpec extends SpecBase with WireMockHelper with IntegrationPa
 
         val result = connector.sendEmail(emailRequest)
         result.futureValue.status mustBe NOT_FOUND
+      }
+    }
+
+    "must return status as REQUEST_TIMEOUT for invalid email submission" in {
+
+      forAll(arbitrary[EmailRequest]) { emailRequest =>
+        stubResponse(emailUrl, REQUEST_TIMEOUT)
+
+        val result = connector.sendEmail(emailRequest)
+        result.futureValue.status mustBe REQUEST_TIMEOUT
       }
     }
   }

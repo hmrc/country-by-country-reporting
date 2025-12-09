@@ -89,6 +89,14 @@ class SubmissionConnectorSpec extends SpecBase with GuiceOneAppPerSuite with Wir
         val result = connector.submitDisclosure(xml, conversationId)
         result.futureValue.status mustBe SERVICE_UNAVAILABLE
       }
+
+      "when upscan returns 408 response" in {
+        stubResponse(submissionUrl, REQUEST_TIMEOUT)
+
+        val xml    = <test></test>
+        val result = connector.submitDisclosure(xml, conversationId)
+        result.futureValue.status mustBe REQUEST_TIMEOUT
+      }
     }
 
   }

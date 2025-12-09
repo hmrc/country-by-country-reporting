@@ -25,7 +25,7 @@ import org.scalacheck.Gen
 import org.scalatest.concurrent.IntegrationPatience
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
-import play.api.http.Status.OK
+import play.api.http.Status.{OK, REQUEST_TIMEOUT}
 import wiremock.WireMockHelper
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -85,6 +85,16 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockHelper with I
           result.futureValue.status mustBe errorCode
         }
       }
+
+      "must return status as RequestTimeOut for create Subscription" in {
+        stubResponse(agentCreateSubscriptionEndpoint, REQUEST_TIMEOUT, RequestMethod.POST)
+
+        forAll { (request: AgentSubscriptionEtmpRequest) =>
+          val result = connector.createSubscription(request)
+
+          result.futureValue.status mustBe REQUEST_TIMEOUT
+        }
+      }
     }
 
     "read subscription" - {
@@ -109,6 +119,16 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockHelper with I
           result.futureValue.status mustBe errorCode
         }
       }
+
+      "must return status as REQUEST_TIMEOUT for read Subscription" in {
+        forAll(nonEmptyString) { (agentRefNo: String) =>
+          stubResponse(s"$agentReadSubscriptionEndpoint/ARN/$agentRefNo", REQUEST_TIMEOUT, RequestMethod.GET)
+
+          val result = connector.readSubscription(agentRefNo)
+
+          result.futureValue.status mustBe REQUEST_TIMEOUT
+        }
+      }
     }
 
     "update subscription" - {
@@ -129,6 +149,15 @@ class AgentSubscriptionConnectorSpec extends SpecBase with WireMockHelper with I
 
           val result = connector.updateSubscription(request)
           result.futureValue.status mustBe errorCode
+        }
+      }
+
+      "must return status as REQUEST_TIMEOUT for update Subscription" in {
+        stubResponse(agentUpdateSubscriptionEndpoint, REQUEST_TIMEOUT, RequestMethod.PUT)
+
+        forAll { (request: AgentSubscriptionEtmpRequest) =>
+          val result = connector.updateSubscription(request)
+          result.futureValue.status mustBe REQUEST_TIMEOUT
         }
       }
     }
