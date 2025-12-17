@@ -31,6 +31,10 @@ package object xml {
     def read(xml: NodeSeq): Option[T] =
       xml.headOption.map(r.read)
 
+  given optionSeqReads[T](using r: XmlReads[T]): XmlReads[Option[Seq[T]]] with
+    def read(xml: NodeSeq): Option[Seq[T]] =
+      if (xml.isEmpty) None else Some(xml.map(r.read))
+
   def fromXml[T](xml: NodeSeq)(using r: XmlReads[T]): T = r.read(xml)
 
   extension (xml: NodeSeq)

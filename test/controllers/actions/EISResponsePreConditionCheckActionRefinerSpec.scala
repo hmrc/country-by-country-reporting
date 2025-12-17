@@ -18,10 +18,11 @@ package controllers.actions
 
 import base.SpecBase
 import config.AppConfig
+import controllers.auth.EISRequest
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.Status.{BAD_REQUEST, OK}
 import play.api.mvc.Results.Ok
-import play.api.mvc._
+import play.api.mvc.*
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import play.api.test.{FakeHeaders, FakeRequest}
 import play.twirl.api.HtmlFormat
@@ -68,11 +69,22 @@ class EISResponsePreConditionCheckActionRefinerSpec extends SpecBase with Before
             <Code>50009</Code>
             <Details>Duplicate message ref IDs</Details>
           </FileError>
+          <FileError>
+            <Code>50008</Code>
+            <Details>Invalid MessageRefID format</Details>
+          </FileError>
           <RecordError>
             <Code>80000</Code>
             <Details>Duplicate doc ref IDs</Details>
             <DocRefIDInError>CBCUSER001DHSJEURUT20001</DocRefIDInError>
             <DocRefIDInError>CBCUSER001DHSJEURUT20002</DocRefIDInError>
+          </RecordError>
+          <RecordError>
+            <Code>50010</Code>
+            <Details>File Contains Test Data for Production Environment</Details>
+            <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD10ENTUniqueCharactersForDocType</DocRefIDInError>
+            <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD11REPUniqueCharactersForDocType</DocRefIDInError>
+            <DocRefIDInError>GB2022GBXACBC0000012345CBC40120231231093012UniqueCharacters_1234567890OECD12ADDUniqueCharactersForDocType</DocRefIDInError>
           </RecordError>
         </ValidationErrors>
         <ValidationResult>
@@ -105,7 +117,14 @@ class EISResponsePreConditionCheckActionRefinerSpec extends SpecBase with Before
 
       val request = FakeRequest("", "").withHeaders(headers).withBody(rejectedXml)
 
-      val testAction: Future[Result] = action.invokeBlock(request, response)
+      val block: EISRequest[_] => Future[Result] = { request =>
+        val errors = request.BREResponse.genericStatusMessage.validationErrors
+        errors.fileError.map(_.length) mustBe Some(2)
+        errors.recordError.map(_.length) mustBe Some(2)
+        Future.successful(Ok)
+      }
+
+      val testAction: Future[Result] = action.invokeBlock(request, block)
       status(testAction) mustBe OK
     }
 
