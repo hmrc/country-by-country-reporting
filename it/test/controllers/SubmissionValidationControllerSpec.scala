@@ -17,11 +17,8 @@
 package controllers
 
 import config.AppConfig
-import connectors.{SDESConnector, SubscriptionConnector}
 import controllers.auth.{IdentifierAuthAction, IdentifierAuthActionImpl, IdentifierRequest}
-import models.submission.{CBC402, MessageSpecData, NewInformation, SubmissionDetails}
-import models.upscan.UploadId
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, anyString}
 import org.mockito.Mockito.{doAnswer, spy, when}
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -30,38 +27,16 @@ import play.api.mvc.{AnyContent, BodyParsers, Request, Result}
 import play.api.test.*
 import play.api.test.Helpers.*
 import play.api.{inject, Application}
-import repositories.submission.FileDetailsRepository
+import services.validation.XMLValidationService
 import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector}
-import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.http.HttpVerbs.POST
 
-import java.time.LocalDate
 import scala.concurrent.Future
+import scala.xml.XML
 
-class SubmissionControllerSpec extends ISpecBase {
+class SubmissionValidationControllerSpec extends ISpecBase {
 
   private def authorisedApp(): Application = {
-
-    val readSubscriptionResponse =
-      """
-        |{
-        |  "displaySubscriptionForCBCResponse" : {
-        |    "responseCommon" : {
-        |      "status" : "Pending",
-        |      "processingDate" : "2026-01-05"
-        |    },
-        |    "responseDetail" : {
-        |      "subscriptionID" : "testsubscriptionId",
-        |      "isGBUser" : true,
-        |      "primaryContact" : [{
-        |        "organisation" : {
-        |          "organisationName" : "testOrg"
-        |        },
-        |        "email" : "test@test.com"
-        |      }]
-        |    }
-        |  }
-        |}""".stripMargin
 
     val mockAppConfig = mock[AppConfig]
 
@@ -72,8 +47,7 @@ class SubmissionControllerSpec extends ISpecBase {
         case _          => "HMRC-AS-AGENT"
       }
     )
-    when(mockAppConfig.maxLargeFileSizeBytes).thenReturn(104857600L)
-    when(mockAppConfig.maxNormalFileSizeBytes).thenReturn(1233L)
+    when(mockAppConfig.fileUploadXSDFilePath).thenReturn("/xsd/CbcXML_v2.0.xsd")
 
     val realAuthAction = new IdentifierAuthActionImpl(
       authConnector = mock[AuthConnector],
@@ -91,48 +65,32 @@ class SubmissionControllerSpec extends ISpecBase {
       block(IdentifierRequest(request, AffinityGroup.Organisation))
     }.when(authAction).invokeBlock(any(), any())
 
-    val mockSubscriptionConnector = mock[SubscriptionConnector]
+    val mockXmlValidationService = mock[XMLValidationService]
 
     when(
-      mockSubscriptionConnector.readSubscriptionInformation(any())(any(), any())
-    ).thenReturn(
-      Future.successful(HttpResponse(OK, readSubscriptionResponse))
-    )
-
-    val mockSDESConnector = mock[SDESConnector]
-
-    when(
-      mockSDESConnector.sendFileNotification(any())(any(), any())
-    ).thenReturn(
-      Future.successful(Right(NO_CONTENT))
-    )
-
-    val mockFileRepository = mock[FileDetailsRepository]
-    when(mockFileRepository.insert(any())).thenReturn(Future.successful(true))
+      mockXmlValidationService.validate(anyString(), anyString())
+    ).thenReturn(Right(XML.loadFile("test/resources/cbc/fileUpload/validcbc.xml")))
 
     new GuiceApplicationBuilder()
       .overrides(
         inject.bind[IdentifierAuthAction].toInstance(authAction),
         inject.bind[AppConfig].toInstance(mockAppConfig),
-        inject.bind[SubscriptionConnector].toInstance(mockSubscriptionConnector),
-        inject.bind[SDESConnector].toInstance(mockSDESConnector),
-        inject.bind[FileDetailsRepository].toInstance(mockFileRepository)
+        inject.bind[XMLValidationService].toInstance(mockXmlValidationService)
       )
       .build()
   }
 
-  "POST /submit" should {
+  "POST /validate-submission" should {
 
     "reject unauthenticated requests" in {
       val request =
-        FakeRequest(POST, "/country-by-country-reporting/submit")
+        FakeRequest(POST, "/country-by-country-reporting/validate-submission")
           .withHeaders(CONTENT_TYPE -> "application/json")
           .withBody(
             Json.obj(
               "someField" -> "someValue"
             )
           )
-
       val app = unauthorisedApp()
 
       running(app) {
@@ -146,27 +104,23 @@ class SubmissionControllerSpec extends ISpecBase {
 
     "return 200 OK when authorised request" in {
 
-      val submissionDetails = SubmissionDetails(
-        fileName = "cbc-report.xml",
-        uploadId = UploadId("7e67633b-596b-454d-b7b1-c85fe3fdf994"),
-        enrolmentId = "sub-123",
-        fileSize = 1234,
-        documentUrl = "test",
-        checksum = "test",
-        messageSpecData = MessageSpecData("msg-456", CBC402, NewInformation, LocalDate.now(), LocalDate.now(), "GlobalCorp Ltd")
-      )
-
-      val jsonBody = Json.toJson(submissionDetails)
+      val upscanUrl       = "/some-upscan-url"
+      val conversationId  = "conversationId123"
+      val subscriptionId  = "subscriptionId123"
+      val fileReferenceId = "fileReferenceId123"
+      val validateRequestJsonBody =
+        Json.obj("url" -> upscanUrl, "conversationId" -> conversationId, "subscriptionId" -> subscriptionId, "fileReferenceId" -> fileReferenceId)
 
       val request =
-        FakeRequest(POST, "/country-by-country-reporting/submit")
+        FakeRequest(POST, "/country-by-country-reporting/validate-submission")
           .withHeaders(CONTENT_TYPE -> "application/json")
-          .withBody(jsonBody)
+          .withBody(validateRequestJsonBody)
 
       val app = authorisedApp()
 
       running(app) {
-        val result = route(app, request).getOrElse(fail("Route not defined"))
+        val result =
+          route(app, request).getOrElse(fail("Route not defined"))
 
         status(result) shouldBe OK
       }

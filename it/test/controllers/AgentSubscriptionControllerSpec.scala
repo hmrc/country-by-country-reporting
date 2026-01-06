@@ -21,9 +21,7 @@ import controllers.auth.{AgentOnlyAuthAction, AgentOnlyAuthActionImpl, AgentOnly
 import models.agentSubscription.*
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{doAnswer, spy, when}
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, BodyParsers, Request, Result}
@@ -34,32 +32,43 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.http.HttpVerbs.POST
 
-import java.time.LocalDateTime
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class AgentSubscriptionControllerSpec extends AnyWordSpec with Matchers with MockitoSugar {
+class AgentSubscriptionControllerSpec extends ISpecBase {
 
-  val readResponse = DisplayAgentSubscriptionResponse(
-    success = SuccessResponse(
-      processingDate = LocalDateTime.now(),
-      agent = Agent(
-        arn = "testAgentReferenceNumber",
-        gbUser = true,
-        primaryContact = Contact("test@test.com"),
-        tradingName = None,
-        secondaryContact = None
-      )
-    )
-  )
-
-  private def unauthorisedApp(): Application = new GuiceApplicationBuilder().build()
+  val subscriptionResponseJson: String =
+    s"""{
+       |  "success": {
+       |    "processingDate": "2023-05-17T09:26:17Z",
+       |    "agent": {
+       |      "arn": "111111111",
+       |      "tradingName": "Test Ltd",
+       |      "gbUser": true,
+       |      "primaryContact": {
+       |        "organisation": {
+       |          "name": "Test Org"
+       |        },
+       |        "email": "test1@test.com",
+       |        "phone": "0123456789",
+       |        "mobile": "0123456789"
+       |      },
+       |      "secondaryContact": {
+       |        "organisation": {
+       |          "name": "Test Org 2"
+       |        },
+       |        "email": "test2@test.com",
+       |        "phone": "0123456000",
+       |        "mobile": "0123456789"
+       |      }
+       |    }
+       |  }
+       |}""".stripMargin
 
   private def authorisedApp(): Application = {
 
     val realAuthAction = new AgentOnlyAuthActionImpl(
       authConnector = mock[AuthConnector],
-      parser = mock[BodyParsers.Default]
+      parser = BodyParsers.Default()
     )
 
     val authAction = spy(realAuthAction)
@@ -83,9 +92,9 @@ class AgentSubscriptionControllerSpec extends AnyWordSpec with Matchers with Moc
     when(
       mockConnector.readSubscription(any())(any(), any())
     ).thenReturn(
-      Future.successful(HttpResponse(OK, "{}"))
+      Future.successful(HttpResponse(OK, subscriptionResponseJson))
     )
-    
+
     when(
       mockConnector.updateSubscription(any())(any(), any())
     ).thenReturn(
@@ -218,18 +227,18 @@ class AgentSubscriptionControllerSpec extends AnyWordSpec with Matchers with Moc
     "return 200 OK when authorised request" in {
 
       val validRequest = AgentRequestDetailForUpdate(
-            "TestIDType",
-            "TestIDNumber",
-            None,
-            true,
-            AgentContactInformation(
-              organisationDetails = AgentDetails("testOrganisation"),
-              email = "test@test.com",
-              phone = None,
-              mobile = None
-            ),
-            None
-          )
+        "TestIDType",
+        "TestIDNumber",
+        None,
+        true,
+        AgentContactInformation(
+          organisationDetails = AgentDetails("testOrganisation"),
+          email = "test@test.com",
+          phone = None,
+          mobile = None
+        ),
+        None
+      )
 
       val jsonBody = Json.toJson(validRequest)
 

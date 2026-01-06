@@ -17,45 +17,47 @@
 package controllers
 
 import config.AppConfig
+import connectors.SubscriptionConnector
 import controllers.auth.{IdentifierAuthAction, IdentifierAuthActionImpl, IdentifierRequest}
-import models.submission.{ConversationId, FileDetails, Pending, TestData}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{doAnswer, spy, when}
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, BodyParsers, Request, Result}
 import play.api.test.*
 import play.api.test.Helpers.*
 import play.api.{inject, Application}
-import repositories.submission.FileDetailsRepository
-import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector}
+import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.http.HttpVerbs.POST
 
-import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.Future
 
-class FileDetailsControllerSpec extends ISpecBase {
+class SubscriptionControllerSpec extends ISpecBase {
 
   private def authorisedApp(): Application = {
 
-    val dateNow     = LocalDate.now()
-    val dateTimeNow = LocalDateTime.now()
-    val fileDetails: FileDetails = FileDetails(
-      ConversationId("conversationId123456"),
-      "subscriptionId",
-      "messageRefId",
-      "Reporting Entity",
-      TestData,
-      Pending,
-      "file1.xml",
-      dateTimeNow,
-      dateTimeNow,
-      None,
-      Some(Organisation),
-      None,
-      dateNow,
-      dateNow
-    )
+    val readSubscriptionResponse =
+      """
+        |{
+        |  "displaySubscriptionForCBCResponse" : {
+        |    "responseCommon" : {
+        |      "status" : "Pending",
+        |      "processingDate" : "2026-01-05"
+        |    },
+        |    "responseDetail" : {
+        |      "subscriptionID" : "testsubscriptionId",
+        |      "isGBUser" : true,
+        |      "primaryContact" : [{
+        |        "organisation" : {
+        |          "organisationName" : "testOrg"
+        |        },
+        |        "email" : "test@test.com"
+        |      }]
+        |    }
+        |  }
+        |}""".stripMargin
 
     val mockAppConfig = mock[AppConfig]
 
@@ -80,29 +82,37 @@ class FileDetailsControllerSpec extends ISpecBase {
 
       val block = invocation.getArgument(1).asInstanceOf[Request[AnyContent] => Future[Result]]
 
-      block(IdentifierRequest(request, Organisation))
+      block(IdentifierRequest(request, AffinityGroup.Organisation))
     }.when(authAction).invokeBlock(any(), any())
 
-    val mockFileDetailsRepository = mock[FileDetailsRepository]
+    val mockSubscriptionConnector = mock[SubscriptionConnector]
 
-    val conversationId = ConversationId("testid")
-    when(mockFileDetailsRepository.findByConversationId(conversationId)).thenReturn(Future.successful(Some(fileDetails)))
-    when(mockFileDetailsRepository.findBySubscriptionId("testsubscriptionId")).thenReturn(Future.successful(Seq(fileDetails)))
-    when(mockFileDetailsRepository.findStatusByConversationId(conversationId)).thenReturn(Future.successful(Some(Pending)))
+    when(
+      mockSubscriptionConnector.readSubscriptionInformation(any())(any(), any())
+    ).thenReturn(
+      Future.successful(HttpResponse(OK, readSubscriptionResponse))
+    )
+
+    when(
+      mockSubscriptionConnector.updateSubscription(any())(any(), any())
+    ).thenReturn(
+      Future.successful(HttpResponse(OK, "{}"))
+    )
 
     new GuiceApplicationBuilder()
       .overrides(
         inject.bind[IdentifierAuthAction].toInstance(authAction),
         inject.bind[AppConfig].toInstance(mockAppConfig),
-        inject.bind[FileDetailsRepository].toInstance(mockFileDetailsRepository)
+        inject.bind[SubscriptionConnector].toInstance(mockSubscriptionConnector)
       )
       .build()
   }
 
-  "GET /files/:conversationId/details" should {
+  "POST /subscription/read-subscription/:subscriptionId" should {
 
     "reject unauthenticated requests" in {
-      val request = FakeRequest(GET, "/country-by-country-reporting/files/testid/details")
+      val request =
+        FakeRequest(POST, "/country-by-country-reporting/subscription/read-subscription/testid")
 
       val app = unauthorisedApp()
 
@@ -117,7 +127,8 @@ class FileDetailsControllerSpec extends ISpecBase {
 
     "return 200 OK when authorised request" in {
 
-      val request = FakeRequest(GET, "/country-by-country-reporting/files/testid/details")
+      val request =
+        FakeRequest(POST, "/country-by-country-reporting/subscription/read-subscription/testid")
 
       val app = authorisedApp()
 
@@ -129,10 +140,17 @@ class FileDetailsControllerSpec extends ISpecBase {
       }
     }
   }
-  "GET /files/details/:subscriptionId" should {
+  "POST /subscription/update-subscription" should {
 
     "reject unauthenticated requests" in {
-      val request = FakeRequest(GET, "/country-by-country-reporting/files/details/testsubscriptionId")
+      val request =
+        FakeRequest(POST, "/country-by-country-reporting/subscription/update-subscription")
+          .withHeaders(CONTENT_TYPE -> "application/json")
+          .withBody(
+            Json.obj(
+              "someField" -> "someValue"
+            )
+          )
 
       val app = unauthorisedApp()
 
@@ -147,37 +165,36 @@ class FileDetailsControllerSpec extends ISpecBase {
 
     "return 200 OK when authorised request" in {
 
-      val request = FakeRequest(GET, "/country-by-country-reporting/files/details/testsubscriptionId")
+      val requestDetailJson = Json.parse(
+        """
+          |{
+          | "IDType": "SAFE",
+          | "IDNumber": "IDNumber",
+          | "tradingName": "Test Trading Name",
+          | "isGBUser": true,
+          | "primaryContact":
+          |   {
+          |     "organisation": {
+          |       "organisationName": "TestorgName1"
+          |     },
+          |     "email": "test@email.com",
+          |     "phone": "+4411223344"
+          |   },
+          | "secondaryContact":
+          |   {
+          |     "organisation": {
+          |       "organisationName": "TestorgName2"
+          |     },
+          |     "email": "test@email.com",
+          |     "phone": "+4411223344"
+          |   }
+          |}""".stripMargin
+      )
 
-      val app = authorisedApp()
-
-      running(app) {
-        val result =
-          route(app, request).getOrElse(fail("Route not defined"))
-
-        status(result) shouldBe OK
-      }
-    }
-  }
-  "GET /files/:conversationId/status" should {
-
-    "reject unauthenticated requests" in {
-      val request = FakeRequest(GET, "/country-by-country-reporting/files/testid/status")
-
-      val app = unauthorisedApp()
-
-      running(app) {
-        val result = route(app, request).getOrElse {
-          fail("Route not defined.")
-        }
-
-        status(result) should (be(UNAUTHORIZED) or be(FORBIDDEN))
-      }
-    }
-
-    "return 200 OK when authorised request" in {
-
-      val request = FakeRequest(GET, "/country-by-country-reporting/files/testid/status")
+      val request =
+        FakeRequest(POST, "/country-by-country-reporting/subscription/update-subscription")
+          .withHeaders(CONTENT_TYPE -> "application/json")
+          .withJsonBody(requestDetailJson)
 
       val app = authorisedApp()
 
