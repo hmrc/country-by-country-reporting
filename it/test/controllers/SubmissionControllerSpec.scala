@@ -118,6 +118,9 @@ class SubmissionControllerSpec extends ISpecBase {
         inject.bind[SDESConnector].toInstance(mockSDESConnector),
         inject.bind[FileDetailsRepository].toInstance(mockFileRepository)
       )
+      .configure(
+        "auditing.enabled" -> "false"
+      )
       .build()
   }
 

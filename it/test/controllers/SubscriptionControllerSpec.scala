@@ -105,6 +105,9 @@ class SubscriptionControllerSpec extends ISpecBase {
         inject.bind[AppConfig].toInstance(mockAppConfig),
         inject.bind[SubscriptionConnector].toInstance(mockSubscriptionConnector)
       )
+      .configure(
+        "auditing.enabled" -> "false"
+      )
       .build()
   }
 
@@ -206,5 +209,4 @@ class SubscriptionControllerSpec extends ISpecBase {
       }
     }
   }
-
 }

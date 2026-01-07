@@ -77,6 +77,9 @@ class SubmissionValidationControllerSpec extends ISpecBase {
         inject.bind[AppConfig].toInstance(mockAppConfig),
         inject.bind[XMLValidationService].toInstance(mockXmlValidationService)
       )
+      .configure(
+        "auditing.enabled" -> "false"
+      )
       .build()
   }
 

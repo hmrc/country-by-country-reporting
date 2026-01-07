@@ -106,6 +106,9 @@ class AgentSubscriptionControllerSpec extends ISpecBase {
         inject.bind[AgentOnlyAuthAction].toInstance(authAction),
         inject.bind[AgentSubscriptionConnector].toInstance(mockConnector)
       )
+      .configure(
+        "auditing.enabled" -> "false"
+      )
       .build()
   }
 

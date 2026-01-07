@@ -96,6 +96,9 @@ class FileDetailsControllerSpec extends ISpecBase {
         inject.bind[AppConfig].toInstance(mockAppConfig),
         inject.bind[FileDetailsRepository].toInstance(mockFileDetailsRepository)
       )
+      .configure(
+        "auditing.enabled" -> "false"
+      )
       .build()
   }
 

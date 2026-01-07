@@ -18,20 +18,30 @@ package controllers
 
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.stream.Materializer
+import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
+import play.api.i18n.Lang.logger
 import play.api.inject.guice.GuiceApplicationBuilder
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
-trait ISpecBase extends AnyWordSpec with Matchers with MockitoSugar {
+trait ISpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAndAfterAll {
 
   implicit val system: ActorSystem                = ActorSystem()
   implicit val materializer: Materializer         = Materializer(system)
   implicit val executionContext: ExecutionContext = system.dispatcher
 
   def unauthorisedApp(): Application = new GuiceApplicationBuilder().build()
+
+  override def afterAll(): Unit = {
+    val termination: Future[Unit] = system.terminate().map(_ => ())
+    termination.onComplete(_ => super.afterAll())
+    termination.failed.foreach { ex =>
+      logger.error(s"ActorSystem termination error: ${ex.getMessage}")
+    }
+  }
 
 }
