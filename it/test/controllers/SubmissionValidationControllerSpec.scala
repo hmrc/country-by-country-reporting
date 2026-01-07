@@ -101,7 +101,7 @@ class SubmissionValidationControllerSpec extends ISpecBase {
           fail("Route not defined.")
         }
 
-        status(result) should (be(UNAUTHORIZED) or be(FORBIDDEN))
+        status(result) should be(UNAUTHORIZED)
       }
     }
 

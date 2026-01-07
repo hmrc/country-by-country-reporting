@@ -131,7 +131,7 @@ class AgentSubscriptionControllerSpec extends ISpecBase {
           fail("Route not defined.")
         }
 
-        status(result) should (be(UNAUTHORIZED) or be(FORBIDDEN))
+        status(result) should be(UNAUTHORIZED)
       }
     }
 
@@ -186,7 +186,7 @@ class AgentSubscriptionControllerSpec extends ISpecBase {
           fail("Route not defined.")
         }
 
-        status(result) should (be(UNAUTHORIZED) or be(FORBIDDEN))
+        status(result) should be(UNAUTHORIZED)
       }
     }
 
@@ -223,7 +223,7 @@ class AgentSubscriptionControllerSpec extends ISpecBase {
           fail("Route not defined.")
         }
 
-        status(result) should (be(UNAUTHORIZED) or be(FORBIDDEN))
+        status(result) should be(UNAUTHORIZED)
       }
     }
 
