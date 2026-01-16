@@ -20,7 +20,7 @@ import config.AppConfig
 import controllers.actions.EISResponsePreConditionCheckActionRefiner
 import controllers.auth.ValidateAuthTokenAction
 import models.audit.{Audit, AuditDetailForEISResponse, AuditType}
-import models.submission.{Accepted => FileStatusAccepted, ConversationId, FileStatus, Rejected}
+import models.submission.{Accepted as FileStatusAccepted, ConversationId, FileStatus, Rejected}
 import models.xml.{BREResponse, ValidationStatus}
 import play.api.Logging
 import play.api.libs.json.Json
@@ -32,7 +32,7 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import utils.{CustomAlertUtil, DateTimeFormatUtil}
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.xml.NodeSeq
 
 class EISResponseController @Inject() (
@@ -57,54 +57,60 @@ class EISResponseController @Inject() (
     }
 
   def processEISResponse(): Action[NodeSeq] = (Action(parse.xml) andThen validateAuth andThen actionRefiner).async { implicit request =>
-    fileDetailsRepository
+    val found = fileDetailsRepository
       .findByConversationId(ConversationId(request.BREResponse.conversationID))
       .flatMap {
         case Some(fileDetails) =>
           val auditDetails = AuditDetailForEISResponse(request.BREResponse, Some(fileDetails))
           val audit        = Audit(auditDetails, userType = fileDetails.userType)
-          auditService.sendAuditEvent(AuditType.eisResponse, Json.toJson(audit))
+          auditService.sendAuditEvent(AuditType.eisResponse, Json.toJson(audit)).map(_ => true)
         case _ =>
+          logger.warn(s"File details not found for ConversationID: ${request.BREResponse.conversationID}")
           val auditDetails = AuditDetailForEISResponse(request.BREResponse, None)
-          auditService.sendAuditEvent(AuditType.eisResponse, Json.toJson(Audit(auditDetails, error = Some("File details not found"))))
+          auditService.sendAuditEvent(AuditType.eisResponse, Json.toJson(Audit(auditDetails, error = Some("File details not found")))).map(_ => false)
       }
       .recoverWith { case e: Exception =>
         val errorMessage = s"Failed to get file details: ${e.getMessage}"
         logger.error(errorMessage)
         val auditDetails = AuditDetailForEISResponse(request.BREResponse, None)
-        auditService.sendAuditEvent(AuditType.eisResponse, Json.toJson(Audit(auditDetails, error = Some(errorMessage))))
+        auditService.sendAuditEvent(AuditType.eisResponse, Json.toJson(Audit(auditDetails, error = Some(errorMessage)))).map(_ => false)
       }
     val conversationId = request.BREResponse.conversationID
     val fileStatus     = convertToFileStatus(request.BREResponse)
 
-    fileDetailsRepository.updateStatus(conversationId, fileStatus) map {
-      case Some(updatedFileDetails) =>
-        val fastJourney = updatedFileDetails.lastUpdated.isBefore(updatedFileDetails.submitted.plusSeconds(appConfig.eisResponseWaitTime))
+    found.flatMap {
+      case true =>
+        fileDetailsRepository.updateStatus(conversationId, fileStatus) map {
+          case Some(updatedFileDetails) =>
+            val fastJourney = updatedFileDetails.lastUpdated.isBefore(updatedFileDetails.submitted.plusSeconds(appConfig.eisResponseWaitTime))
 
-        (fastJourney, updatedFileDetails.status) match {
-          case (_, FileStatusAccepted) | (false, Rejected(_)) =>
-            emailService.sendAndLogEmail(
-              updatedFileDetails.subscriptionId,
-              DateTimeFormatUtil.displayFormattedDate(updatedFileDetails.submitted),
-              updatedFileDetails.messageRefId,
-              updatedFileDetails.agentDetails,
-              updatedFileDetails.status == FileStatusAccepted,
-              updatedFileDetails.reportType,
-              updatedFileDetails.reportingPeriodStartDate.toString,
-              updatedFileDetails.reportingPeriodEndDate.toString,
-              updatedFileDetails.reportingEntityName
-            )
+            (fastJourney, updatedFileDetails.status) match {
+              case (_, FileStatusAccepted) | (false, Rejected(_)) =>
+                emailService.sendAndLogEmail(
+                  updatedFileDetails.subscriptionId,
+                  DateTimeFormatUtil.displayFormattedDate(updatedFileDetails.submitted),
+                  updatedFileDetails.messageRefId,
+                  updatedFileDetails.agentDetails,
+                  updatedFileDetails.status == FileStatusAccepted,
+                  updatedFileDetails.reportType,
+                  updatedFileDetails.reportingPeriodStartDate.toString,
+                  updatedFileDetails.reportingPeriodEndDate.toString,
+                  updatedFileDetails.reportingEntityName
+                )
+              case _ =>
+                logger.warn(
+                  s"Upload file status is rejected on fast journey. No email has been sent: lastUpdated: ${updatedFileDetails.lastUpdated}, submitted: ${updatedFileDetails.submitted}"
+                )
+            }
+            NoContent
           case _ =>
-            logger.warn(
-              s"Upload file status is rejected on fast journey. No email has been sent: lastUpdated: ${updatedFileDetails.lastUpdated}, submitted: ${updatedFileDetails.submitted}"
-            )
+            logger.error("Failed to update the status:mongo error - when trying to update status for ConversationID: " + conversationId + " to " + fileStatus)
+            val auditDetails = AuditDetailForEISResponse(request.BREResponse, None)
+            auditService.sendAuditEvent(AuditType.eisResponse, Json.toJson(Audit(auditDetails, error = Some("Failed to update the status: mongo error"))))
+            NoContent // We want to always respond with Success to EIS
         }
-        NoContent
-      case _ =>
-        logger.error("Failed to update the status:mongo error")
-        val auditDetails = AuditDetailForEISResponse(request.BREResponse, None)
-        auditService.sendAuditEvent(AuditType.eisResponse, Json.toJson(Audit(auditDetails, error = Some("Failed to update the status: mongo error"))))
-        InternalServerError
+      case false =>
+        Future.successful(NoContent)
     }
   }
 }
