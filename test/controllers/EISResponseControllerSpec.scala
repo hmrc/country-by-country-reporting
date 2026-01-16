@@ -405,8 +405,25 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
       verify(mockFileDetailsRepository, never()).updateStatus(any[String](), any[FileStatus]())
     }
 
-    "must return InternalServerError on failing to update the status" in {
-      when(mockFileDetailsRepository.findByConversationId(any[ConversationId])).thenReturn(Future.failed(new RuntimeException("Failed to get file details")))
+    "must return 204 on failing to update the status" in {
+      val fileDetails =
+        FileDetails(
+          ConversationId("conversationId123456"),
+          "subscriptionId",
+          "messageRefId",
+          "Reporting Entity",
+          TestData,
+          Rejected(ValidationErrors(None, None)),
+          "file1.xml",
+          LocalDateTime.now().minusSeconds(11),
+          LocalDateTime.now(),
+          None,
+          None,
+          None,
+          LocalDate.now(),
+          LocalDate.now()
+        )
+      when(mockFileDetailsRepository.findByConversationId(any[ConversationId])).thenReturn(Future.successful(Some(fileDetails)))
       when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(Success))
       when(mockFileDetailsRepository.updateStatus(any[String](), any[FileStatus]())).thenReturn(Future.successful(None))
 
@@ -417,7 +434,7 @@ class EISResponseControllerSpec extends SpecBase with BeforeAndAfterEach {
 
         val result = route(application, request).value
 
-        status(result) mustEqual INTERNAL_SERVER_ERROR
+        status(result) mustEqual NO_CONTENT
         verify(mockFileDetailsRepository, times(1)).updateStatus(any[String](), any[FileStatus]())
       }
     }
