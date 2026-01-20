@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,17 @@ package services
 
 import base.SpecBase
 import models.submission.*
+import play.api.test.Helpers.{await, defaultAwaitTimeout}
 
+import java.nio.charset.StandardCharsets
+import java.nio.file.{Files, Path}
 import scala.xml.Elem
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class DataExtractionSpec extends SpecBase {
+class DataExtractionStreamSpec extends SpecBase {
 
-  val dataExtraction: DataExtraction = app.injector.instanceOf[DataExtraction]
+  val dataExtraction = app.injector.instanceOf[DataExtractionStream]
+
   def generateValidXml(
     reportingEntityDocTypeIndic: List[Option[String]] = List(None),
     cbcReportDocTypeIndic: List[Option[String]] = List(),
@@ -33,51 +38,53 @@ class DataExtractionSpec extends SpecBase {
       <MessageSpec>
         <MessageRefId>MessageRefId</MessageRefId>
         <MessageTypeIndic>CBC401</MessageTypeIndic>
-      </MessageSpec>
-      {
+      </MessageSpec>{
       reportingEntityDocTypeIndic.map(reportingEntityIndic =>
         <CbcBody>
-          <ReportingEntity>
-            <Entity>
-              <Name>Name</Name>
-            </Entity>
-            <ReportingRole>CBC704</ReportingRole>
-            <ReportingPeriod>
-              <StartDate>2012-01-01</StartDate>
-              <EndDate>2016-01-01</EndDate>
-            </ReportingPeriod>
-          {
+        <ReportingEntity>
+          <Entity>
+            <Name>Name</Name>
+          </Entity>
+          <ReportingRole>CBC704</ReportingRole>
+          <ReportingPeriod>
+            <StartDate>2012-01-01</StartDate>
+            <EndDate>2016-01-01</EndDate>
+          </ReportingPeriod>{
           if reportingEntityIndic.nonEmpty then Seq(<DocSpec>
-              <urn1:DocTypeIndic>{reportingEntityIndic.get}</urn1:DocTypeIndic>
-            </DocSpec>)
+          <urn1:DocTypeIndic>
+            {reportingEntityIndic.get}
+          </urn1:DocTypeIndic>
+        </DocSpec>)
           else Seq.empty
         }
-          </ReportingEntity>
-          {
+        </ReportingEntity>{
           cbcReportDocTypeIndic.map(cbcReportIndic =>
             <CbcReports>
-              {
+          {
               if cbcReportIndic.nonEmpty then Seq(<DocSpec>
-                  <urn1:DocTypeIndic>{cbcReportIndic.get}</urn1:DocTypeIndic>
-                </DocSpec>)
+          <urn1:DocTypeIndic>
+            {cbcReportIndic.get}
+          </urn1:DocTypeIndic>
+        </DocSpec>)
               else Seq.empty
             }
-            </CbcReports>
+        </CbcReports>
           )
-        }
-          {
+        }{
           additionalInfoDocTypeIndic.map(additionalInfoIndic =>
             <AdditionalInfo>
-              {
+          {
               if additionalInfoIndic.nonEmpty then Seq(<DocSpec>
-                  <urn1:DocTypeIndic>{additionalInfoIndic.get}</urn1:DocTypeIndic>
-                </DocSpec>)
+          <urn1:DocTypeIndic>
+            {additionalInfoIndic.get}
+          </urn1:DocTypeIndic>
+        </DocSpec>)
               else Seq.empty
             }
-            </AdditionalInfo>
+        </AdditionalInfo>
           )
         }
-        </CbcBody>
+      </CbcBody>
       )
     }
     </CBC_OECD>
@@ -87,7 +94,12 @@ class DataExtractionSpec extends SpecBase {
     "must return Some(MessageSpecData) when given valid xml" in {
       val xml = generateValidXml(reportingEntityDocTypeIndic = List(Some("OECD1")))
 
-      dataExtraction.messageSpecData(xml) mustBe Some(MessageSpecData("MessageRefId", CBC401, NewInformation, startDate, endDate, "Name"))
+      val xmlFile = writeXmlToTempFile(xml)
+      val xmlUrl  = xmlFile.toUri.toURL.toString
+
+      val result = await(dataExtraction.messageSpecData(xmlUrl))
+
+      result mustBe Some(MessageSpecData("MessageRefId", CBC401, NewInformation, startDate, endDate, "Name"))
     }
 
     "must return None when given invalid xml" in {
@@ -101,7 +113,12 @@ class DataExtractionSpec extends SpecBase {
           </ReportingEntity>
         </file>
 
-      dataExtraction.messageSpecData(xml) mustBe None
+      val xmlFile = writeXmlToTempFile(xml)
+      val xmlUrl  = xmlFile.toUri.toURL.toString
+
+      val result = await(dataExtraction.messageSpecData(xmlUrl))
+
+      result mustBe None
     }
 
   }
@@ -117,7 +134,12 @@ class DataExtractionSpec extends SpecBase {
             additionalInfoDocTypeIndic = List(Some("OECD3"))
           )
 
-          dataExtraction.getReportType(CBC402, xml) mustBe TestData
+          val xmlFile = writeXmlToTempFile(xml)
+          val xmlUrl  = xmlFile.toUri.toURL.toString
+
+          val result = await(dataExtraction.messageSpecData(xmlUrl).map(_.map(_.reportType).getOrElse(fail("Expected Some(MessageSpecData)"))))
+
+          result mustBe TestData
         }
         s"DocTypeIndic $code in CbcReports returns TestDataReportType" in {
           val xml = generateValidXml(
@@ -126,7 +148,12 @@ class DataExtractionSpec extends SpecBase {
             additionalInfoDocTypeIndic = List(Some("OECD3"))
           )
 
-          dataExtraction.getReportType(CBC402, xml) mustBe TestData
+          val xmlFile = writeXmlToTempFile(xml)
+          val xmlUrl  = xmlFile.toUri.toURL.toString
+
+          val result = await(dataExtraction.messageSpecData(xmlUrl).map(_.map(_.reportType).getOrElse(fail("Expected Some(MessageSpecData)"))))
+
+          result mustBe TestData
         }
         s"DocTypeIndic $code in AdditionalInfo returns TestDataReportType" in {
           val xml = generateValidXml(
@@ -135,7 +162,12 @@ class DataExtractionSpec extends SpecBase {
             additionalInfoDocTypeIndic = List(Some(code))
           )
 
-          dataExtraction.getReportType(CBC402, xml) mustBe TestData
+          val xmlFile = writeXmlToTempFile(xml)
+          val xmlUrl  = xmlFile.toUri.toURL.toString
+
+          val result = await(dataExtraction.messageSpecData(xmlUrl).map(_.map(_.reportType).getOrElse(fail("Expected Some(MessageSpecData)"))))
+
+          result mustBe TestData
         }
       }
     }
@@ -143,13 +175,23 @@ class DataExtractionSpec extends SpecBase {
     "must return NewInformationReportType if the MessageTypeIndic is CBC401 and any ReportingEntity DocTypeIndic is OECD1" in {
       val xml = generateValidXml(reportingEntityDocTypeIndic = List(Some("OECD1")))
 
-      dataExtraction.getReportType(CBC401, xml) mustBe NewInformation
+      val xmlFile = writeXmlToTempFile(xml)
+      val xmlUrl  = xmlFile.toUri.toURL.toString
+
+      val result = await(dataExtraction.messageSpecData(xmlUrl).map(_.map(_.reportType).getOrElse(fail("Expected Some(MessageSpecData)"))))
+
+      result mustBe NewInformation
     }
 
     "must return NewInformationForExistingReport if the MessageTypeIndic is CBC401 and none of ReportingEntity DocTypeIndic is OECD1" in {
       val xml = generateValidXml(reportingEntityDocTypeIndic = List(Some("OECD2")))
 
-      dataExtraction.getReportType(CBC401, xml) mustBe NewInformationForExistingReport
+      val xmlFile = writeXmlToTempFile(xml)
+      val xmlUrl  = xmlFile.toUri.toURL.toString
+
+      val result = await(dataExtraction.messageSpecData(xmlUrl).map(_.map(_.reportType).getOrElse(fail("Expected Some(MessageSpecData)"))))
+
+      result mustBe NewInformationForExistingReport
     }
 
     "must return DeletionOfAllPreviousInformationReportType if any ReportingEntity DocTypeIndic is OECD3" in {
@@ -157,7 +199,12 @@ class DataExtractionSpec extends SpecBase {
         reportingEntityDocTypeIndic = List(None, Some("Y"), Some("OECD3"))
       )
 
-      dataExtraction.getReportType(CBC402, xml) mustBe DeletionOfAllInformation
+      val xmlFile = writeXmlToTempFile(xml)
+      val xmlUrl  = xmlFile.toUri.toURL.toString
+
+      val result = await(dataExtraction.messageSpecData(xmlUrl).map(_.map(_.reportType).getOrElse(fail("Expected Some(MessageSpecData)"))))
+
+      result mustBe DeletionOfAllInformation
     }
 
     "must return CorrectionsAndDeletionsForExistingReportType if there is at least one CbcReports element" in {
@@ -165,7 +212,12 @@ class DataExtractionSpec extends SpecBase {
         cbcReportDocTypeIndic = List(None)
       )
 
-      dataExtraction.getReportType(CBC402, xml) mustBe CorrectionAndDeletionForExistingReport
+      val xmlFile = writeXmlToTempFile(xml)
+      val xmlUrl  = xmlFile.toUri.toURL.toString
+
+      val result = await(dataExtraction.messageSpecData(xmlUrl).map(_.map(_.reportType).getOrElse(fail("Expected Some(MessageSpecData)"))))
+
+      result mustBe CorrectionAndDeletionForExistingReport
     }
 
     "must return CorrectionsAndDeletionsForExistingReportType if there is at least one AdditionalInfo element" in {
@@ -173,7 +225,12 @@ class DataExtractionSpec extends SpecBase {
         additionalInfoDocTypeIndic = List(None)
       )
 
-      dataExtraction.getReportType(CBC402, xml) mustBe CorrectionAndDeletionForExistingReport
+      val xmlFile = writeXmlToTempFile(xml)
+      val xmlUrl  = xmlFile.toUri.toURL.toString
+
+      val result = await(dataExtraction.messageSpecData(xmlUrl).map(_.map(_.reportType).getOrElse(fail("Expected Some(MessageSpecData)"))))
+
+      result mustBe CorrectionAndDeletionForExistingReport
     }
 
     "must return CorrectionsForExistingReportType if all the DocTypeIndic values in CbcReports or AdditionalInfo are OECD2" in {
@@ -181,7 +238,12 @@ class DataExtractionSpec extends SpecBase {
         cbcReportDocTypeIndic = List(Some("OECD2"), Some("OECD2"), Some("OECD2"))
       )
 
-      dataExtraction.getReportType(CBC402, xml) mustBe CorrectionForExistingReport
+      val xmlFile = writeXmlToTempFile(xml)
+      val xmlUrl  = xmlFile.toUri.toURL.toString
+
+      val result = await(dataExtraction.messageSpecData(xmlUrl).map(_.map(_.reportType).getOrElse(fail("Expected Some(MessageSpecData)"))))
+
+      result mustBe CorrectionForExistingReport
     }
 
     "must return DeletionForExistingReport if all the DocTypeIndic values in CbcReports or AdditionalInfo are OECD3 and ReportingEntity DocTypeIndicators contains OECD0" in {
@@ -190,7 +252,12 @@ class DataExtractionSpec extends SpecBase {
         reportingEntityDocTypeIndic = List(Option("OECD0"))
       )
 
-      dataExtraction.getReportType(CBC402, xml) mustBe DeletionForExistingReport
+      val xmlFile = writeXmlToTempFile(xml)
+      val xmlUrl  = xmlFile.toUri.toURL.toString
+
+      val result = await(dataExtraction.messageSpecData(xmlUrl).map(_.map(_.reportType).getOrElse(fail("Expected Some(MessageSpecData)"))))
+
+      result mustBe DeletionForExistingReport
     }
 
     "must return CorrectionAndDeletionForExistingReport if the DocTypeIndic values in CbcReports or AdditionalInfo are mixed" in {
@@ -199,7 +266,12 @@ class DataExtractionSpec extends SpecBase {
         additionalInfoDocTypeIndic = List(Some("OECD1"))
       )
 
-      dataExtraction.getReportType(CBC402, xml) mustBe CorrectionAndDeletionForExistingReport
+      val xmlFile = writeXmlToTempFile(xml)
+      val xmlUrl  = xmlFile.toUri.toURL.toString
+
+      val result = await(dataExtraction.messageSpecData(xmlUrl).map(_.map(_.reportType).getOrElse(fail("Expected Some(MessageSpecData)"))))
+
+      result mustBe CorrectionAndDeletionForExistingReport
     }
 
     "must return CorrectionAndDeletionForExistingReport if there are no DocTypeIndic values in CbcReports or AdditionalInfo" in {
@@ -208,7 +280,12 @@ class DataExtractionSpec extends SpecBase {
         additionalInfoDocTypeIndic = List(None)
       )
 
-      dataExtraction.getReportType(CBC402, xml) mustBe CorrectionAndDeletionForExistingReport
+      val xmlFile = writeXmlToTempFile(xml)
+      val xmlUrl  = xmlFile.toUri.toURL.toString
+
+      val result = await(dataExtraction.messageSpecData(xmlUrl).map(_.map(_.reportType).getOrElse(fail("Expected Some(MessageSpecData)"))))
+
+      result mustBe CorrectionAndDeletionForExistingReport
     }
 
     "must return CorrectionAndDeletionForExistingReport if CbcReports or AdditionalInfo contains OECD3 and ReportingEntity DocTypeIndicators contains OECD2" in {
@@ -217,14 +294,30 @@ class DataExtractionSpec extends SpecBase {
         reportingEntityDocTypeIndic = List(Option("OECD2"))
       )
 
-      dataExtraction.getReportType(CBC402, xml) mustBe CorrectionAndDeletionForExistingReport
+      val xmlFile = writeXmlToTempFile(xml)
+      val xmlUrl  = xmlFile.toUri.toURL.toString
+
+      val result = await(dataExtraction.messageSpecData(xmlUrl).map(_.map(_.reportType).getOrElse(fail("Expected Some(MessageSpecData)"))))
+
+      result mustBe CorrectionAndDeletionForExistingReport
     }
 
     "must return CorrectionForReportingEntity if none of the conditions above are met" in {
       val xml = generateValidXml()
 
-      dataExtraction.getReportType(CBC402, xml) mustBe CorrectionForReportingEntity
+      val xmlFile = writeXmlToTempFile(xml)
+      val xmlUrl  = xmlFile.toUri.toURL.toString
+
+      val result = await(dataExtraction.messageSpecData(xmlUrl).map(_.map(_.reportType).getOrElse(fail("Expected Some(MessageSpecData)"))))
+
+      result mustBe CorrectionForReportingEntity
     }
+  }
+
+  private def writeXmlToTempFile(xml: Elem): Path = {
+    val tmpFile = Files.createTempFile("message-spec-", ".xml")
+    Files.write(tmpFile, xml.toString().getBytes(StandardCharsets.UTF_8))
+    tmpFile
   }
 
 }

@@ -17,15 +17,18 @@
 package services.validation
 
 import models.validation.SaxParseError
-import org.xml.sax.SAXParseException
+import org.xml.sax.{ErrorHandler, SAXParseException}
 import org.xml.sax.helpers.DefaultHandler
 
-import java.io.StringReader
+import java.io.{InputStream, StringReader}
 import java.net.URL
 import javax.inject.Inject
 import javax.xml.parsers.{SAXParser, SAXParserFactory}
-import javax.xml.validation.Schema
+import javax.xml.transform.stream.StreamSource
+import javax.xml.validation.{Schema, SchemaFactory}
 import scala.collection.mutable.ListBuffer
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Using
 import scala.xml.factory.XMLLoader
 import scala.xml.{Elem, NodeSeq}
 
@@ -73,4 +76,51 @@ class XMLValidationService @Inject() () {
     val loadedXML                       = xmlLoader(filePath, list).load(new StringReader(xml.mkString))
     if (list.isEmpty) Right(loadedXML) else Left(list)
   }
+
+  def validateUrlStreamAsync(upScanUrl: String, xsdResourcePath: String)(implicit ec: ExecutionContext): Future[Either[List[SaxParseError], Unit]] =
+    Future {
+      Using.resource(new URL(upScanUrl).openStream()) { is =>
+        validateStream(is, xsdResourcePath)
+      }
+    }
+
+  private def loadSchemaFromResource(xsdResourcePath: String): Schema = {
+    val xsdUrl: URL =
+      Option(getClass.getResource(xsdResourcePath))
+        .getOrElse(throw new IllegalArgumentException(s"XSD resource not found: $xsdResourcePath"))
+
+    SchemaFactory.newInstance(schemaLang).newSchema(xsdUrl)
+  }
+
+  private def toErrorHandler(errorList: ListBuffer[SaxParseError]): ErrorHandler =
+    new ErrorHandler {
+      override def warning(e: SAXParseException): Unit =
+        errorList += SaxParseError(e.getLineNumber, e.getMessage)
+
+      override def error(e: SAXParseException): Unit =
+        errorList += SaxParseError(e.getLineNumber, e.getMessage)
+
+      override def fatalError(e: SAXParseException): Unit =
+        errorList += SaxParseError(e.getLineNumber, e.getMessage)
+    }
+
+  private def validateStream(xmlInput: InputStream, xsdResourcePath: String): Either[List[SaxParseError], Unit] = {
+    val errors = ListBuffer.empty[SaxParseError]
+
+    val schema    = loadSchemaFromResource(xsdResourcePath)
+    val validator = schema.newValidator()
+    validator.setErrorHandler(toErrorHandler(errors))
+
+    try
+      validator.validate(new StreamSource(xmlInput))
+    catch {
+      case e: SAXParseException =>
+        errors += SaxParseError(e.getLineNumber, e.getMessage)
+      case e: Exception =>
+        errors += SaxParseError(-1, e.getMessage)
+    }
+
+    if (errors.isEmpty) Right(()) else Left(errors.toList)
+  }
+
 }
