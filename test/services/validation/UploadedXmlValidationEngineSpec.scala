@@ -29,6 +29,7 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.DurationInt
 import scala.xml.Elem
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class UploadedXmlValidationEngineSpec extends SpecBase {
 

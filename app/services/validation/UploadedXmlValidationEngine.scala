@@ -26,14 +26,14 @@ import services.DataExtractionStream
 
 import javax.inject.Inject
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class UploadedXmlValidationEngine @Inject() (xmlValidationService: XMLValidationService,
                                              xmlErrorMessageHelper: XmlErrorMessageHelper,
                                              dataExtraction: DataExtractionStream,
                                              appConfig: AppConfig
-) extends Logging {
+)(implicit ec: ExecutionContext)
+    extends Logging {
 
   def validateUploadSubmission(upScanUrl: String): Future[SubmissionValidationResult] =
     try
