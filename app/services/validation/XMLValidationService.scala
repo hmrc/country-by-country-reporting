@@ -21,7 +21,7 @@ import org.xml.sax.{ErrorHandler, SAXParseException}
 import org.xml.sax.helpers.DefaultHandler
 
 import java.io.{InputStream, StringReader}
-import java.net.URL
+import java.net.{URI, URL}
 import javax.inject.Inject
 import javax.xml.parsers.{SAXParser, SAXParserFactory}
 import javax.xml.transform.stream.StreamSource
@@ -79,7 +79,7 @@ class XMLValidationService @Inject() () {
 
   def validateUrlStreamAsync(upScanUrl: String, xsdResourcePath: String)(implicit ec: ExecutionContext): Future[Either[List[SaxParseError], Unit]] =
     Future {
-      Using.resource(new URL(upScanUrl).openStream()) { is =>
+      Using.resource(new URI(upScanUrl).toURL.openStream()) { is =>
         validateStream(is, xsdResourcePath)
       }
     }
