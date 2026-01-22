@@ -21,7 +21,7 @@ import org.xml.sax.helpers.DefaultHandler
 import org.xml.sax.Attributes
 
 import javax.xml.parsers.SAXParserFactory
-import java.net.URL
+import java.net.URI
 import java.time.LocalDate
 import javax.inject.Inject
 import scala.collection.mutable
@@ -61,7 +61,7 @@ class DataExtractionStream @Inject() (implicit ec: ExecutionContext) {
     val parser  = factory.newSAXParser()
     val handler = new MessageSpecHandler
 
-    val is = new URL(xmlUrl).openStream()
+    val is = new URI(xmlUrl).toURL.openStream()
     try parser.parse(is, handler)
     finally is.close()
 
