@@ -18,6 +18,7 @@ package controllers
 
 import config.AppConfig
 import controllers.auth.{IdentifierAuthAction, IdentifierAuthActionImpl, IdentifierRequest}
+import models.submission.*
 import org.mockito.ArgumentMatchers.{any, anyString}
 import org.mockito.Mockito.{doAnswer, spy, when}
 import org.scalatest.wordspec.AnyWordSpec
@@ -27,12 +28,13 @@ import play.api.mvc.{AnyContent, BodyParsers, Request, Result}
 import play.api.test.*
 import play.api.test.Helpers.*
 import play.api.{inject, Application}
+import services.DataExtractionStream
 import services.validation.XMLValidationService
 import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector}
 import uk.gov.hmrc.http.HttpVerbs.POST
 
-import scala.concurrent.Future
-import scala.xml.XML
+import java.time.LocalDate
+import scala.concurrent.{ExecutionContext, Future}
 
 class SubmissionValidationControllerSpec extends ISpecBase {
 
@@ -66,16 +68,21 @@ class SubmissionValidationControllerSpec extends ISpecBase {
     }.when(authAction).invokeBlock(any(), any())
 
     val mockXmlValidationService = mock[XMLValidationService]
+    val mockDataExtractionSteam  = mock[DataExtractionStream]
+    val msd                      = MessageSpecData("XDSG111111", CBC401, NewInformation, LocalDate.now(), LocalDate.now(), "Reporting Entity")
 
     when(
-      mockXmlValidationService.validate(anyString(), anyString())
-    ).thenReturn(Right(XML.loadFile("test/resources/cbc/fileUpload/validcbc.xml")))
+      mockXmlValidationService.validateUrlStreamAsync(anyString(), anyString())(any[ExecutionContext]())
+    ).thenReturn(Future.successful(Right(())))
+
+    when(mockDataExtractionSteam.messageSpecData(any[String])).thenReturn(Future.successful(Some(msd)))
 
     new GuiceApplicationBuilder()
       .overrides(
         inject.bind[IdentifierAuthAction].toInstance(authAction),
         inject.bind[AppConfig].toInstance(mockAppConfig),
-        inject.bind[XMLValidationService].toInstance(mockXmlValidationService)
+        inject.bind[XMLValidationService].toInstance(mockXmlValidationService),
+        inject.bind[DataExtractionStream].toInstance(mockDataExtractionSteam)
       )
       .configure(
         "auditing.enabled" -> "false"

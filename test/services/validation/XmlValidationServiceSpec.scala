@@ -18,6 +18,8 @@ package services.validation
 
 import base.SpecBase
 import models.validation.SaxParseError
+import play.api.test.Helpers.{await, defaultAwaitTimeout}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.collection.mutable.ListBuffer
 import scala.xml.XML
@@ -86,6 +88,26 @@ class XmlValidationServiceSpec extends SpecBase {
       val validSubmission = XML.loadFile("test/resources/cbc/fileUpload/validcbc_empty.xml")
 
       val result = service.validate(validSubmission, xsdPath)
+
+      result.isLeft mustBe true
+    }
+
+    "must correctly validate a streaming submission" in {
+      val service = app.injector.instanceOf[XMLValidationService]
+
+      val xmlUrl = getClass.getResource("/cbc/fileUpload/validcbc.xml").toURI.toString
+
+      val result = await(service.validateUrlStreamAsync(xmlUrl, xsdPath))
+
+      result.isLeft mustBe false
+    }
+
+    "must correctly validate a streaming submission with empty value" in {
+      val service = app.injector.instanceOf[XMLValidationService]
+
+      val xmlUrl = getClass.getResource("/cbc/fileUpload/validcbc_empty.xml").toURI.toString
+
+      val result = await(service.validateUrlStreamAsync(xmlUrl, xsdPath))
 
       result.isLeft mustBe true
     }

@@ -19,36 +19,36 @@ package services.validation
 import config.AppConfig
 import helpers.XmlErrorMessageHelper
 import models.submission.MessageSpecData
-import models.validation._
+import models.validation.*
 import org.xml.sax.SAXParseException
 import play.api.Logging
-import services.DataExtraction
+import services.DataExtractionStream
 
 import javax.inject.Inject
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.Future
-import scala.xml.Elem
+import scala.concurrent.{ExecutionContext, Future}
 
 class UploadedXmlValidationEngine @Inject() (xmlValidationService: XMLValidationService,
                                              xmlErrorMessageHelper: XmlErrorMessageHelper,
-                                             dataExtraction: DataExtraction,
+                                             dataExtraction: DataExtractionStream,
                                              appConfig: AppConfig
-) extends Logging {
+)(implicit ec: ExecutionContext)
+    extends Logging {
 
   def validateUploadSubmission(upScanUrl: String): Future[SubmissionValidationResult] =
     try
-      performXmlValidation(upScanUrl) match {
+      performXmlValidation(upScanUrl) map {
         case Right(messageSpecData) =>
           messageSpecData match {
-            case Some(msd) => Future.successful(SubmissionValidationSuccess(msd))
+            case Some(msd) => SubmissionValidationSuccess(msd)
             case None =>
               val errorMessage = "Could not retrieve messageSpec information from the submission"
               logger.warn(errorMessage)
-              Future.successful(InvalidXmlError(errorMessage))
+              InvalidXmlError(errorMessage)
           }
 
         case Left(errors) =>
-          Future.successful(SubmissionValidationFailure(ValidationErrors(errors)))
+          SubmissionValidationFailure(ValidationErrors(errors))
       }
     catch {
       case e: SAXParseException =>
@@ -56,11 +56,9 @@ class UploadedXmlValidationEngine @Inject() (xmlValidationService: XMLValidation
         Future.successful(InvalidXmlError(e.getMessage))
     }
 
-  def performXmlValidation(upScanUrl: String): Either[List[GenericError], Option[MessageSpecData]] = {
-    val xmlOrErrors: Either[ListBuffer[SaxParseError], Elem] = xmlValidationService.validate(upScanUrl, appConfig.fileUploadXSDFilePath)
-    xmlOrErrors match {
-      case Right(xml) => Right(dataExtraction.messageSpecData(xml))
-      case Left(list) => Left(xmlErrorMessageHelper.generateErrorMessages(list))
+  def performXmlValidation(upScanUrl: String): Future[Either[List[GenericError], Option[MessageSpecData]]] =
+    xmlValidationService.validateUrlStreamAsync(upScanUrl, appConfig.fileUploadXSDFilePath) flatMap {
+      case Right(_)   => dataExtraction.messageSpecData(upScanUrl).map(Right(_))
+      case Left(list) => Future.successful(Left(xmlErrorMessageHelper.generateErrorMessages(ListBuffer.from(list))))
     }
-  }
 }
