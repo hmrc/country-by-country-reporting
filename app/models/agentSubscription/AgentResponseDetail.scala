@@ -39,7 +39,6 @@ object AgentResponseDetail {
         (__ \ "primaryContact").read[Seq[ContactInformation]] and
         (__ \ "secondaryContact").readNullable[Seq[ContactInformation]]
     ) { (subscriptionID, tradingName, isGBUser, primaryContact, secondaryContact) =>
-      logger.info(s"AgentResponseDetail: received ${primaryContact.size} primary contacts and ${secondaryContact.getOrElse(0)} secondaryContacts")
       AgentResponseDetail(subscriptionID, tradingName, isGBUser, primaryContact.head, secondaryContact.map(_.head))
     }
   }

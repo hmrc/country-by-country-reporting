@@ -79,3 +79,4 @@ lazy val it = project
     scalacOptions := scalacOptions.value.distinct
   )
   .settings(libraryDependencies ++= AppDependencies.itDependencies)
+addCommandAlias("testAll", "; test ; it/test")
