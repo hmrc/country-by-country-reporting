@@ -23,7 +23,6 @@ lazy val microservice = Project("country-by-country-reporting", file("."))
     scalacOptions := scalacOptions.value.distinct
   )
   .settings(inConfig(Test)(testSettings): _*)
-  .settings(scoverageSettings)
   .settings(resolvers += Resolver.mavenCentral)
   .settings(CodeCoverageSettings.settings: _*)
   .settings(

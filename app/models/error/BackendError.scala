@@ -16,8 +16,7 @@
 
 package models.error
 
-import play.api.libs.json._
-import play.api.libs.json.OFormat
+import play.api.libs.json.*
 import uk.gov.hmrc.auth.core.AffinityGroup
 
 abstract class BackendError private[error] (val detail: String)
