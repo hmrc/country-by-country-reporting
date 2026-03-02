@@ -32,42 +32,6 @@ lazy val microservice = Project("country-by-country-reporting", file("."))
   )
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
 
-lazy val scoverageSettings = {
-  import scoverage.ScoverageKeys
-
-  val excludedPackages = Seq(
-    "<empty>",
-    ".*Reverse.*",
-    ".*Routes.*",
-    ".*standardError*.*",
-    ".*main_template*.*",
-    "uk.gov.hmrc.BuildInfo",
-    "app.*",
-    "prod.*",
-    "config.*",
-    "testOnlyDoNotUseInAppConf.*",
-    "views.html.*",
-    "testOnly.*",
-    ".*.metrics.*",
-    ".*.audit.*",
-    ".*javascript.*",
-    ".*GuiceInjector;",
-    ".*ControllerConfiguration",
-    ".*LanguageSwitchController",
-    ".*handlers.*",
-    ".*utils.*",
-    ".*Repository.*",
-    ".*/models/.*"
-  )
-
-  Seq(
-    ScoverageKeys.coverageExcludedFiles    := excludedPackages.mkString(";"),
-    ScoverageKeys.coverageMinimumStmtTotal := 80,
-    ScoverageKeys.coverageFailOnMinimum    := true,
-    ScoverageKeys.coverageHighlighting     := true
-  )
-}
-
 lazy val testSettings: Seq[Def.Setting[_]] = Seq(fork := true, unmanagedSourceDirectories += baseDirectory.value / "test-common")
 
 lazy val it = project
