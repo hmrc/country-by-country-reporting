@@ -229,7 +229,7 @@ class AgentSubscriptionControllerSpec extends ISpecBase {
 
     "return 200 OK when authorised request" in {
 
-      val validRequest = AgentRequestDetailForUpdate(
+      val validRequest = AgentRequestDetailForUpdatePayload(
         "TestIDType",
         "TestIDNumber",
         None,
@@ -240,7 +240,9 @@ class AgentSubscriptionControllerSpec extends ISpecBase {
           phone = None,
           mobile = None
         ),
-        None
+        None,
+        cbcId = Some("TestCBCId"),
+        agentClient = Some("Test client")
       )
 
       val jsonBody = Json.toJson(validRequest)

@@ -16,25 +16,29 @@
 
 package services
 
-import org.apache.pekko.http.javadsl.model.DateTime
 import base.SpecBase
 import connectors.AgentSubscriptionConnector
 import generators.Generators
-import models.agentSubscription.{AgentResponseDetail, _}
-import models.error._
-import org.mockito.ArgumentMatchers.any
+import models.agentSubscription.AgentSubscriptionEtmpRequest.*
+import models.agentSubscription.*
+import models.audit.AuditDetailForUpdateAgentRequest
+import models.error.*
+import models.subscription.{ContactInformation, OrganisationDetails}
+import org.apache.pekko.http.javadsl.model.DateTime
+import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
+import org.mockito.Mockito.verify
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatest.BeforeAndAfterEach
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import play.api.http.Status._
-import play.api.inject.bind
-import play.api.libs.json.Json
-import play.api.test.Helpers.{defaultAwaitTimeout, status}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import AgentSubscriptionEtmpRequest._
-import models.subscription.{ContactInformation, OrganisationDetails}
-import org.mockito.ArgumentMatchers.{eq => eqTo}
 import org.scalatest.prop.TableDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import play.api.http.Status.*
+import play.api.inject.bind
+import play.api.libs.json.{JsValue, Json}
+import play.api.test.Helpers.{defaultAwaitTimeout, status}
+import services.audit.AuditService
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Failure, Success}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -46,14 +50,16 @@ class AgentSubscriptionRequestServiceSpec
     with ScalaCheckPropertyChecks
     with TableDrivenPropertyChecks {
 
-  override def beforeEach(): Unit = reset(mockAgentSubscriptionConnector)
+  override def beforeEach(): Unit = reset(mockAgentSubscriptionConnector, mockAuditService)
 
   val mockAgentSubscriptionConnector = mock[AgentSubscriptionConnector]
+  val mockAuditService               = mock[AuditService]
 
   "AgentSubscriptionService" - {
     val application = applicationBuilder()
       .overrides(
-        bind[AgentSubscriptionConnector].toInstance(mockAgentSubscriptionConnector)
+        bind[AgentSubscriptionConnector].toInstance(mockAgentSubscriptionConnector),
+        bind[AuditService].toInstance(mockAuditService)
       )
       .build()
 
@@ -573,17 +579,51 @@ class AgentSubscriptionRequestServiceSpec
 
     "UpdateSubscription" - {
       val updateAgentSubscriptionRequest = agentSubscriptionRequestJson.as[AgentSubscriptionEtmpRequest]
+      val agentClientDetails             = AgentClientDetails(Some("cbcId"), Some("test name"))
 
-      "must  return UpdateSubscription with OK status when connector response with ok status" in {
+      "must  return UpdateSubscription with OK status when connector and audit service return an ok status" in {
         when(mockAgentSubscriptionConnector.updateSubscription(any[AgentSubscriptionEtmpRequest]())(any[HeaderCarrier](), any[ExecutionContext]()))
           .thenReturn(Future.successful(HttpResponse(OK, "Good Response")))
+        when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(Success))
 
-        val result = service.updateContactInformation(updateAgentSubscriptionRequest)
+        val auditTypeCaptor = ArgumentCaptor.forClass(classOf[String])
+        val auditPayload    = ArgumentCaptor.forClass(classOf[JsValue])
+        val result          = service.updateContactInformation(updateAgentSubscriptionRequest, agentClientDetails)
 
         whenReady(result) { sub =>
           verify(mockAgentSubscriptionConnector, times(1)).updateSubscription(any[AgentSubscriptionEtmpRequest]())(any[HeaderCarrier](),
                                                                                                                    any[ExecutionContext]()
           )
+          verify(mockAuditService, times(1)).sendAuditEvent(any(), any())(any(), any())
+          sub mustBe Right(())
+        }
+        verify(mockAuditService).sendAuditEvent(auditTypeCaptor.capture(), auditPayload.capture())(any(), any())
+
+        auditTypeCaptor.getValue mustEqual "UpdateContactDetails"
+        val auditDetail = auditPayload.getValue.as[AuditDetailForUpdateAgentRequest]
+        auditDetail.subscriptionId mustBe Some("cbcId")
+        auditDetail.reportingEntityName mustBe Some("test name")
+        auditDetail.firstContactName mustBe None
+        auditDetail.firstContactEmail mustBe "mj@gmailqqq.com"
+        auditDetail.firstContactPhoneNumber mustBe Some("(+351) 282 43 50 50")
+        auditDetail.hasSecondContact mustBe true
+        auditDetail.secondContactName mustBe None
+        auditDetail.secondContactEmail mustBe Some("djwkxescl@gmail.com")
+        auditDetail.secondContactPhoneNumber mustBe Some("1-234 567.89/01 ext.1234")
+      }
+
+      "must  return UpdateSubscription with OK status when connector returns Ok and audit service returns a failure" in {
+        when(mockAgentSubscriptionConnector.updateSubscription(any[AgentSubscriptionEtmpRequest]())(any[HeaderCarrier](), any[ExecutionContext]()))
+          .thenReturn(Future.successful(HttpResponse(OK, "Good Response")))
+        when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(Failure("Failed")))
+
+        val result = service.updateContactInformation(updateAgentSubscriptionRequest, agentClientDetails)
+
+        whenReady(result) { sub =>
+          verify(mockAgentSubscriptionConnector, times(1)).updateSubscription(any[AgentSubscriptionEtmpRequest]())(any[HeaderCarrier](),
+                                                                                                                   any[ExecutionContext]()
+          )
+          verify(mockAuditService, times(1)).sendAuditEvent(any(), any())(any(), any())
           sub mustBe Right(())
         }
       }
@@ -606,7 +646,7 @@ class AgentSubscriptionRequestServiceSpec
           when(mockAgentSubscriptionConnector.updateSubscription(any[AgentSubscriptionEtmpRequest]())(any[HeaderCarrier](), any[ExecutionContext]()))
             .thenReturn(Future.successful(HttpResponse(expectedStatusCode, "")))
 
-          val result = service.updateContactInformation(updateAgentSubscriptionRequest)
+          val result = service.updateContactInformation(updateAgentSubscriptionRequest, agentClientDetails)
 
           whenReady(result) { sub =>
             verify(mockAgentSubscriptionConnector, times(1)).updateSubscription(any[AgentSubscriptionEtmpRequest]())(any[HeaderCarrier](),

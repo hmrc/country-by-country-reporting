@@ -17,22 +17,26 @@
 package services
 
 import connectors.AgentSubscriptionConnector
-import models.agentSubscription._
-import models.error._
+import models.agentSubscription.*
+import models.error.*
 import models.subscription.{ContactInformation, OrganisationDetails}
 import play.api.Logging
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.libs.json.{JsSuccess, Json, Reads}
 import play.api.mvc.Result
-import play.api.mvc.Results._
+import play.api.mvc.Results.*
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try}
-import cats.syntax.all._
+import cats.syntax.all.*
+import models.audit.AuditType.updateContactDetails
+import models.audit.{Audit, AuditDetailForUpdateAgentRequest}
+import services.audit.AuditService
+import uk.gov.hmrc.auth.core.AffinityGroup
 
-class AgentSubscriptionService @Inject() (agentSubscriptionConnector: AgentSubscriptionConnector) extends Logging {
+class AgentSubscriptionService @Inject() (agentSubscriptionConnector: AgentSubscriptionConnector, auditService: AuditService) extends Logging {
 
   def createContactInformation(subscriptionRequest: AgentSubscriptionEtmpRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Result] =
     agentSubscriptionConnector.createSubscription(subscriptionRequest).map { response =>
@@ -72,11 +76,15 @@ class AgentSubscriptionService @Inject() (agentSubscriptionConnector: AgentSubsc
     }
 
   def updateContactInformation(
-    agentRequestDetailForUpdate: AgentSubscriptionEtmpRequest
+    agentRequestDetailForUpdate: AgentSubscriptionEtmpRequest,
+    agentClientDetails: AgentClientDetails
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Either[UpdateSubscriptionError, Unit]] =
     agentSubscriptionConnector.updateSubscription(agentRequestDetailForUpdate).map { response =>
       response.status match {
-        case OK => Right(())
+        case OK =>
+          val audit = Audit(AuditDetailForUpdateAgentRequest(agentRequestDetailForUpdate, agentClientDetails), Some(AffinityGroup.Agent))
+          auditService.sendAuditEvent(updateContactDetails, Json.toJson(audit))
+          Right(())
         case status =>
           handleError(response, Update)
           Left(UpdateSubscriptionError(status))

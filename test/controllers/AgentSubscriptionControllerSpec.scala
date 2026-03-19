@@ -19,8 +19,8 @@ package controllers
 import base.SpecBase
 import controllers.auth.{AgentOnlyAuthAction, FakeAgentOnlyAuthAction}
 import generators.Generators
-import models.agentSubscription.{AgentResponseDetail, AgentSubscriptionEtmpRequest, CreateAgentSubscriptionRequest}
-import models.error._
+import models.agentSubscription.{AgentClientDetails, AgentResponseDetail, AgentSubscriptionEtmpRequest, CreateAgentSubscriptionRequest}
+import models.error.*
 import org.apache.pekko.http.javadsl.model.DateTime
 import org.mockito.ArgumentMatchers.any
 import org.scalacheck.Arbitrary.arbitrary
@@ -30,7 +30,7 @@ import play.api.inject.bind
 import play.api.libs.json.Json
 import play.api.mvc.Results.{BadRequest, Conflict, Forbidden, InternalServerError, NotFound, ServiceUnavailable}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import services.AgentSubscriptionService
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -377,7 +377,11 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
     "UpdateSubscription" - {
 
       "should return OK when updateContactInformation was successful" in {
-        when(mockAgentSubscriptionService.updateContactInformation(any[AgentSubscriptionEtmpRequest])(any[HeaderCarrier], any[ExecutionContext]))
+        when(
+          mockAgentSubscriptionService.updateContactInformation(any[AgentSubscriptionEtmpRequest], any[AgentClientDetails])(any[HeaderCarrier],
+                                                                                                                            any[ExecutionContext]
+          )
+        )
           .thenReturn(Future.successful(Right(())))
 
         val request =
@@ -392,7 +396,11 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
       }
 
       "should return InternalServerError when updateContactInformation fails" in {
-        when(mockAgentSubscriptionService.updateContactInformation(any[AgentSubscriptionEtmpRequest])(any[HeaderCarrier], any[ExecutionContext]))
+        when(
+          mockAgentSubscriptionService.updateContactInformation(any[AgentSubscriptionEtmpRequest], any[AgentClientDetails])(any[HeaderCarrier],
+                                                                                                                            any[ExecutionContext]
+          )
+        )
           .thenReturn(Future.successful(Left(UpdateSubscriptionError(500))))
 
         val request =
