@@ -104,28 +104,7 @@ case class AgentRequestDetailForUpdatePayload(IDType: String,
 )
 
 object AgentRequestDetailForUpdatePayload {
-
-  implicit val reads: Reads[AgentRequestDetailForUpdatePayload] = (
-    (__ \ "IDType").read[String] and
-      (__ \ "IDNumber").read[String] and
-      (__ \ "tradingName").readNullable[String] and
-      (__ \ "isGBUser").read[Boolean] and
-      (__ \ "primaryContact").read[AgentContactInformation] and
-      (__ \ "secondaryContact").readNullable[AgentContactInformation] and
-      (__ \ "cbcId").readNullable[String] and
-      (__ \ "agentClient").readNullable[String]
-  )((idt, idr, tn, gb, pc, sc, cbcId, agentClient) => AgentRequestDetailForUpdatePayload(idt, idr, tn, gb, pc, sc, cbcId, agentClient))
-
-  implicit lazy val writes: Writes[AgentRequestDetailForUpdatePayload] = (
-    (__ \ "IDType").write[String] and
-      (__ \ "IDNumber").write[String] and
-      (__ \ "tradingName").writeNullable[String] and
-      (__ \ "isGBUser").write[Boolean] and
-      (__ \ "primaryContact").write[AgentContactInformation] and
-      (__ \ "secondaryContact").writeNullable[AgentContactInformation] and
-      (__ \ "cbcId").writeNullable[String] and
-      (__ \ "agentClient").writeNullable[String]
-  )(r => (r.IDType, r.IDNumber, r.tradingName, r.isGBUser, r.primaryContact, r.secondaryContact, r.cbcId, r.agentClient))
+  implicit val format: OFormat[AgentRequestDetailForUpdatePayload] = Json.format[AgentRequestDetailForUpdatePayload]
 
   implicit class UpdateAgentSubscriptionRequestExtension(val req: AgentRequestDetailForUpdatePayload) extends AnyVal {
 
