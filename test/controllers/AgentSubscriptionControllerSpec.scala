@@ -19,9 +19,10 @@ package controllers
 import base.SpecBase
 import controllers.auth.{AgentOnlyAuthAction, FakeAgentOnlyAuthAction}
 import generators.Generators
-import models.agentSubscription.{AgentResponseDetail, AgentSubscriptionEtmpRequest, CreateAgentSubscriptionRequest}
-import models.error._
+import models.agentSubscription.{AgentClientDetails, AgentResponseDetail, AgentSubscriptionEtmpRequest, CreateAgentSubscriptionRequest, Organisation}
+import models.error.*
 import org.apache.pekko.http.javadsl.model.DateTime
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
@@ -30,7 +31,7 @@ import play.api.inject.bind
 import play.api.libs.json.Json
 import play.api.mvc.Results.{BadRequest, Conflict, Forbidden, InternalServerError, NotFound, ServiceUnavailable}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import services.AgentSubscriptionService
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -375,31 +376,75 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
     }
 
     "UpdateSubscription" - {
+      val requestAgentUpdateDetailJson = Json.parse("""
+                                           |{
+                                           |      "IDType": "ARN",
+                                           |      "IDNumber": "IDNumber",
+                                           |      "tradingName": "Trading Name",
+                                           |      "isGBUser": true,
+                                           |      "primaryContact":
+                                           |        {
+                                           |          "organisation": {
+                                           |            "organisationName": "orgName1"
+                                           |          },
+                                           |          "email": "test@email.com",
+                                           |          "phone": "+4411223344"
+                                           |        },
+                                           |        "cbcId": "cbcId",
+                                           |        "agentClient":"some-client"
+                                           |}
+                                           |""".stripMargin)
 
       "should return OK when updateContactInformation was successful" in {
-        when(mockAgentSubscriptionService.updateContactInformation(any[AgentSubscriptionEtmpRequest])(any[HeaderCarrier], any[ExecutionContext]))
+        val agentClientDetailsCaptor           = ArgumentCaptor.forClass(classOf[AgentClientDetails])
+        val agentSubscriptionEtmpRequestCaptor = ArgumentCaptor.forClass(classOf[AgentSubscriptionEtmpRequest])
+
+        when(
+          mockAgentSubscriptionService.updateContactInformation(any[AgentSubscriptionEtmpRequest], any[AgentClientDetails])(any[HeaderCarrier],
+                                                                                                                            any[ExecutionContext]
+          )
+        )
           .thenReturn(Future.successful(Right(())))
 
         val request =
           FakeRequest(
             POST,
             routes.AgentSubscriptionController.updateSubscription().url
-          ).withJsonBody(requestDetailJson)
+          ).withJsonBody(requestAgentUpdateDetailJson)
 
         val result = route(application, request).value
         status(result) mustEqual OK
 
+        verify(mockAgentSubscriptionService)
+          .updateContactInformation(agentSubscriptionEtmpRequestCaptor.capture(), agentClientDetailsCaptor.capture())(any[HeaderCarrier], any[ExecutionContext])
+
+        agentClientDetailsCaptor.getValue mustEqual AgentClientDetails(Some("cbcId"), Some("some-client"))
+
+        val etmRequest = agentSubscriptionEtmpRequestCaptor.getValue
+        etmRequest.idType mustEqual "ARN"
+        etmRequest.idNumber mustEqual "IDNumber"
+        etmRequest.tradingName mustEqual Some("Trading Name")
+        etmRequest.gbUser mustEqual true
+        etmRequest.primaryContact.email mustEqual "test@email.com"
+        etmRequest.primaryContact.organisation mustEqual Some(Organisation("orgName1"))
+        etmRequest.primaryContact.phone mustEqual Some("+4411223344")
+        etmRequest.secondaryContact mustEqual None
+
       }
 
       "should return InternalServerError when updateContactInformation fails" in {
-        when(mockAgentSubscriptionService.updateContactInformation(any[AgentSubscriptionEtmpRequest])(any[HeaderCarrier], any[ExecutionContext]))
+        when(
+          mockAgentSubscriptionService.updateContactInformation(any[AgentSubscriptionEtmpRequest], any[AgentClientDetails])(any[HeaderCarrier],
+                                                                                                                            any[ExecutionContext]
+          )
+        )
           .thenReturn(Future.successful(Left(UpdateSubscriptionError(500))))
 
         val request =
           FakeRequest(
             POST,
             routes.AgentSubscriptionController.updateSubscription().url
-          ).withJsonBody(requestDetailJson)
+          ).withJsonBody(requestAgentUpdateDetailJson)
 
         val result = route(application, request).value
         status(result) mustEqual INTERNAL_SERVER_ERROR

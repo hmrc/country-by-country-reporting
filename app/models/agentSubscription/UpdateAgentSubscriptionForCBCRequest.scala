@@ -76,8 +76,37 @@ object AgentRequestDetailForUpdate {
       (__ \ "primaryContact").write[AgentContactInformation] and
       (__ \ "secondaryContact").writeNullable[AgentContactInformation]
   )(r => (r.IDType, r.IDNumber, r.tradingName, r.isGBUser, r.primaryContact, r.secondaryContact))
+}
 
-  implicit class UpdateAgentSubscriptionRequestExtension(val req: AgentRequestDetailForUpdate) extends AnyVal {
+case class UpdateAgentSubscriptionDetails(requestCommon: AgentRequestCommonForUpdate, requestDetail: AgentRequestDetailForUpdate)
+
+object UpdateAgentSubscriptionDetails {
+  implicit val format: OFormat[UpdateAgentSubscriptionDetails] = Json.format[UpdateAgentSubscriptionDetails]
+}
+
+case class UpdateAgentSubscriptionForCBCRequest(updateAgentSubscriptionForCBCRequest: UpdateAgentSubscriptionDetails)
+
+object UpdateAgentSubscriptionForCBCRequest {
+  implicit val format: OFormat[UpdateAgentSubscriptionForCBCRequest] = Json.format[UpdateAgentSubscriptionForCBCRequest]
+
+  def apply(requestDetail: AgentRequestDetailForUpdate): UpdateAgentSubscriptionForCBCRequest =
+    UpdateAgentSubscriptionForCBCRequest(UpdateAgentSubscriptionDetails(AgentRequestCommonForUpdate("CBC"), requestDetail))
+}
+
+case class AgentRequestDetailForUpdatePayload(IDType: String,
+                                              IDNumber: String,
+                                              tradingName: Option[String],
+                                              isGBUser: Boolean,
+                                              primaryContact: AgentContactInformation,
+                                              secondaryContact: Option[AgentContactInformation],
+                                              cbcId: Option[String] = None,
+                                              agentClient: Option[String] = None
+)
+
+object AgentRequestDetailForUpdatePayload {
+  implicit val format: OFormat[AgentRequestDetailForUpdatePayload] = Json.format[AgentRequestDetailForUpdatePayload]
+
+  implicit class UpdateAgentSubscriptionRequestExtension(val req: AgentRequestDetailForUpdatePayload) extends AnyVal {
 
     def toUpdateEtmpRequest: AgentSubscriptionEtmpRequest =
       AgentSubscriptionEtmpRequest(
@@ -101,19 +130,4 @@ object AgentRequestDetailForUpdate {
         }
       )
   }
-}
-
-case class UpdateAgentSubscriptionDetails(requestCommon: AgentRequestCommonForUpdate, requestDetail: AgentRequestDetailForUpdate)
-
-object UpdateAgentSubscriptionDetails {
-  implicit val format: OFormat[UpdateAgentSubscriptionDetails] = Json.format[UpdateAgentSubscriptionDetails]
-}
-
-case class UpdateAgentSubscriptionForCBCRequest(updateAgentSubscriptionForCBCRequest: UpdateAgentSubscriptionDetails)
-
-object UpdateAgentSubscriptionForCBCRequest {
-  implicit val format: OFormat[UpdateAgentSubscriptionForCBCRequest] = Json.format[UpdateAgentSubscriptionForCBCRequest]
-
-  def apply(requestDetail: AgentRequestDetailForUpdate): UpdateAgentSubscriptionForCBCRequest =
-    UpdateAgentSubscriptionForCBCRequest(UpdateAgentSubscriptionDetails(AgentRequestCommonForUpdate("CBC"), requestDetail))
 }

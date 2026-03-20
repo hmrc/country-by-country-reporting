@@ -16,8 +16,9 @@
 
 package models.audit
 
+import models.agentSubscription.{AgentClientDetails, AgentSubscriptionEtmpRequest}
 import models.subscription.{ContactInformation, RequestDetailForUpdate}
-import play.api.libs.json._
+import play.api.libs.json.*
 
 case class AuditDetailForUpdateOrgSubscriptionRequest(subscriptionId: String,
                                                       reportingEntityName: String,
@@ -47,6 +48,45 @@ object AuditDetailForUpdateOrgSubscriptionRequest {
       subscriptionId = requestDetailForUpdate.IDNumber,
       reportingEntityName = requestDetailForUpdate.tradingName.getOrElse(""),
       firstContactName = primaryContact.organisationDetails.organisationName,
+      firstContactEmail = primaryContact.email,
+      firstContactPhoneNumber = primaryContact.phone,
+      hasSecondContact = secondaryContact.isDefined,
+      secondContactName = maybeSecondContactName,
+      secondContactEmail = maybeSecondContactEmail,
+      secondContactPhoneNumber = maybeSecondContactPhone
+    )
+  }
+
+}
+
+case class AuditDetailForUpdateAgentRequest(subscriptionId: Option[String],
+                                            reportingEntityName: Option[String],
+                                            firstContactName: Option[String],
+                                            firstContactEmail: String,
+                                            firstContactPhoneNumber: Option[String],
+                                            hasSecondContact: Boolean,
+                                            secondContactName: Option[String],
+                                            secondContactEmail: Option[String],
+                                            secondContactPhoneNumber: Option[String]
+)
+
+object AuditDetailForUpdateAgentRequest {
+  implicit val format: OFormat[AuditDetailForUpdateAgentRequest] = Json.format[AuditDetailForUpdateAgentRequest]
+
+  def apply(requestDetailForUpdate: AgentSubscriptionEtmpRequest, agentClientDetails: AgentClientDetails): AuditDetailForUpdateAgentRequest = {
+    val primaryContact                         = requestDetailForUpdate.primaryContact
+    val secondaryContact                       = requestDetailForUpdate.secondaryContact
+    val maybeSecondContactName: Option[String] = secondaryContact.flatMap(_.organisation.map(_.name))
+
+    val (maybeSecondContactEmail, maybeSecondContactPhone) = (
+      for (contact <- secondaryContact) yield contact.email,
+      for (contact <- secondaryContact) yield contact.phone.getOrElse("")
+    )
+
+    new AuditDetailForUpdateAgentRequest(
+      subscriptionId = agentClientDetails.cbcId,
+      reportingEntityName = agentClientDetails.agentClient,
+      firstContactName = primaryContact.organisation.map(_.name),
       firstContactEmail = primaryContact.email,
       firstContactPhoneNumber = primaryContact.phone,
       hasSecondContact = secondaryContact.isDefined,

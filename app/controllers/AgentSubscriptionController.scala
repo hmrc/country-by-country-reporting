@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.auth.AgentOnlyAuthAction
-import models.agentSubscription.{AgentRequestDetailForUpdate, CreateAgentSubscriptionRequest}
+import models.agentSubscription.{AgentClientDetails, AgentRequestDetailForUpdatePayload, CreateAgentSubscriptionRequest}
 import models.error.{ReadSubscriptionError, UpdateSubscriptionError}
 import play.api.Logging
 import play.api.libs.json.{JsResult, JsValue, Json}
@@ -62,8 +62,8 @@ class AgentSubscriptionController @Inject() (
   }
 
   def updateSubscription(): Action[JsValue] = authenticate.async(parse.json) { implicit request =>
-    val updateSubscriptionResult: JsResult[AgentRequestDetailForUpdate] =
-      request.body.validate[AgentRequestDetailForUpdate]
+    val updateSubscriptionResult: JsResult[AgentRequestDetailForUpdatePayload] =
+      request.body.validate[AgentRequestDetailForUpdatePayload]
 
     updateSubscriptionResult.fold(
       invalid =>
@@ -72,7 +72,8 @@ class AgentSubscriptionController @Inject() (
           InternalServerError("Json Validation Failed")
         },
       validReq =>
-        agentSubscriptionService.updateContactInformation(validReq.toUpdateEtmpRequest).map {
+        val agentClientDetails = AgentClientDetails(validReq.cbcId, validReq.agentClient)
+        agentSubscriptionService.updateContactInformation(validReq.toUpdateEtmpRequest, agentClientDetails).map {
           case Right(_) => Ok
           case Left(UpdateSubscriptionError(value)) =>
             logger.error(s"Agent updateContactInformation $value")
