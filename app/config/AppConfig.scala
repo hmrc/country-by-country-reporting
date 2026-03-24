@@ -69,5 +69,5 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val staleTaskEnabled: Boolean           = config.get[Boolean]("tasks.staleFiles.enabled")
   val staleTaskInterval: FiniteDuration   = config.get[FiniteDuration]("tasks.staleFiles.interval")
   val staleTaskAlertAfter: FiniteDuration = config.get[FiniteDuration]("tasks.staleFiles.alertAfter")
-  val stopTaskAlertAfter: FiniteDuration = config.get[FiniteDuration]("tasks.staleFiles.stopAlertsAfter")
+  val stopTaskAlertAfter: FiniteDuration  = config.get[FiniteDuration]("tasks.staleFiles.stopAlertsAfter")
 }
