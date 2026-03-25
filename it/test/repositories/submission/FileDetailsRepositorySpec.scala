@@ -42,7 +42,7 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
   private val mockAppConfig = mock[AppConfig]
   when(mockAppConfig.cacheTtl) thenReturn 1L
   when(mockAppConfig.staleTaskAlertAfter) thenReturn 2.hours
-  when(mockAppConfig.stopTaskAlertAfter) thenReturn 3.hours
+  when(mockAppConfig.cutOffTaskAlertAfter) thenReturn 1.hours
 
   override val repository: FileDetailsRepository = new FileDetailsRepository(mongoComponent, mockAppConfig, metricsService)
 

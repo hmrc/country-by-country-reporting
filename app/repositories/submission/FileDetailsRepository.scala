@@ -118,9 +118,10 @@ class FileDetailsRepository @Inject() (
       }
 
   def findStaleSubmissions(): Future[Seq[FileDetails]] = {
+    val stopTaskAlertAfter = appConfig.cutOffTaskAlertAfter.toSeconds + appConfig.staleTaskAlertAfter.toSeconds
     val filter: Bson = and(
       equal("status", Codecs.toBson(Pending.asInstanceOf[FileStatus])),
-      gte("submitted", dateTimeNow.minusSeconds(appConfig.stopTaskAlertAfter.toSeconds)),
+      gte("submitted", dateTimeNow.minusSeconds(stopTaskAlertAfter)),
       lt("submitted", dateTimeNow.minusSeconds(appConfig.staleTaskAlertAfter.toSeconds))
     )
 
