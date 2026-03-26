@@ -27,11 +27,7 @@ class CustomAlertUtil extends Logging {
 
   def alertForProblemStatus(errors: ValidationErrors): Unit = {
     val errorCodes = Seq(errors.fileError.map(_.map(_.code.code)).getOrElse(Nil), errors.recordError.map(_.map(_.code.code)).getOrElse(Nil)).flatten
-    if (
-      errorCodes.exists(
-          problemsStatusErrorCodes.contains(_))
-      )
-     {
+    if (errorCodes.exists(problemsStatusErrorCodes.contains(_))) {
       logger.warn(s"File Rejected with unexpected errors codes returned: ${errorCodes.map(_.mkString(" and "))}")
     }
   }
