@@ -16,39 +16,24 @@
 
 package utils
 
-import models.xml.FileErrorCode.{fileErrorCodesForProblemStatus, CustomError => FileCustomError}
-import models.xml.RecordErrorCode.{CustomError, DocRefIDFormat}
-import models.xml.{FileErrorCode, FileErrors, RecordError, RecordErrorCode, ValidationErrors}
+import models.xml.FileErrorCode.fileErrorCodesForProblemStatus
+import models.xml.RecordErrorCode.DocRefIDFormat
+import models.xml.{FileErrorCode, ValidationErrors}
 import play.api.Logging
-import utils.ErrorDetails.{errorList, error_details_910}
 
 class CustomAlertUtil extends Logging {
 
-  private val expectedErrorCodes: Seq[String]       = FileErrorCode.values.map(_.code) ++ RecordErrorCode.values.map(_.code)
   private val problemsStatusErrorCodes: Seq[String] = fileErrorCodesForProblemStatus.map(_.code).:+(DocRefIDFormat.code)
 
   def alertForProblemStatus(errors: ValidationErrors): Unit = {
     val errorCodes = Seq(errors.fileError.map(_.map(_.code.code)).getOrElse(Nil), errors.recordError.map(_.map(_.code.code)).getOrElse(Nil)).flatten
     if (
       errorCodes.exists(
-        !expectedErrorCodes.contains(_)
-          || errorCodes.exists(problemsStatusErrorCodes.contains(_))
-          || recordErrorDetailNotAllowed(errors.recordError)
-          || fileErrorDetailNotAllowed(errors.fileError)
+          problemsStatusErrorCodes.contains(_))
       )
-    ) {
-      logger.warn("File Rejected with unexpected error")
+     {
+      logger.warn(s"File Rejected with unexpected errors codes returned: ${errorCodes.map(_.mkString(" and "))}")
     }
   }
-
-  private def recordErrorDetailNotAllowed(errors: Option[Seq[RecordError]]): Boolean =
-    errors.exists(
-      _.exists(error => error.code == CustomError && !errorList.exists(error.details.getOrElse("").contains(_)))
-    )
-
-  private def fileErrorDetailNotAllowed(errors: Option[Seq[FileErrors]]): Boolean =
-    errors.exists(
-      _.exists(error => error.code == FileCustomError && !error.details.getOrElse("").contains(error_details_910))
-    )
 
 }
