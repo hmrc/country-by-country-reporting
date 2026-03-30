@@ -30,7 +30,7 @@ import services.metrics.MetricsService
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.{LocalDate, LocalDateTime, ZoneId}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
@@ -42,10 +42,11 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
   private val mockAppConfig = mock[AppConfig]
   when(mockAppConfig.cacheTtl) thenReturn 1L
   when(mockAppConfig.staleTaskAlertAfter) thenReturn 2.hours
+  when(mockAppConfig.cutOffTaskAlertAfter) thenReturn 1.hours
 
   override val repository: FileDetailsRepository = new FileDetailsRepository(mongoComponent, mockAppConfig, metricsService)
 
-  private val dateTimeNow: LocalDateTime = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
+  private val dateTimeNow: LocalDateTime = LocalDateTime.now(ZoneId.of("Europe/London")).truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
   private val fileDetails: FileDetails = FileDetails(
     ConversationId("conversationId123456"),
     "subscriptionId",
@@ -293,19 +294,25 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
 
   "findStaleSubmissions" - {
     "should retrieve a stale pending submission " in {
-      val oldPendingFile = fileDetails.copy(submitted = dateTimeNow.minusDays(1), name = "oldfile.xml", _id = ConversationId("conversationId777777"))
+      val oldPendingFile_1 = fileDetails.copy(submitted = dateTimeNow.minusMinutes(180), name = "oldfile.xml", _id = ConversationId("conversationId777777"))
+      val oldPendingFile_2 = fileDetails.copy(submitted = dateTimeNow.minusMinutes(121), name = "oldfile.xml", _id = ConversationId("conversationId777778"))
+      val oldPendingFile_3 = fileDetails.copy(submitted = dateTimeNow.minusMinutes(181), name = "oldfile.xml", _id = ConversationId("conversationId777779"))
+      val oldPendingFile_4 = fileDetails.copy(submitted = dateTimeNow.minusMinutes(119), name = "oldfile.xml", _id = ConversationId("conversationId777775"))
       val oldRejectedFile =
-        fileDetails.copy(status = RejectedSDES, submitted = dateTimeNow.minusDays(1), name = "oldishfile.xml", _id = ConversationId("conversationId777778"))
+        fileDetails.copy(status = RejectedSDES, submitted = dateTimeNow.minusMinutes(122), name = "oldishfile.xml", _id = ConversationId("conversationId777776"))
 
       val result: Future[Seq[FileDetails]] = for {
         _   <- repository.insert(fileDetails)
-        _   <- repository.insert(oldPendingFile)
+        _   <- repository.insert(oldPendingFile_1)
+        _   <- repository.insert(oldPendingFile_2)
+        _   <- repository.insert(oldPendingFile_3)
+        _   <- repository.insert(oldPendingFile_4)
         _   <- repository.insert(oldRejectedFile)
         res <- repository.findStaleSubmissions()
       } yield res
 
       whenReady(result) {
-        _ mustBe List(oldPendingFile)
+        _ mustBe List(oldPendingFile_1, oldPendingFile_2)
       }
     }
   }
