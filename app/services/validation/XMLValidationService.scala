@@ -17,12 +17,13 @@
 package services.validation
 
 import models.validation.SaxParseError
-import org.xml.sax.{ErrorHandler, SAXParseException}
 import org.xml.sax.helpers.DefaultHandler
+import org.xml.sax.{ErrorHandler, SAXParseException}
 
 import java.io.{InputStream, StringReader}
 import java.net.{URI, URL}
 import javax.inject.Inject
+import javax.xml.XMLConstants
 import javax.xml.parsers.{SAXParser, SAXParserFactory}
 import javax.xml.transform.stream.StreamSource
 import javax.xml.validation.{Schema, SchemaFactory}
@@ -109,6 +110,9 @@ class XMLValidationService @Inject() () {
 
     val schema    = loadSchemaFromResource(xsdResourcePath)
     val validator = schema.newValidator()
+    validator.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "")
+    validator.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "")
+    validator.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true)
     validator.setErrorHandler(toErrorHandler(errors))
 
     try

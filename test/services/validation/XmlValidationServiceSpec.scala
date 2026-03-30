@@ -111,5 +111,32 @@ class XmlValidationServiceSpec extends SpecBase {
 
       result.isLeft mustBe true
     }
+
+    "must correctly validate a streaming submission with xxe value" in {
+      val service = app.injector.instanceOf[XMLValidationService]
+
+      val xmlUrl = getClass.getResource("/cbc/fileUpload/xxecbc.xml").toURI.toString
+
+      val result = await(service.validateUrlStreamAsync(xmlUrl, xsdPath))
+
+      result.isLeft mustBe true
+      val errors = result.left.get
+      errors.size mustBe 2
+      errors.map(e => (e.errorMessage.contains("doctype") || e.errorMessage.contains("entity") || e.errorMessage.contains("external")) mustBe true)
+    }
+
+    "must correctly validate a streaming submission with doctype value" in {
+      val service = app.injector.instanceOf[XMLValidationService]
+
+      val xmlUrl = getClass.getResource("/cbc/fileUpload/doctype.xml").toURI.toString
+
+      val result = await(service.validateUrlStreamAsync(xmlUrl, xsdPath))
+
+      result.isLeft mustBe true
+      val errors = result.left.get
+      errors.size mustBe 2
+      errors.map(e => e.errorMessage.contains("accessExternalDTD") mustBe true)
+    }
+
   }
 }
