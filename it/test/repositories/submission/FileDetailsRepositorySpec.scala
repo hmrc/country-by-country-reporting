@@ -30,7 +30,7 @@ import services.metrics.MetricsService
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.{Clock, LocalDate, LocalDateTime, ZoneId, ZoneOffset, ZonedDateTime}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
@@ -46,7 +46,7 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
 
   override val repository: FileDetailsRepository = new FileDetailsRepository(mongoComponent, mockAppConfig, metricsService)
 
-  private val dateTimeNow: LocalDateTime = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
+  private val dateTimeNow: LocalDateTime = LocalDateTime.now(ZoneId.of("Europe/London")).truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
   private val fileDetails: FileDetails = FileDetails(
     ConversationId("conversationId123456"),
     "subscriptionId",
