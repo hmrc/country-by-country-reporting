@@ -30,7 +30,8 @@ import services.metrics.MetricsService
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
-import java.time.{Clock, LocalDate, LocalDateTime, ZoneId, ZoneOffset, ZonedDateTime}
+
+import java.time.{LocalDate, LocalDateTime, ZoneId}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
