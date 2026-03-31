@@ -21,9 +21,9 @@ import models.submission.*
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 
 import java.nio.charset.StandardCharsets
-import java.nio.file.{Files, Path}
-import scala.xml.Elem
+import java.nio.file.{Files, Path, Paths}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.xml.Elem
 
 class DataExtractionStreamSpec extends SpecBase {
 
@@ -247,13 +247,7 @@ class DataExtractionStreamSpec extends SpecBase {
     }
 
     "must return DeletionForExistingReport if all the DocTypeIndic values in CbcReports or AdditionalInfo are OECD3 and ReportingEntity DocTypeIndicators contains OECD0" in {
-      val xml = generateValidXml(
-        additionalInfoDocTypeIndic = List(Some("OECD3"), None),
-        reportingEntityDocTypeIndic = List(Option("OECD0"))
-      )
-
-      val xmlFile = writeXmlToTempFile(xml)
-      val xmlUrl  = xmlFile.toUri.toURL.toString
+      val xmlUrl = Paths.get("test/resources/cbc/fileUpload/validation/Deletions_for_an_existing_report.xml").toUri.toURL.toString
 
       val result = await(dataExtraction.messageSpecData(xmlUrl).map(_.map(_.reportType).getOrElse(fail("Expected Some(MessageSpecData)"))))
 
@@ -289,14 +283,7 @@ class DataExtractionStreamSpec extends SpecBase {
     }
 
     "must return CorrectionAndDeletionForExistingReport if CbcReports or AdditionalInfo contains OECD3 and ReportingEntity DocTypeIndicators contains OECD2" in {
-      val xml = generateValidXml(
-        additionalInfoDocTypeIndic = List(Some("OECD3"), None),
-        reportingEntityDocTypeIndic = List(Option("OECD2"))
-      )
-
-      val xmlFile = writeXmlToTempFile(xml)
-      val xmlUrl  = xmlFile.toUri.toURL.toString
-
+      val xmlUrl = Paths.get("test/resources/cbc/fileUpload/validation/Corrections_and_deletions_for_an_existing_report.xml").toUri.toString
       val result = await(dataExtraction.messageSpecData(xmlUrl).map(_.map(_.reportType).getOrElse(fail("Expected Some(MessageSpecData)"))))
 
       result mustBe CorrectionAndDeletionForExistingReport

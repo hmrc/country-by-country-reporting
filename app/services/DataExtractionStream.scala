@@ -114,7 +114,6 @@ class DataExtractionStream @Inject() (implicit ec: ExecutionContext) {
       qName: String
     ): Unit = {
       val value = text.toString.trim
-
       path match {
         case "MessageRefId" :: _ if value.nonEmpty =>
           acc.messageRefId = Some(value)
@@ -172,7 +171,16 @@ class DataExtractionStream @Inject() (implicit ec: ExecutionContext) {
       DeletionOfAllInformation
     }
 
-    // 3. Correction / deletion context if sections exist
+    // 3. CBC401 new-information logic (only if no correction sections)
+    else if (messageTypeIndicator == CBC401 && acc.reportingEntityDocTypeIndicators.nonEmpty) {
+      if (acc.reportingEntityDocTypeIndicators.contains("OECD1")) {
+        NewInformation
+      } else {
+        NewInformationForExistingReport
+      }
+    }
+
+    // 4. Correction / deletion context if sections exist
     else if (acc.seenCbcReports || acc.seenAdditionalInfo) {
       val unique = acc.sectionDocTypeIndicators.distinct
 
@@ -185,15 +193,6 @@ class DataExtractionStream @Inject() (implicit ec: ExecutionContext) {
 
         case _ =>
           CorrectionAndDeletionForExistingReport
-      }
-    }
-
-    // 4. CBC401 new-information logic (only if no correction sections)
-    else if (messageTypeIndicator == CBC401 && acc.reportingEntityDocTypeIndicators.nonEmpty) {
-      if (acc.reportingEntityDocTypeIndicators.contains("OECD1")) {
-        NewInformation
-      } else {
-        NewInformationForExistingReport
       }
     }
 
