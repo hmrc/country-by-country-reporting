@@ -22,10 +22,10 @@ import connectors.EmailConnector
 import generators.Generators
 import models.agentSubscription.{AgentContactDetails, AgentResponseDetail}
 import models.email.EmailRequest
-import models.error.ReadSubscriptionError
-import models.submission._
+import models.error.{ReadSubscriptionError, UpdateSubscriptionError}
+import models.submission.*
 import models.subscription.{ContactInformation, OrganisationDetails, ResponseDetail}
-import org.mockito.ArgumentMatchers.{any, eq => mockitoEq}
+import org.mockito.ArgumentMatchers.{any, eq as mockitoEq}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
@@ -455,6 +455,36 @@ class EmailServiceSpec extends SpecBase with Generators with ScalaCheckPropertyC
         }
       }
     }
+
+    "must fail to submit to the email connector when failing to retrieve contact details with uneexpected error" in {
+
+      when(mockEmailConnector.sendEmail(any[EmailRequest])(any[HeaderCarrier]))
+        .thenReturn(
+          Future.successful(HttpResponse(ACCEPTED, ""))
+        )
+
+      when(mockSubscriptionService.getContactInformation(any[String])(any[HeaderCarrier], any[ExecutionContext]))
+        .thenReturn(
+          Future.successful(Left(UpdateSubscriptionError(INTERNAL_SERVER_ERROR)))
+        )
+
+      val result =
+        emailService.sendEmail(subscriptionId,
+                               submissionTime,
+                               messageRefId,
+                               None,
+                               isUploadSuccessful = true,
+                               reportType,
+                               reportingStartDate,
+                               reportingEndDate,
+                               reportingEntityName
+        )
+
+      whenReady(result) { result =>
+        result.map(_.result.map(_.status)) mustBe Seq(None)
+      }
+    }
+
     "getReportTypeMessage" - {
 
       "mus give correct message for respective Report Type" in {

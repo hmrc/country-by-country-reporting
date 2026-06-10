@@ -55,5 +55,13 @@ class ValidateAuthTokenActionSpec extends SpecBase {
       val testAction: Future[Result] = action.invokeBlock(request, response)
       status(testAction) mustBe FORBIDDEN
     }
+
+    "must return FORBIDDEN when the request auth token is missing" in {
+
+      val request = FakeRequest("", "")
+
+      val testAction: Future[Result] = action.invokeBlock(request, response)
+      status(testAction) mustBe FORBIDDEN
+    }
   }
 }

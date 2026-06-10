@@ -182,6 +182,7 @@ class AgentSubscriptionService @Inject() (agentSubscriptionConnector: AgentSubsc
         val orgContactFromIndividualName = OrganisationDetails(s"${individual.firstName} ${individual.lastName}")
         Right(ContactInformation(orgContactFromIndividualName, contact.email, contact.phone, contact.mobile))
       case (None, None) => // This should never happen but adding it here to cover all cases
+        println("------------------------------")
         logger.warn(s"Neither an Organisation nor individual contact found in ETMP display agent contact response")
         Left(ReadSubscriptionError(UNPROCESSABLE_ENTITY))
     }

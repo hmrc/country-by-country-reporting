@@ -34,11 +34,12 @@ import uk.gov.hmrc.auth.core.retrieve.{~, Retrieval}
 import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, Enrolment, Enrolments, MissingBearerToken}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import org.scalatest.concurrent.ScalaFutures
 import scala.concurrent.duration.*
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 
-class AgentOnlyAuthActionSpec extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar {
+class AgentOnlyAuthActionSpec extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar with ScalaFutures {
 
   class Harness(authAction: AgentOnlyAuthAction) extends InjectedController {
 
@@ -69,6 +70,52 @@ class AgentOnlyAuthActionSpec extends PlaySpec with GuiceOneAppPerSuite with Moc
         val result     = controller.onPageLoad()(FakeRequest("", ""))
         status(result) mustBe UNAUTHORIZED
 
+      }
+
+      "must return unauthorised if affinity group is not agent" in {
+
+        type RetrievalType = Enrolments ~ Option[AffinityGroup]
+
+        val authRetrievals: RetrievalType = new ~(
+          Enrolments(
+            Set(
+              Enrolment("HMRC-AS-AGENT").withIdentifier("AgentReferenceNumber", "arn123")
+            )
+          ),
+          Some(AffinityGroup.Individual)
+        )
+
+        when(mockAuthConnector.authorise(any(), any[Retrieval[RetrievalType]])(any(), any()))
+          .thenReturn(Future.successful(authRetrievals))
+
+        val authAction = application.injector.instanceOf[AgentOnlyAuthAction]
+        val controller = new Harness(authAction)
+
+        val result = controller.onPageLoad()(FakeRequest("", ""))
+        status(result) mustBe UNAUTHORIZED
+      }
+
+      "must throw IllegalAccessException when AgentReferenceNumber is not present" in {
+
+        type RetrievalType = Enrolments ~ Option[AffinityGroup]
+
+        val authRetrievals: RetrievalType = new ~(
+          Enrolments(
+            Set(
+              Enrolment("HMRC-AS-AGENT")
+            )
+          ),
+          Some(AffinityGroup.Agent)
+        )
+
+        when(mockAuthConnector.authorise(any(), any[Retrieval[RetrievalType]])(any(), any()))
+          .thenReturn(Future.successful(authRetrievals))
+
+        val authAction = application.injector.instanceOf[AgentOnlyAuthAction]
+        val controller = new Harness(authAction)
+
+        val result = controller.onPageLoad()(FakeRequest("", "")).failed
+        result.futureValue mustBe an[IllegalAccessException]
       }
     }
 

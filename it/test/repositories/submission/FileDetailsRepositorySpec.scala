@@ -300,7 +300,11 @@ class FileDetailsRepositorySpec extends SpecBase with DefaultPlayMongoRepository
       val oldPendingFile_3 = fileDetails.copy(submitted = dateTimeNow.minusMinutes(181), name = "oldfile.xml", _id = ConversationId("conversationId777779"))
       val oldPendingFile_4 = fileDetails.copy(submitted = dateTimeNow.minusMinutes(119), name = "oldfile.xml", _id = ConversationId("conversationId777775"))
       val oldRejectedFile =
-        fileDetails.copy(status = RejectedSDES, submitted = dateTimeNow.minusMinutes(122), name = "oldishfile.xml", _id = ConversationId("conversationId777776"))
+        fileDetails.copy(status = RejectedSDES,
+                         submitted = dateTimeNow.minusMinutes(122),
+                         name = "oldishfile.xml",
+                         _id = ConversationId("conversationId777776")
+        )
 
       val result: Future[Seq[FileDetails]] = for {
         _   <- repository.insert(fileDetails)

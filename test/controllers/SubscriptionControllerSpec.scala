@@ -25,9 +25,10 @@ import org.mockito.ArgumentMatchers.any
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
 import play.api.inject.bind
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
+import play.mvc.WebSocket
 import services.SubscriptionService
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
@@ -156,6 +157,30 @@ class SubscriptionControllerSpec extends SpecBase with Generators with ScalaChec
 
     }
 
+    "should return InternalServerError when ReadSubscription throws unexpected Api Error" in {
+      when(
+        mockSubscriptionService
+          .getContactInformation(any[String]())(
+            any[HeaderCarrier](),
+            any[ExecutionContext]()
+          )
+      ).thenReturn(
+        Future.successful(
+          Left(UpdateSubscriptionError(500))
+        )
+      )
+
+      val request =
+        FakeRequest(
+          POST,
+          routes.SubscriptionController.readSubscription("XACBC0009234568").url
+        )
+
+      val result = route(application, request).value
+      status(result) mustEqual INTERNAL_SERVER_ERROR
+
+    }
+
     "should return OK when UpdateSubscription was successful" in {
       when(
         mockSubscriptionService
@@ -198,6 +223,19 @@ class SubscriptionControllerSpec extends SpecBase with Generators with ScalaChec
           POST,
           routes.SubscriptionController.updateSubscription().url
         ).withJsonBody(requestDetailJson)
+
+      val result = route(application, request).value
+      status(result) mustEqual INTERNAL_SERVER_ERROR
+
+    }
+
+    "should return InternalServerError when invalid json is sent" in {
+
+      val request =
+        FakeRequest(
+          POST,
+          routes.SubscriptionController.updateSubscription().url
+        ).withJsonBody(Json.obj("invalid" -> "json"))
 
       val result = route(application, request).value
       status(result) mustEqual INTERNAL_SERVER_ERROR

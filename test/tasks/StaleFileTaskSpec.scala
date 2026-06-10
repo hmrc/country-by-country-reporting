@@ -19,15 +19,15 @@ package tasks
 import base.SpecBase
 import config.AppConfig
 import org.apache.pekko.actor.{ActorSystem, Cancellable, Scheduler}
+import org.mockito.*
 import org.mockito.ArgumentMatchers.{any, argThat}
-import org.mockito._
 import play.api.Configuration
 import play.api.inject.ApplicationLifecycle
 import repositories.submission.FileDetailsRepository
 import uk.gov.hmrc.mongo.TimestampSupport
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
 

@@ -375,6 +375,21 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
       }
     }
 
+    "should return NotFound when getContactInformation fails" in {
+      when(mockAgentSubscriptionService.getContactInformation(any[String])(any[HeaderCarrier], any[ExecutionContext]))
+        .thenReturn(Future.successful(Left(ReadSubscriptionError(404))))
+
+      val request =
+        FakeRequest(
+          POST,
+          routes.AgentSubscriptionController.readSubscription().url
+        )
+
+      val result = route(application, request).value
+      status(result) mustEqual NOT_FOUND
+
+    }
+
     "UpdateSubscription" - {
       val requestAgentUpdateDetailJson = Json.parse("""
                                            |{
@@ -394,6 +409,11 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
                                            |        "agentClient":"some-client"
                                            |}
                                            |""".stripMargin)
+
+      val invalidRequestAgentUpdateDetailJson = Json.parse("""
+          |{"invalid":"true"
+          |}
+          |""".stripMargin)
 
       "should return OK when updateContactInformation was successful" in {
         val agentClientDetailsCaptor           = ArgumentCaptor.forClass(classOf[AgentClientDetails])
@@ -430,6 +450,27 @@ class AgentSubscriptionControllerSpec extends SpecBase with Generators with Scal
         etmRequest.primaryContact.phone mustEqual Some("+4411223344")
         etmRequest.secondaryContact mustEqual None
 
+      }
+
+      "should return an Internal server error when AgentRequestDetailForUpdatePayload is invalid" in {
+        val agentClientDetailsCaptor           = ArgumentCaptor.forClass(classOf[AgentClientDetails])
+        val agentSubscriptionEtmpRequestCaptor = ArgumentCaptor.forClass(classOf[AgentSubscriptionEtmpRequest])
+
+        when(
+          mockAgentSubscriptionService.updateContactInformation(any[AgentSubscriptionEtmpRequest], any[AgentClientDetails])(any[HeaderCarrier],
+                                                                                                                            any[ExecutionContext]
+          )
+        )
+          .thenReturn(Future.successful(Right(())))
+
+        val request =
+          FakeRequest(
+            POST,
+            routes.AgentSubscriptionController.updateSubscription().url
+          ).withJsonBody(invalidRequestAgentUpdateDetailJson)
+
+        val result = route(application, request).value
+        status(result) mustEqual INTERNAL_SERVER_ERROR
       }
 
       "should return InternalServerError when updateContactInformation fails" in {

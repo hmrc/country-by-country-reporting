@@ -18,7 +18,7 @@ package metrics
 
 import base.SpecBase
 import com.codahale.metrics.MetricRegistry
-import models.submission.{Accepted, Rejected}
+import models.submission.{Accepted, Rejected, RejectedSDESVirus}
 import models.xml.ValidationErrors
 import org.scalacheck.Gen
 import org.scalatest.BeforeAndAfterEach
@@ -47,6 +47,13 @@ class MetricsServiceSpec extends SpecBase with Injecting with BeforeAndAfterEach
       rejectedCounter.dec()
     }
 
+    "increment counter file Status RejectedSDESVirus counter" in {
+      val failureCounter = metricsService.getFileStatusCounter(RejectedSDESVirus)
+      failureCounter.inc()
+      failureCounter.getCount mustBe 1
+      failureCounter.dec()
+    }
+
     "increment counter file Status pending counter" in {
       val pendingCounter = metricsService.fileStatusPendingCounter
       pendingCounter.inc()
@@ -57,7 +64,18 @@ class MetricsServiceSpec extends SpecBase with Injecting with BeforeAndAfterEach
     "processFileStatus" in {
       val status = Gen.oneOf(Seq(Accepted, Rejected(ValidationErrors(None, None)))).sample.value
       metricsService.processFileStatusMetrics(status)(Future(Some("test"))).map(_ => metricsService.getFileStatusCounter(status).getCount mustBe 1)
+    }
 
+    "processFileStatusMetrics must increment failureCounter and rethrow exception when block fails" in {
+      val failureBefore = metricsService.failureCounter.getCount
+      val exception     = new RuntimeException("something went wrong")
+
+      val result = metricsService.processFileStatusMetrics(Accepted)(Future.failed(exception))
+
+      result.failed.map { thrown =>
+        thrown mustBe exception
+        metricsService.failureCounter.getCount mustBe (failureBefore + 1)
+      }
     }
 
   }

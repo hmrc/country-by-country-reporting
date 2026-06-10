@@ -22,6 +22,7 @@ import helpers.XmlErrorMessageHelper
 import models.submission.{CBC401, MessageSpecData, NewInformation}
 import models.validation.*
 import org.mockito.ArgumentMatchers.any
+import org.xml.sax.SAXParseException
 import services.DataExtractionStream
 
 import java.time.LocalDate
@@ -151,6 +152,16 @@ class UploadedXmlValidationEngineSpec extends SpecBase {
       when(mockDataExtraction.messageSpecData(any[String])).thenReturn(Future.successful(Some(messageSpecData)))
 
       Await.result(validationEngine.validateUploadSubmission(source), 10.seconds) mustBe SubmissionValidationSuccess(messageSpecData)
+    }
+
+    "must return InvalidXmlError when data extraction return a none when extracting messageSpecData" in new SetUp {
+
+      when(mockXmlValidationService.validateUrlStreamAsync(any[String](), any[String]())(any[ExecutionContext]())).thenReturn(Future.successful(Right(())))
+      when(mockDataExtraction.messageSpecData(any[String])).thenReturn(Future.successful(None))
+
+      Await.result(validationEngine.validateUploadSubmission(source), 10.seconds) mustBe InvalidXmlError(
+        "Could not retrieve messageSpec information from the submission"
+      )
     }
 
     "must return ValidationFailure for file which multiple pieces of mandatory information missing" in new SetUp {
