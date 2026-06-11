@@ -191,6 +191,42 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           result mustBe List(GenericError(lineNumber, Message("xml.not.allowed.length", List("MessageRefId", "100"))))
         }
 
+        "must return unique error when CorrDocRefId allowed length exceeds 200 but user is told must be 100 characters or less" in {
+
+          val maxLengthError1 = SaxParseError(
+            lineNumber,
+            s"cvc-maxLength-valid: Value '$over400' with length = '201' is not facet-valid with respect to maxLength '400' for type 'StringMin1Max200_Type'."
+          )
+          val maxlengthError2 = SaxParseError(lineNumber, s"cvc-type.3.1.3: The value '$over400' of element 'cbc:CorrDocRefId' is not valid.")
+
+          val result = helper.generateErrorMessages(ListBuffer(maxLengthError1, maxlengthError2))
+          result mustBe List(GenericError(lineNumber, Message("xml.not.allowed.length", List("CorrDocRefId", "164"))))
+        }
+
+        "must return unique error when CorrMessageRefId allowed length exceeds 200 but user is told must be 100 characters or less" in {
+
+          val maxLengthError1 = SaxParseError(
+            lineNumber,
+            s"cvc-maxLength-valid: Value '$over400' with length = '201' is not facet-valid with respect to maxLength '400' for type 'StringMin1Max200_Type'."
+          )
+          val maxlengthError2 = SaxParseError(lineNumber, s"cvc-type.3.1.3: The value '$over400' of element 'cbc:CorrMessageRefId' is not valid.")
+
+          val result = helper.generateErrorMessages(ListBuffer(maxLengthError1, maxlengthError2))
+          result mustBe List(GenericError(lineNumber, Message("xml.not.corrMessageRefId", List())))
+        }
+
+        "must return unique error when SendingEntityIN allowed length exceeds 200 but user is told must be 100 characters or less" in {
+
+          val maxLengthError1 = SaxParseError(
+            lineNumber,
+            s"cvc-maxLength-valid: Value '$over400' with length = '201' is not facet-valid with respect to maxLength '400' for type 'StringMin1Max200_Type'."
+          )
+          val maxlengthError2 = SaxParseError(lineNumber, s"cvc-type.3.1.3: The value '$over400' of element 'cbc:SendingEntityIN' is not valid.")
+
+          val result = helper.generateErrorMessages(ListBuffer(maxLengthError1, maxlengthError2))
+          result mustBe List(GenericError(lineNumber, Message("xml.SendingEntityIN.length", List())))
+        }
+
         "must return unique error when DocRefId allowed length exceeds 200 but user is told must be 164 characters or less" in {
 
           val maxLengthError1 = SaxParseError(
@@ -327,6 +363,28 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           val error2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '' of element 'cbc:MessageRefId' is not valid.")
           val result = helper.generateErrorMessages(ListBuffer(error1, error2))
           result mustBe List(GenericError(lineNumber, Message("xml.empty.field", List("MessageRefId"))))
+        }
+
+        "must return correct error for missing SendingEntityIN" in {
+
+          val error1 =
+            SaxParseError(lineNumber,
+                          "cvc-minLength-valid: Value '' with length = '0' is not facet-valid with respect to minLength '2' for type 'StringMin2Max200_Type'."
+            )
+          val error2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '' of element 'cbc:SendingEntityIN' is not valid.")
+          val result = helper.generateErrorMessages(ListBuffer(error1, error2))
+          result mustBe List(GenericError(lineNumber, Message("xml.add.sendingEntityIN", List("SendingEntityIN"))))
+        }
+
+        "must return correct error for missing CorrMessageRefId" in {
+
+          val error1 =
+            SaxParseError(lineNumber,
+                          "cvc-minLength-valid: Value '' with length = '0' is not facet-valid with respect to minLength '2' for type 'StringMin2Max200_Type'."
+            )
+          val error2 = SaxParseError(lineNumber, "cvc-type.3.1.3: The value '' of element 'cbc:CorrMessageRefId' is not valid.")
+          val result = helper.generateErrorMessages(ListBuffer(error1, error2))
+          result mustBe List(GenericError(lineNumber, Message("xml.not.corrMessageRefId", List())))
         }
 
         "must return '... is missing' message for Revenues and Summary" in {
@@ -508,6 +566,80 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           result mustBe List(GenericError(lineNumber, Message("xml.not.ISO.code", List("TIN issuedBy"))))
         }
 
+        "must return correct error for empty enum  for attribute" in {
+          val invalidEnumError1 =
+            SaxParseError(
+              lineNumber,
+              "cvc-enumeration-valid: Value '' is not facet-valid with respect to enumeration '[AF, AX]'. It must be a value from the enumeration."
+            )
+          val invalidEnumError2 =
+            SaxParseError(lineNumber,
+                          "cvc-attribute.3: The value '' of attribute 'issuedBy' on element 'TIN' is not valid with respect to its type, 'CountryCode_Type'."
+            )
+          val result = helper.generateErrorMessages(ListBuffer(invalidEnumError1, invalidEnumError2))
+          result mustBe List(GenericError(lineNumber, Message("xml.optional.field.empty", List("issuedBy"))))
+        }
+//currCode_Type
+        "must return correct error for incorrect currency enum  for attribute" in {
+          val invalidEnumError1 =
+            SaxParseError(
+              lineNumber,
+              "cvc-enumeration-valid: Value 'currCode' is not facet-valid with respect to enumeration '[FJD]'. It must be a value from the enumeration."
+            )
+          val invalidEnumError2 =
+            SaxParseError(
+              lineNumber,
+              "cvc-attribute.3: The value 'FJDs' of attribute 'currCode' on element 'ProfitOrLoss' is not valid with respect to its type, 'currCode_Type'."
+            )
+          val result = helper.generateErrorMessages(ListBuffer(invalidEnumError1, invalidEnumError2))
+          result mustBe List(GenericError(lineNumber, Message("xml.not.ISO.currency.code", List("ProfitOrLoss currCode"))))
+        }
+
+        "must return correct error for empty currency enum  for attribute" in {
+          val invalidEnumError1 =
+            SaxParseError(
+              lineNumber,
+              "cvc-enumeration-valid: Value '' is not facet-valid with respect to enumeration '[FJD]'. It must be a value from the enumeration."
+            )
+          val invalidEnumError2 =
+            SaxParseError(
+              lineNumber,
+              "cvc-attribute.3: The value '' of attribute 'currCode' on element 'ProfitOrLoss' is not valid with respect to its type, 'currCode_Type'."
+            )
+          val result = helper.generateErrorMessages(ListBuffer(invalidEnumError1, invalidEnumError2))
+          result mustBe List(GenericError(lineNumber, Message("xml.currCode.attribute.empty", List("ProfitOrLoss currCode"))))
+        }
+
+        "must return correct error for incorrect language enum  for attribute" in {
+          val invalidEnumError1 =
+            SaxParseError(
+              lineNumber,
+              "cvc-enumeration-valid: Value 'HZw' is not facet-valid with respect to enumeration '[HZ]'. It must be a value from the enumeration."
+            )
+          val invalidEnumError2 =
+            SaxParseError(
+              lineNumber,
+              "cvc-attribute.3: The value 'HZw' of attribute 'language' on element 'OtherInfo' is not valid with respect to its type, 'currCode_Type'."
+            )
+          val result = helper.generateErrorMessages(ListBuffer(invalidEnumError1, invalidEnumError2))
+          result mustBe List(GenericError(lineNumber, Message("xml.not.ISO.language.code", List("OtherInfo language"))))
+        }
+
+        "must return correct error for incorrect legalAddressType enum  for attribute" in {
+          val invalidEnumError1 =
+            SaxParseError(
+              lineNumber,
+              "cvc-enumeration-valid: Value 'OEC_D301' is not facet-valid with respect to enumeration '[OECD301]'. It must be a value from the enumeration."
+            )
+          val invalidEnumError2 =
+            SaxParseError(
+              lineNumber,
+              "cvc-attribute.3: The value 'OEC_D301' of attribute 'legalAddressType' on element 'Address' is not valid with respect to its type, 'currCode_Type'."
+            )
+          val result = helper.generateErrorMessages(ListBuffer(invalidEnumError1, invalidEnumError2))
+          result mustBe List(GenericError(lineNumber, Message("xml.not.allowed.value", List("Address legalAddressType"))))
+        }
+
         "must return correct error for empty element error'" in {
 
           val missingElementError1 =
@@ -659,6 +791,14 @@ class XmlErrorMessageHelperSpec extends SpecBase {
           val error2 = SaxParseError(lineNumber, "cvc-complex-type.2.2: Element 'Amount' must have no element [children], and the value must be valid.")
           val result = helper.generateErrorMessages(ListBuffer(error1, error2))
           result mustBe List(GenericError(lineNumber, Message("xml.must.be.whole.number", List("Amount"))))
+        }
+
+        "must return correct error when empty amount value is included on whole number field" in {
+
+          val error1 = SaxParseError(lineNumber, "cvc-datatype-valid.1.2.1: '' is not a valid value for 'integer'.")
+          val error2 = SaxParseError(lineNumber, "cvc-complex-type.2.2: Element 'Amount' must have no element [children], and the value must be valid.")
+          val result = helper.generateErrorMessages(ListBuffer(error1, error2))
+          result mustBe List(GenericError(lineNumber, Message("xml.empty.field", List("Amount"))))
         }
 
         "must return correct error when an int is not a whole number" in {

@@ -74,6 +74,51 @@ class SdesCallbackControllerSpec extends SpecBase with BeforeAndAfterEach with S
       }
     }
 
+    "must return Ok when file details cannot be found and event sent successfully" in {
+
+      forAll(arbitrarySuccessSdesCallback.arbitrary, arbitrary[FileDetails]) { (sdesCallback, fileDetails) =>
+        reset(mockAuditService)
+        when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(Success))
+        when(mockFileDetailsRepository.findByConversationId(sdesCallback.correlationID)).thenReturn(Future.successful(None))
+        val request = FakeRequest(POST, routes.SdesCallbackController.callback().url)
+          .withBody(Json.toJson(sdesCallback.copy(notification = models.sdes.NotificationType.FileProcessingFailure)))
+        val result = route(application, request).value
+        status(result) mustEqual OK
+        verify(mockAuditService, timeout(500).times(2)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
+
+      }
+    }
+
+    "must return Ok when file details does not contain the conversation Id" in {
+
+      forAll(arbitrarySuccessSdesCallback.arbitrary, arbitrary[FileDetails]) { (sdesCallback, fileDetails) =>
+        reset(mockAuditService)
+        when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(Success))
+        when(mockFileDetailsRepository.findByConversationId(sdesCallback.correlationID)).thenReturn(Future.successful(None))
+
+        val request = FakeRequest(POST, routes.SdesCallbackController.callback().url).withBody(Json.toJson(sdesCallback))
+        val result  = route(application, request).value
+        status(result) mustEqual OK
+        verify(mockAuditService, timeout(500).times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
+
+      }
+    }
+
+    "must return Ok and send event when retrieving file details throws an exception" in {
+
+      forAll(arbitrarySuccessSdesCallback.arbitrary, arbitrary[FileDetails]) { (sdesCallback, fileDetails) =>
+        reset(mockAuditService)
+        when(mockAuditService.sendAuditEvent(any(), any())(any(), any())).thenReturn(Future.successful(Success))
+        when(mockFileDetailsRepository.findByConversationId(sdesCallback.correlationID)).thenReturn(Future.successful(new RuntimeException()))
+
+        val request = FakeRequest(POST, routes.SdesCallbackController.callback().url).withBody(Json.toJson(sdesCallback))
+        val result  = route(application, request).value
+        status(result) mustEqual OK
+        verify(mockAuditService, timeout(500).times(1)).sendAuditEvent(any[String](), any[JsValue]())(any[HeaderCarrier], any[ExecutionContext])
+
+      }
+    }
+
     "must return Ok for failure notification and update status and send email" in {
       forAll(arbitraryFailureSdesCallback.arbitrary, arbitraryPendingFileDetails.arbitrary) { (sdesCallback, fileDetails) =>
         reset(mockAuditService)

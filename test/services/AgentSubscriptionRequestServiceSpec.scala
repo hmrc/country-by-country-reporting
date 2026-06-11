@@ -638,7 +638,8 @@ class AgentSubscriptionRequestServiceSpec
         (BAD_REQUEST, "BAD_REQUEST"),
         (FORBIDDEN, "FORBIDDEN"),
         (SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE"),
-        (CONFLICT, "CONFLICT")
+        (CONFLICT, "CONFLICT"),
+        (NETWORK_AUTHENTICATION_REQUIRED, "NETWORK_AUTHENTICATION_REQUIRED")
       )
 
       forAll(scenarios) { (expectedStatusCode, description) =>

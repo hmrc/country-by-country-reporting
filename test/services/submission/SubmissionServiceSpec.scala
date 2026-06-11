@@ -25,12 +25,14 @@ import generators.Generators
 import models.agentSubscription.{AgentContactDetails, AgentResponseDetail}
 import models.audit.AuditType
 import models.error.{ReadSubscriptionError, RepositoryError, SdesSubmissionError, SubmissionServiceError}
-import models.submission._
+import models.submission.*
 import models.subscription.ResponseDetail
+import models.validation.SaxParseError
 import models.xml.XmlHandler
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.{any, eq => mEq}
+import org.mockito.ArgumentMatchers.{any, eq as mEq}
 import org.scalatest.concurrent.IntegrationPatience
+import org.scalatest.matchers.should.Matchers.should
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Application
 import play.api.http.Status.OK
@@ -46,9 +48,10 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import java.io.IOException
 import java.time.Clock
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
-import scala.xml.{Elem, NodeSeq, TopScope}
+import scala.xml.{Elem, MetaData, NamespaceBinding, Node, NodeSeq, TopScope}
 
 class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Generators with ScalaCheckDrivenPropertyChecks {
 
@@ -109,8 +112,7 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
       "must send notification to SDES and persist the file details with Pending status" in {
         forAll { (agentRefNo: String, submissionDetails: SubmissionDetails, agentDetails: AgentResponseDetail, orgDetails: ResponseDetail) =>
           implicit val fakeIdentifierRequest: IdentifierRequest[JsValue] = IdentifierRequest(mockRequest, AffinityGroup.Agent, Option(agentRefNo))
-
-          val conversationId = ConversationId.fromUploadId(submissionDetails.uploadId)
+          val conversationId                                             = ConversationId.fromUploadId(submissionDetails.uploadId)
 
           mockSuccessfulFileNotification(submissionDetails, orgDetails, conversationId)
           mockSuccessfulOrgDetailsRetrieval(submissionDetails, orgDetails)
@@ -196,6 +198,7 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
 
       val xmlSubmissionFilePath = "xml-submission-file-path"
       val testXml               = Elem("CBC_OECD", "CBC_OECD", xml.Null, TopScope, minimizeEmpty = true)
+      val emptyElem             = EmptyElem("CBC_OECD", "CBC_OECD", xml.Null, TopScope)
 
       "must submit file to EIS and persist the file details with Pending status" in {
         forAll { (agentRefNo: String, submissionDetails: SubmissionDetails, agentDetails: AgentResponseDetail, orgDetails: ResponseDetail) =>
@@ -222,6 +225,35 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
 
           result.futureValue.value mustBe conversationId
           assertOnFileDetails(agentRefNo, submissionDetails, agentDetails, conversationId)
+          verify(mockAuditService, times(1)).sendAuditEvent(mEq(AuditType.fileSubmission), any[JsValue])(any(), any())
+          reset(mockAuditService)
+        }
+      }
+
+      "*must return error when uploaded xml is empty" in {
+        forAll { (agentRefNo: String, submissionDetails: SubmissionDetails, agentDetails: AgentResponseDetail, orgDetails: ResponseDetail) =>
+          implicit val fakeIdentifierRequest: IdentifierRequest[JsValue] = IdentifierRequest(mockRequest, AffinityGroup.Agent, Option(agentRefNo))
+
+          val conversationId      = ConversationId.fromUploadId(submissionDetails.uploadId)
+          val submissionMetaData  = SubmissionMetaData.build(dateTimeNow, conversationId, submissionDetails.fileName)
+          val agentContactDetails = AgentContactDetails(agentRefNo, agentDetails)
+
+          mockSuccessfulReportTypeExtraction(submissionDetails)
+          when(
+            mockTransformService.addSubscriptionDetailsToSubmission(any[NodeSeq], mEq(orgDetails), mEq(submissionMetaData), mEq(Option(agentContactDetails)))
+          )
+            .thenReturn(testXml)
+          when(mockAppConfig.submissionXSDFilePath).thenReturn(xmlSubmissionFilePath)
+          when(mockXmlHandler.load(submissionDetails.documentUrl)).thenReturn(Success(emptyElem))
+          when(mockXmlValidationService.validate(any[NodeSeq], mEq(xmlSubmissionFilePath))).thenReturn(Right(testXml))
+          mockSuccessfulOrgDetailsRetrieval(submissionDetails, orgDetails)
+          mockSuccessfulAgentDetailsRetrieval(agentRefNo, agentDetails)
+          mockSuccessfulSubmissionToEIS(conversationId)
+          mockSuccessfulFileDetailsPersistence()
+
+          val result = submissionService.submitNormalFile(submissionDetails)
+
+          result.futureValue.left.value mustBe a[SubmissionServiceError]
           verify(mockAuditService, times(1)).sendAuditEvent(mEq(AuditType.fileSubmission), any[JsValue])(any(), any())
           reset(mockAuditService)
         }
@@ -353,6 +385,33 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
         }
       }
 
+      "must return error when validate xml returns a saxParser error" in {
+        val saxParserError = SaxParseError(1, "SAX parser error")
+        forAll { (agentRefNo: String, submissionDetails: SubmissionDetails, agentDetails: AgentResponseDetail, orgDetails: ResponseDetail) =>
+          implicit val fakeIdentifierRequest: IdentifierRequest[JsValue] = IdentifierRequest(mockRequest, AffinityGroup.Agent, Option(agentRefNo))
+
+          val conversationId      = ConversationId.fromUploadId(submissionDetails.uploadId)
+          val submissionMetaData  = SubmissionMetaData.build(dateTimeNow, conversationId, submissionDetails.fileName)
+          val agentContactDetails = AgentContactDetails(agentRefNo, agentDetails)
+
+          mockSuccessfulReportTypeExtraction(submissionDetails)
+          when(
+            mockTransformService.addSubscriptionDetailsToSubmission(any[NodeSeq], mEq(orgDetails), mEq(submissionMetaData), mEq(Option(agentContactDetails)))
+          )
+            .thenReturn(testXml)
+          when(mockAppConfig.submissionXSDFilePath).thenReturn(xmlSubmissionFilePath)
+          when(mockXmlHandler.load(submissionDetails.documentUrl)).thenReturn(Success(testXml))
+          when(mockXmlValidationService.validate(any[NodeSeq], mEq(xmlSubmissionFilePath))).thenReturn(Left(ListBuffer(saxParserError)))
+          mockSuccessfulOrgDetailsRetrieval(submissionDetails, orgDetails)
+          mockSuccessfulAgentDetailsRetrieval(agentRefNo, agentDetails)
+          mockFailedFileDetailsPersistence()
+
+          val result = submissionService.submitNormalFile(submissionDetails)
+
+          result.futureValue.left.value mustBe a[SubmissionServiceError]
+        }
+      }
+
       "must return error when unable to persist file details" in {
         forAll { (agentRefNo: String, submissionDetails: SubmissionDetails, agentDetails: AgentResponseDetail, orgDetails: ResponseDetail) =>
           implicit val fakeIdentifierRequest: IdentifierRequest[JsValue] = IdentifierRequest(mockRequest, AffinityGroup.Agent, Option(agentRefNo))
@@ -441,4 +500,14 @@ class SubmissionServiceSpec extends SpecBase with IntegrationPatience with Gener
   private def mockFailedSubmissionToEIS(errorStatus: Short) =
     when(mockSubmissionConnector.submitDisclosure(any[NodeSeq], any[ConversationId])(any[HeaderCarrier]))
       .thenReturn(Future.successful(HttpResponse(errorStatus, "Submission error")))
+
+}
+class EmptyElem(
+  prefix: String,
+  label: String,
+  attributes: MetaData,
+  scope: NamespaceBinding
+) extends Elem(prefix, label, attributes, scope, minimizeEmpty = true) {
+
+  override def headOption: Option[Node] = None
 }
